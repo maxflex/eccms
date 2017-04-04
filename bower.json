@@ -22,12 +22,12 @@
     "normalize-css": "normalize.css#~3.0.3",
     "Ionicons": "ionicons#~2.0.1",
     "font-awesome": "~4.5.0",
-    "angular": "angularjs#1.4.12",
+    "angular": "angularjs#1.6.3",
     "jquery.inputmask": "~3.2.5",
     "jquery-ui": "jquery.ui#1.11.4",
-    "angular-animate": "#1.4.12",
-    "angular-sanitize": "~1.4.8",
-    "angular-resource": "~1.4.8",
+    "angular-animate": "#1.6.3",
+    "angular-sanitize": "~1.6.3",
+    "angular-resource": "~1.6.3",
     "nprogress": "~0.2.0",
     "angular-material": "~1.0.2",
     "angular-i18n": "~1.4.8",
@@ -60,7 +60,7 @@
     "requirejs": "^2.2.0",
     "angular-file-upload": "^2.3.4",
     "angucomplete-alt": "^3.0.0",
-    "angular-aria": "1.5.8",
-    "angular-messages": "1.5.8"
+    "angular-aria": "1.6.3",
+    "angular-messages": "1.6.3"
   }
 }
