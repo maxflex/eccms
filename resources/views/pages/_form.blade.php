@@ -93,52 +93,6 @@
     </div>
 </div>
 
-<div class="row mbs">
-    <div class="col-sm-7">
-        <label class="no-margin-bottom label-opacity">блок «полезное»</label>
-        <div class="input-group" ng-repeat='u in FormService.model.useful track by $index' ng-class="{'mbs useful-width': !$last}">
-           <input class="field form-control" placeholder="текст" ng-model='u.text' style='width: calc(165% + 1px)'>
-           <span class="input-group-btn" style="width:0px;"></span>
-           <input class="field form-control" style='margin-left: calc(65% - 1px); width: 35%'
-                  placeholder="ID раздела" ng-model='u.page_id_field' ng-keyup="checkUsefulExistance('id', $event, u.page_id_field)">
-           <span class="input-group-btn" style='left: -1px' ng-if='$last'>
-               <button class="btn btn-default" type="button" ng-disabled="!FormService.model.keyphrase" ng-click="addUseful()">
-                   <span class="glyphicon glyphicon-plus no-margin-right" style='font-size: 12px'></span>
-               </button>
-           </span>
-        </div>
-    </div>
-</div>
-
-<div class="serp">
-    <div class="row mb">
-        <div class="col-sm-3">
-            <label class="no-margin-bottom label-opacity">предметы</label>
-            <ng-multi object='{{ fact('subjects', 'name') }}' label='name' model='FormService.model.subjects' none-text='выберите предметы'></ng-multi>
-        </div>
-        <div class="col-sm-3">
-            <label class="no-margin-bottom label-opacity">выезд</label>
-            <select class='form-control selectpicker' ng-model='FormService.model.place' convert-to-number>
-                <option ng-repeat='place in {{ fact('places', 'serp') }}' value='@{{ place.id }}'>@{{ place.serp }}</option>
-            </select>
-        </div>
-        <div class="col-sm-3">
-            <label class="no-margin-bottom label-opacity">метро</label>
-            <ng-select-new model='FormService.model.station_id' object="{{ fact('stations', 'title', 'title') }}" label='title' none-text='не указано' live-search='true' convert-to-number></ng-select-new>
-        </div>
-        <div class="col-sm-3">
-            <label class="no-margin-bottom label-opacity">сортировка по</label>
-            <select class='form-control selectpicker' ng-model='FormService.model.sort' convert-to-number id='sort'>
-                <option ng-repeat='o in {{ fact('sort') }}' value='@{{ o.id }}' ng-hide='(o.id == 5 && !FormService.model.station_id)'>@{{ o.title }}</option>
-            </select>
-        </div>
-    </div>
-    <div class="row mb">
-        <div class="col-sm-12">
-            @include('modules.input', ['title' => 'скрытый фильтр', 'model' => 'hidden_filter'])
-        </div>
-    </div>
-</div>
 <div class="row mbb">
     <div class="col-sm-12">
         <label>содержание раздела</label>

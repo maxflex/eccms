@@ -10,9 +10,6 @@ use App\Models\Page;
 
 class PagesController extends Controller
 {
-    // разрешенные теги в поле html
-    const ALLOWED_TAGS = ['a', 'p', 'ol', 'ul', 'li', 'h2', 'h3'];
-
     /**
      * Display a listing of the resource.
      *
@@ -85,44 +82,6 @@ class PagesController extends Controller
      */
     public function update(Request $request, $id)
     {
-        // validate tags
-        if ($request->html) {
-            preg_match_all("/<[^>]*>/", $request->html, $tags);
-            $counts = [];
-            foreach($tags[0] as $tag) {
-                // only <a></a> is allowed with attributes
-                if (strpos($tag, '<a') === 0) {
-                    @$counts['a']++;
-                    continue;
-                }
-                $allowed = false;
-                foreach(self::ALLOWED_TAGS as $allowed_tag) {
-                    if (in_array($tag, ["<{$allowed_tag}>", "</{$allowed_tag}>"])) {
-                        if (! isset($counts[$allowed_tag])) {
-                            $counts[$allowed_tag] = 0;
-                        }
-
-                        if ($tag[1] == '/') {
-                            $counts[$allowed_tag]--;
-                        } else {
-                            $counts[$allowed_tag]++;
-                        }
-                        $allowed = true;
-                        break;
-                    }
-                }
-                if (! $allowed) {
-                    return response()->json("Тег " . htmlspecialchars($tag) . " запрещен", 403);
-                }
-            }
-            // validate opening tags count = enclosing tags count
-            foreach($counts as $tag => $tag_count_difference) {
-                if ($tag_count_difference != 0) {
-                    return response()->json("Тег {$tag} не сбалансирован", 403);
-                }
-            }
-        }
-
         Page::find($id)->update($request->input());
     }
 

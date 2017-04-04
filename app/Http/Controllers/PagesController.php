@@ -17,12 +17,12 @@ class PagesController extends Controller
      * @return \Illuminate\Http\Response
      * $ngController [Search|Pages] – откуда перешли – с поиска или через меню
      */
-    public function index(Request $request, $ngController = 'Pages')
+    public function index(Request $request)
     {
         return view('pages.index')->with(ngInit([
             'current_page'      => $request->page,
             'exportable_fields' => Page::getExportableFields(),
-        ]))->with(compact('ngController'));
+        ]));
     }
 
     /**

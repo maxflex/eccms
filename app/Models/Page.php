@@ -21,21 +21,14 @@ class Page extends Model
         'h1',
         'h1_bottom',
         'html',
-        'position',
-        'sort',
-        'place',
-        'subjects',
-        'station_id',
         'seo_desktop',
         'seo_mobile',
         'variable_id',
-        'hidden_filter',
         'useful'
     ];
 
     protected static $hidden_on_export = [
         'id',
-        'position',
         'created_at',
         'updated_at'
     ];
@@ -52,8 +45,6 @@ class Page extends Model
     protected $attributes = [
         'seo_desktop' => 0,
         'seo_mobile' => 0,
-        'sort' => 1,
-        'place' => 1
     ];
 
     public function useful()
@@ -78,18 +69,6 @@ class Page extends Model
         } else {
             $this->attributes['variable_id'] = $value;
         }
-    }
-
-    private static function _getNextPosition()
-    {
-        return DB::table('pages')->max('position') + 1;
-    }
-
-    protected static function boot()
-    {
-        static::creating(function($model) {
-            $model->position = static::_getNextPosition();
-        });
     }
 
     public static function search($search)
@@ -126,32 +105,3 @@ class Page extends Model
         return $query;
     }
 }
-
-/**
- * Функция поиска БД
- *
- DROP FUNCTION IF EXISTS onlysymbols;
- DELIMITER $$
- CREATE FUNCTION `onlysymbols`( str TEXT ) RETURNS TEXT CHARSET utf8
- BEGIN
-   DECLARE i, len SMALLINT DEFAULT 1;
-   DECLARE ret TEXT DEFAULT '';
-   DECLARE c CHAR(1);
-   SET str = LOWER(REPLACE(str, ' ', ''));
-   SET len = CHAR_LENGTH( str );
-   REPEAT
-     BEGIN
-       SET c = MID( str, i, 1 );
-       IF c REGEXP '[а-я]+' THEN
-         SET ret=CONCAT(ret,c);
-       ELSEIF  c = ' ' THEN
-           SET ret=CONCAT(ret," ");
-       END IF;
-       SET i = i + 1;
-     END;
-   UNTIL i > len END REPEAT;
-   SET ret = lower(ret);
-   RETURN ret;
-   END $$
-   DELIMITER ;
- */
