@@ -1,16 +1,16 @@
 @extends('app')
 @section('title', 'Программы')
-@section('controller', 'ProgrammsIndex')
+@section('controller', 'ProgramsIndex')
 
 @section('title-right')
-    {{ link_to_route('programms.create', 'добавить программу') }}
+    {{ link_to_route('programs.create', 'добавить программу') }}
 @endsection
 
 @section('content')
     <table class="table">
         <tr ng-repeat="model in IndexService.page.data">
             <td>
-                <a href='programms/@{{ model.id }}/edit'>@{{ model.title }}</a>
+                <a href='programs/@{{ model.id }}/edit'>@{{ model.title }}</a>
             </td>
             <td>
                 @{{ model.desc }}

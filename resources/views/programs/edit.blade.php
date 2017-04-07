@@ -9,10 +9,10 @@
 @stop
 
 @section('content')
-    @section('controller', 'ProgrammsForm')
+    @section('controller', 'ProgramsForm')
     <div class="row">
         <div class="col-sm-12">
-            @include('programms._form')
+            @include('programs._form')
         </div>
     </div>
 @stop

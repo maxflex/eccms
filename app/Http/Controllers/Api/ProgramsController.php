@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\Programm;
+use App\Models\Program;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
-class ProgrammsController extends Controller
+class ProgramsController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -15,7 +15,7 @@ class ProgrammsController extends Controller
      */
     public function index()
     {
-        return Programm::paginate(30);
+        return Program::paginate(30);
     }
 
     /**
@@ -26,7 +26,7 @@ class ProgrammsController extends Controller
      */
     public function store(Request $request)
     {
-        return Programm::create($request->input())->fresh();
+        return Program::create($request->input())->fresh();
     }
 
     /**
@@ -37,7 +37,7 @@ class ProgrammsController extends Controller
      */
     public function show($id)
     {
-        return Programm::find($id);
+        return Program::find($id);
     }
 
     /**
@@ -49,7 +49,7 @@ class ProgrammsController extends Controller
      */
     public function update(Request $request, $id)
     {
-        Programm::find($id)->update($request->input());
+        Program::find($id)->update($request->input());
     }
 
     /**
@@ -60,6 +60,6 @@ class ProgrammsController extends Controller
      */
     public function destroy($id)
     {
-        Programm::destroy($id);
+        Program::destroy($id);
     }
 }

@@ -328,15 +328,15 @@
 }).call(this);
 
 (function() {
-  angular.module('Egecms').controller('ProgrammsIndex', function($scope, $attrs, IndexService, Programm) {
+  angular.module('Egecms').controller('ProgramsIndex', function($scope, $attrs, IndexService, Program) {
     bindArguments($scope, arguments);
     return angular.element(document).ready(function() {
-      return IndexService.init(Programm, $scope.current_page, $attrs);
+      return IndexService.init(Program, $scope.current_page, $attrs);
     });
-  }).controller('ProgrammsForm', function($scope, $attrs, $timeout, FormService, Programm) {
+  }).controller('ProgramsForm', function($scope, $attrs, $timeout, FormService, Program) {
     bindArguments($scope, arguments);
     return angular.element(document).ready(function() {
-      return FormService.init(Programm, $scope.id, $scope.model);
+      return FormService.init(Program, $scope.id, $scope.model);
     });
   });
 
@@ -634,10 +634,10 @@
 }).call(this);
 
 (function() {
-  angular.module('Egecms').directive('programmItem', function() {
+  angular.module('Egecms').directive('programItem', function() {
     return {
       restrict: 'E',
-      templateUrl: 'directives/programm-item',
+      templateUrl: 'directives/program-item',
       scope: {
         item: '=',
         level: '=?',
@@ -995,8 +995,8 @@
         url: apiPath('pages', 'checkExistance')
       }
     });
-  }).factory('Programm', function($resource) {
-    return $resource(apiPath('programms'), {
+  }).factory('Program', function($resource) {
+    return $resource(apiPath('programs'), {
       id: '@id'
     }, updatable());
   });
@@ -1275,11 +1275,6 @@
     };
     return this;
   });
-
-}).call(this);
-
-(function() {
-
 
 }).call(this);
 

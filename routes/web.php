@@ -17,7 +17,7 @@ Route::group(['middleware' => ['login']], function () {
     Route::resource('pages', 'PagesController');
     Route::get('search', 'PagesController@search');
 
-    Route::resource('programms', 'ProgrammsController');
+    Route::resource('programs', 'ProgramsController');
 
     Route::resource('sass', 'SassController');
 

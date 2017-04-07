@@ -16,8 +16,8 @@ angular.module('Egecms')
                 method: 'POST'
                 url: apiPath('pages', 'checkExistance')
 
-    .factory 'Programm', ($resource) ->
-        $resource apiPath('programms'), {id: '@id'}, updatable()
+    .factory 'Program', ($resource) ->
+        $resource apiPath('programs'), {id: '@id'}, updatable()
 
 apiPath = (entity, additional = '') ->
     "api/#{entity}/" + (if additional then additional + '/' else '') + ":id"

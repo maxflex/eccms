@@ -1,7 +1,7 @@
 angular.module 'Egecms'
-.directive 'programmItem', ->
+.directive 'programItem', ->
     restrict: 'E'
-    templateUrl: 'directives/programm-item'
+    templateUrl: 'directives/program-item'
     scope:
         item:   '='
         level:  '=?'

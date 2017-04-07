@@ -7,7 +7,7 @@
 </h2>
 <ul>
     <li ng-repeat="child in item.content">
-        <programm-item item="child" level="level ? level + 1 : 0" levelstring="getChildLevelString($index)" delete="deleteChild(child)"></programm-item>
+        <program-item item="child" level="level ? level + 1 : 0" levelstring="getChildLevelString($index)" delete="deleteChild(child)"></program-item>
     </li>
     <li>
         <span ng-show="level == 1 && !is_adding" ng-click="addChild()" class="link-like">добавить</span>

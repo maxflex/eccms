@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Programm;
+use App\Models\Program;
 use Illuminate\Http\Request;
 use App\Http\Requests;
 
-class ProgrammsController extends Controller
+class ProgramsController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -15,7 +15,7 @@ class ProgrammsController extends Controller
      */
     public function index(Request $request)
     {
-        return view('programms.index')->with(ngInit([
+        return view('programs.index')->with(ngInit([
             'current_page' => $request->page
         ]));
     }
@@ -27,8 +27,8 @@ class ProgrammsController extends Controller
      */
     public function create()
     {
-        return view('programms.create')->with(ngInit([
-            'model' => new Programm(),
+        return view('programs.create')->with(ngInit([
+            'model' => new Program(),
         ]));
     }
 
@@ -40,6 +40,6 @@ class ProgrammsController extends Controller
      */
     public function edit($id)
     {
-        return view('programms.edit')->with(ngInit(compact('id')));
+        return view('programs.edit')->with(ngInit(compact('id')));
     }
 }

@@ -1,5 +1,5 @@
 @extends('app')
-@section('controller', 'ProgrammsForm')
+@section('controller', 'ProgramsForm')
 @section('title', 'Добавление программы')
 @section('title-center')
     <span ng-click="FormService.create()">добавить</span>
@@ -7,7 +7,7 @@
 @section('content')
     <div class="row">
         <div class="col-sm-12">
-            @include('programms._form')
+            @include('programs._form')
         </div>
     </div>
 @stop
