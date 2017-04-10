@@ -22,6 +22,7 @@ Route::group(['namespace' => 'Api', 'as' => 'api.'], function () {
     Route::post('translit/to-url', 'TranslitController@toUrl');
 
     Route::resource('sass', 'SassController');
+    Route::resource('photos', 'PhotosController');
 
     # Factory
     Route::post('factory', 'FactoryController@get');
