@@ -1,7 +1,7 @@
 (function() {
   var indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
-  angular.module("Egecms", ['ngSanitize', 'ngResource', 'ngAnimate', 'ui.sortable', 'ui.bootstrap', 'angular-ladda', 'angularFileUpload', 'angucomplete-alt', 'ngDrag']).config([
+  angular.module("Egecms", ['ngSanitize', 'ngResource', 'ngAnimate', 'ui.sortable', 'ui.bootstrap', 'angular-ladda', 'angularFileUpload', 'angucomplete-alt', 'ngDrag', 'ngAnimate', 'thatisuday.ng-image-gallery']).config([
     '$compileProvider', function($compileProvider) {
       return $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|chrome-extension|sip):/);
     }
@@ -328,6 +328,34 @@
 }).call(this);
 
 (function() {
+  angular.module('Egecms').config(function(ngImageGalleryOptsProvider) {
+    return ngImageGalleryOptsProvider.setOpts({
+      thumbnails: true,
+      inline: false,
+      imgBubbles: false,
+      bgClose: true,
+      imgAnim: 'fadeup'
+    });
+  }).controller('PhotosIndex', function($scope, $attrs, IndexService, Photo, PhotoService) {
+    bindArguments($scope, arguments);
+    return angular.element(document).ready(function() {
+      return IndexService.init(Photo, $scope.current_page, $attrs);
+    });
+  }).controller('PhotosForm', function($scope, $attrs, FormService, Photo, PhotoService) {
+    bindArguments($scope, arguments);
+    angular.element(document).ready(function() {
+      return FormService.init(Photo, $scope.id, $scope.model);
+    });
+    return $scope.$watchCollection('FormService.model.photos', function(newVal, oldVal) {
+      if (newVal !== void 0) {
+        return $scope.images = PhotoService.getImages();
+      }
+    });
+  });
+
+}).call(this);
+
+(function() {
   angular.module('Egecms').controller('ProgramsIndex', function($scope, $attrs, IndexService, Program) {
     bindArguments($scope, arguments);
     return angular.element(document).ready(function() {
@@ -457,6 +485,27 @@
       };
     });
   });
+
+}).call(this);
+
+(function() {
+  angular.module('Egecms').value('Published', [
+    {
+      id: 0,
+      title: 'не опубликовано'
+    }, {
+      id: 1,
+      title: 'опубликовано'
+    }
+  ]).value('UpDown', [
+    {
+      id: 1,
+      title: 'вверху'
+    }, {
+      id: 2,
+      title: 'внизу'
+    }
+  ]);
 
 }).call(this);
 
@@ -948,85 +997,6 @@
 }).call(this);
 
 (function() {
-  angular.module('Egecms').value('Published', [
-    {
-      id: 0,
-      title: 'не опубликовано'
-    }, {
-      id: 1,
-      title: 'опубликовано'
-    }
-  ]).value('UpDown', [
-    {
-      id: 1,
-      title: 'вверху'
-    }, {
-      id: 2,
-      title: 'внизу'
-    }
-  ]);
-
-}).call(this);
-
-(function() {
-  var apiPath, countable, updatable;
-
-  angular.module('Egecms').factory('Variable', function($resource) {
-    return $resource(apiPath('variables'), {
-      id: '@id'
-    }, updatable());
-  }).factory('VariableGroup', function($resource) {
-    return $resource(apiPath('variables/groups'), {
-      id: '@id'
-    }, updatable());
-  }).factory('Sass', function($resource) {
-    return $resource(apiPath('sass'), {
-      id: '@id'
-    }, updatable());
-  }).factory('Page', function($resource) {
-    return $resource(apiPath('pages'), {
-      id: '@id'
-    }, {
-      update: {
-        method: 'PUT'
-      },
-      checkExistance: {
-        method: 'POST',
-        url: apiPath('pages', 'checkExistance')
-      }
-    });
-  }).factory('Program', function($resource) {
-    return $resource(apiPath('programs'), {
-      id: '@id'
-    }, updatable());
-  });
-
-  apiPath = function(entity, additional) {
-    if (additional == null) {
-      additional = '';
-    }
-    return ("api/" + entity + "/") + (additional ? additional + '/' : '') + ":id";
-  };
-
-  updatable = function() {
-    return {
-      update: {
-        method: 'PUT'
-      }
-    };
-  };
-
-  countable = function() {
-    return {
-      count: {
-        method: 'GET'
-      }
-    };
-  };
-
-}).call(this);
-
-(function() {
   angular.module('Egecms').service('AceService', function() {
     this.initEditor = function(FormService, minLines, id, mode) {
       if (minLines == null) {
@@ -1275,6 +1245,126 @@
     };
     return this;
   });
+
+}).call(this);
+
+(function() {
+  angular.module('Egecms').service('PhotoService', function($http, Photo, FileUploader, FormService, PhotosUploadDir) {
+    this.getUrl = function(model) {
+      if (!model || !model.filename) {
+        return '';
+      }
+      return PhotosUploadDir + model.filename;
+    };
+    this.Uploader = new FileUploader({
+      url: 'api/photos/upload',
+      alias: 'file',
+      filters: [
+        {
+          name: 'imageFilter',
+          fn: function(file, options) {
+            var type;
+            type = "|" + (file.type.slice(file.type.lastIndexOf('/') + 1)) + "|";
+            return '|jpg|png|jpeg|'.indexOf(type) !== -1;
+          }
+        }
+      ],
+      autoUpload: true,
+      removeAfterUpload: true
+    });
+    this.Uploader.onSuccessItem = (function(_this) {
+      return function(item, response) {
+        FormService.model.filename = response;
+        if (typeof _this.onSuccessItemCallback === 'function') {
+          return _this.onSuccessItemCallback();
+        }
+      };
+    })(this);
+    this.Uploader.onBeforeUploadItem = function(item) {
+      return item.formData.push({
+        old_file: FormService.model.filename
+      });
+    };
+    this.getImages = function() {
+      var images;
+      images = [];
+      IndexService.page.datas.forEach(function(image) {
+        return images.push({
+          url: image.url
+        });
+      });
+      return images;
+    };
+    this["delete"] = function() {
+      Photo["delete"]({
+        id: scope.id
+      });
+      return redirect('/photos');
+    };
+    return this;
+  });
+
+}).call(this);
+
+(function() {
+  var apiPath, countable, updatable;
+
+  angular.module('Egecms').factory('Variable', function($resource) {
+    return $resource(apiPath('variables'), {
+      id: '@id'
+    }, updatable());
+  }).factory('VariableGroup', function($resource) {
+    return $resource(apiPath('variables/groups'), {
+      id: '@id'
+    }, updatable());
+  }).factory('Sass', function($resource) {
+    return $resource(apiPath('sass'), {
+      id: '@id'
+    }, updatable());
+  }).factory('Page', function($resource) {
+    return $resource(apiPath('pages'), {
+      id: '@id'
+    }, {
+      update: {
+        method: 'PUT'
+      },
+      checkExistance: {
+        method: 'POST',
+        url: apiPath('pages', 'checkExistance')
+      }
+    });
+  }).factory('Program', function($resource) {
+    return $resource(apiPath('programs'), {
+      id: '@id'
+    }, updatable());
+  }).factory('Photo', function($resource) {
+    return $resource(apiPath('photos'), {
+      id: '@id'
+    }, updatable());
+  });
+
+  apiPath = function(entity, additional) {
+    if (additional == null) {
+      additional = '';
+    }
+    return ("api/" + entity + "/") + (additional ? additional + '/' : '') + ":id";
+  };
+
+  updatable = function() {
+    return {
+      update: {
+        method: 'PUT'
+      }
+    };
+  };
+
+  countable = function() {
+    return {
+      count: {
+        method: 'GET'
+      }
+    };
+  };
 
 }).call(this);
 

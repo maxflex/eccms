@@ -19,6 +19,9 @@ angular.module('Egecms')
     .factory 'Program', ($resource) ->
         $resource apiPath('programs'), {id: '@id'}, updatable()
 
+    .factory 'Photo', ($resource) ->
+        $resource apiPath('photos'), {id: '@id'}, updatable()
+
 apiPath = (entity, additional = '') ->
     "api/#{entity}/" + (if additional then additional + '/' else '') + ":id"
 

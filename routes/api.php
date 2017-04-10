@@ -23,6 +23,10 @@ Route::group(['namespace' => 'Api', 'as' => 'api.'], function () {
 
     Route::resource('sass', 'SassController');
 
+
+    Route::resource('photos/upload', 'PhotosController@upload');
+    Route::resource('photos', 'PhotosController');
+
     # Factory
     Route::post('factory', 'FactoryController@get');
 });

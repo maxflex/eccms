@@ -44711,6 +44711,615 @@ exports.commands = [{
 !function(a){"function"==typeof define&&define.amd?define(["jquery"],a):a("object"==typeof exports?require("jquery"):jQuery)}(function(a){var b,c=navigator.userAgent,d=/iphone/i.test(c),e=/chrome/i.test(c),f=/android/i.test(c);a.mask={definitions:{9:"[0-9]",a:"[A-Za-z]","*":"[A-Za-z0-9]"},autoclear:!0,dataName:"rawMaskFn",placeholder:"_"},a.fn.extend({caret:function(a,b){var c;if(0!==this.length&&!this.is(":hidden"))return"number"==typeof a?(b="number"==typeof b?b:a,this.each(function(){this.setSelectionRange?this.setSelectionRange(a,b):this.createTextRange&&(c=this.createTextRange(),c.collapse(!0),c.moveEnd("character",b),c.moveStart("character",a),c.select())})):(this[0].setSelectionRange?(a=this[0].selectionStart,b=this[0].selectionEnd):document.selection&&document.selection.createRange&&(c=document.selection.createRange(),a=0-c.duplicate().moveStart("character",-1e5),b=a+c.text.length),{begin:a,end:b})},unmask:function(){return this.trigger("unmask")},mask:function(c,g){var h,i,j,k,l,m,n,o;if(!c&&this.length>0){h=a(this[0]);var p=h.data(a.mask.dataName);return p?p():void 0}return g=a.extend({autoclear:a.mask.autoclear,placeholder:a.mask.placeholder,completed:null},g),i=a.mask.definitions,j=[],k=n=c.length,l=null,a.each(c.split(""),function(a,b){"?"==b?(n--,k=a):i[b]?(j.push(new RegExp(i[b])),null===l&&(l=j.length-1),k>a&&(m=j.length-1)):j.push(null)}),this.trigger("unmask").each(function(){function h(){if(g.completed){for(var a=l;m>=a;a++)if(j[a]&&C[a]===p(a))return;g.completed.call(B)}}function p(a){return g.placeholder.charAt(a<g.placeholder.length?a:0)}function q(a){for(;++a<n&&!j[a];);return a}function r(a){for(;--a>=0&&!j[a];);return a}function s(a,b){var c,d;if(!(0>a)){for(c=a,d=q(b);n>c;c++)if(j[c]){if(!(n>d&&j[c].test(C[d])))break;C[c]=C[d],C[d]=p(d),d=q(d)}z(),B.caret(Math.max(l,a))}}function t(a){var b,c,d,e;for(b=a,c=p(a);n>b;b++)if(j[b]){if(d=q(b),e=C[b],C[b]=c,!(n>d&&j[d].test(e)))break;c=e}}function u(){var a=B.val(),b=B.caret();if(o&&o.length&&o.length>a.length){for(A(!0);b.begin>0&&!j[b.begin-1];)b.begin--;if(0===b.begin)for(;b.begin<l&&!j[b.begin];)b.begin++;B.caret(b.begin,b.begin)}else{for(A(!0);b.begin<n&&!j[b.begin];)b.begin++;B.caret(b.begin,b.begin)}h()}function v(){A(),B.val()!=E&&B.change()}function w(a){if(!B.prop("readonly")){var b,c,e,f=a.which||a.keyCode;o=B.val(),8===f||46===f||d&&127===f?(b=B.caret(),c=b.begin,e=b.end,e-c===0&&(c=46!==f?r(c):e=q(c-1),e=46===f?q(e):e),y(c,e),s(c,e-1),a.preventDefault()):13===f?v.call(this,a):27===f&&(B.val(E),B.caret(0,A()),a.preventDefault())}}function x(b){if(!B.prop("readonly")){var c,d,e,g=b.which||b.keyCode,i=B.caret();if(!(b.ctrlKey||b.altKey||b.metaKey||32>g)&&g&&13!==g){if(i.end-i.begin!==0&&(y(i.begin,i.end),s(i.begin,i.end-1)),c=q(i.begin-1),n>c&&(d=String.fromCharCode(g),j[c].test(d))){if(t(c),C[c]=d,z(),e=q(c),f){var k=function(){a.proxy(a.fn.caret,B,e)()};setTimeout(k,0)}else B.caret(e);i.begin<=m&&h()}b.preventDefault()}}}function y(a,b){var c;for(c=a;b>c&&n>c;c++)j[c]&&(C[c]=p(c))}function z(){B.val(C.join(""))}function A(a){var b,c,d,e=B.val(),f=-1;for(b=0,d=0;n>b;b++)if(j[b]){for(C[b]=p(b);d++<e.length;)if(c=e.charAt(d-1),j[b].test(c)){C[b]=c,f=b;break}if(d>e.length){y(b+1,n);break}}else C[b]===e.charAt(d)&&d++,k>b&&(f=b);return a?z():k>f+1?g.autoclear||C.join("")===D?(B.val()&&B.val(""),y(0,n)):z():(z(),B.val(B.val().substring(0,f+1))),k?b:l}var B=a(this),C=a.map(c.split(""),function(a,b){return"?"!=a?i[a]?p(b):a:void 0}),D=C.join(""),E=B.val();B.data(a.mask.dataName,function(){return a.map(C,function(a,b){return j[b]&&a!=p(b)?a:null}).join("")}),B.one("unmask",function(){B.off(".mask").removeData(a.mask.dataName)}).on("focus.mask",function(){if(!B.prop("readonly")){clearTimeout(b);var a;E=B.val(),a=A(),b=setTimeout(function(){B.get(0)===document.activeElement&&(z(),a==c.replace("?","").length?B.caret(0,a):B.caret(a))},10)}}).on("blur.mask",v).on("keydown.mask",w).on("keypress.mask",x).on("input.mask paste.mask",function(){B.prop("readonly")||setTimeout(function(){var a=A(!0);B.caret(a),h()},0)}),e&&f&&B.off("input.mask").on("input.mask",u),A()})}})});
 /*! Copyright (c) 2014 Hidenari Nozaki and contributors | Licensed under the MIT license */
 !function(a,b){"use strict";"undefined"!=typeof module&&module.exports?module.exports=b(require("angular")):"function"==typeof define&&define.amd?define(["angular"],b):b(a.angular)}(window,function(a){"use strict";a.module("angucomplete-alt",[]).directive("angucompleteAlt",["$q","$parse","$http","$sce","$timeout","$templateCache","$interpolate",function(a,b,c,d,e,f,g){function h(b,f,g,h){function w(a,c){a&&("object"==typeof a?(b.searchStr=C(a),z({originalObject:a})):"string"==typeof a&&a.length>0?b.searchStr=a:console&&console.error&&console.error("Tried to set "+(c?"initial":"")+" value of angucomplete to",a,"which is an invalid value"),F(!0))}function x(a){na=null,b.hideResults(a),document.body.removeEventListener("click",x)}function y(a){return a.which?a.which:a.keyCode}function z(a){"function"==typeof b.selectedObject?b.selectedObject(a,b.selectedObjectData):b.selectedObject=a,F(a?!0:!1)}function A(a){return function(c){return b[a]?b[a](c):c}}function B(a){z({originalObject:a}),b.clearSelected&&(b.searchStr=null),U()}function C(a){return b.titleField.split(",").map(function(b){return D(a,b)}).join(" ")}function D(a,b){var c,d;if(b){c=b.split("."),d=a;for(var e=0;e<c.length;e++)d=d[c[e]]}else d=a;return d}function E(a,c){var e,f,g;if(g=new RegExp(c.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"),"i"),a)return a.match&&a.replace||(a=a.toString()),f=a.match(g),e=f?a.replace(g,'<span class="'+b.matchClass+'">'+f[0]+"</span>"):a,d.trustAsHtml(e)}function F(a){b.notEmpty=a,ia=b.searchStr,b.fieldRequired&&h&&b.inputName&&h[b.inputName].$setValidity(ha,a)}function G(a){var c=y(a);if(c!==l&&c!==j)if(c===k||c===n)a.preventDefault();else if(c===i)a.preventDefault(),!b.showDropdown&&b.searchStr&&b.searchStr.length>=fa&&(V(),b.searching=!0,Y(b.searchStr));else if(c===m)U(),b.$apply(function(){ea.val(b.searchStr)});else{if(0===fa&&!b.searchStr)return;b.searchStr&&""!==b.searchStr?b.searchStr.length>=fa&&(V(),ga&&e.cancel(ga),b.searching=!0,ga=e(function(){Y(b.searchStr)},b.pause)):b.showDropdown=!1,ia&&ia!==b.searchStr&&!b.clearSelected&&b.$apply(function(){z()})}}function H(a){!b.overrideSuggestions||b.selectedObject&&b.selectedObject.originalObject===b.searchStr||(a&&a.preventDefault(),e.cancel(ga),R(),B(b.searchStr))}function I(a){var b=getComputedStyle(a);return a.offsetHeight+parseInt(b.marginTop,10)+parseInt(b.marginBottom,10)}function J(){return la.getBoundingClientRect().top+parseInt(getComputedStyle(la).maxHeight,10)}function K(){return f[0].querySelectorAll(".angucomplete-row")[b.currentIndex]}function L(){return K().getBoundingClientRect().top-(la.getBoundingClientRect().top+parseInt(getComputedStyle(la).paddingTop,10))}function M(a){la.scrollTop=la.scrollTop+a}function N(){var a=b.results[b.currentIndex];b.matchClass?ea.val(C(a.originalObject)):ea.val(a.title)}function O(a){var c=y(a),d=null,e=null;c===n&&b.results?(b.currentIndex>=0&&b.currentIndex<b.results.length?(a.preventDefault(),b.selectResult(b.results[b.currentIndex])):(H(a),U()),b.$apply()):c===i&&b.results?(a.preventDefault(),b.currentIndex+1<b.results.length&&b.showDropdown&&(b.$apply(function(){b.currentIndex++,N()}),ma&&(d=K(),J()<d.getBoundingClientRect().bottom&&M(I(d))))):c===k&&b.results?(a.preventDefault(),b.currentIndex>=1?(b.$apply(function(){b.currentIndex--,N()}),ma&&(e=L(),e<0&&M(e-1))):0===b.currentIndex&&b.$apply(function(){b.currentIndex=-1,ea.val(b.searchStr)})):c===o?b.results&&b.results.length>0&&b.showDropdown?b.currentIndex===-1&&b.overrideSuggestions?H():(b.currentIndex===-1&&(b.currentIndex=0),b.selectResult(b.results[b.currentIndex]),b.$digest()):b.searchStr&&b.searchStr.length>0&&H():c===m&&a.preventDefault()}function P(a){return function(c,d,e,f){d||e||f||!c.data||(c=c.data),b.searching=!1,Z(D(aa(c),b.remoteUrlDataField),a)}}function Q(a,c,d,e){b.searching=ka,c||d||e||(c=a.status),0!==c&&c!==-1&&(b.remoteUrlErrorCallback?b.remoteUrlErrorCallback(a,c,d,e):console&&console.error&&console.error("http error"))}function R(){ja&&ja.resolve()}function S(d){var e={},f=b.remoteUrl+encodeURIComponent(d);b.remoteUrlRequestFormatter&&(e={params:b.remoteUrlRequestFormatter(d)},f=b.remoteUrl),b.remoteUrlRequestWithCredentials&&(e.withCredentials=!0),R(),ja=a.defer(),e.timeout=ja.promise,ka=!0,c.get(f,e).then(P(d)).catch(Q).finally(function(){ka=!1})}function T(c){R(),ja=a.defer(),b.remoteApiHandler(c,ja.promise).then(P(c)).catch(Q)}function U(){b.showDropdown=!1,b.results=[],la&&(la.scrollTop=0)}function V(){b.showDropdown=ca,b.currentIndex=b.focusFirst?0:-1,b.results=[]}function W(a){var c,d,e,f,g=b.searchFields.split(","),h=[];for("undefined"!=typeof b.parseInput()&&(a=b.parseInput()(a)),c=0;c<b.localData.length;c++){for(d=!1,e=0;e<g.length;e++)f=D(b.localData[c],g[e])||"",d=d||f.toString().toLowerCase().indexOf(a.toString().toLowerCase())>=0;d&&(h[h.length]=b.localData[c])}return h}function X(a,c,d){if(!d)return!1;for(var e in c)if(c[e].toLowerCase()===d.toLowerCase())return b.selectResult(a),!0;return!1}function Y(a){!a||a.length<fa||(b.localData?b.$apply(function(){var c;c="undefined"!=typeof b.localSearch()?b.localSearch()(a,b.localData):W(a),b.searching=!1,Z(c,a)}):b.remoteApiHandler?T(a):S(a))}function Z(a,c){var d,e,f,g,h,i;if(a&&a.length>0)for(b.results=[],d=0;d<a.length;d++)b.titleField&&""!==b.titleField&&(g=h=C(a[d])),e="",b.descriptionField&&(e=i=D(a[d],b.descriptionField)),f="",b.imageField&&(f=D(a[d],b.imageField)),b.matchClass&&(h=E(g,c),i=E(e,c)),b.results[b.results.length]={title:h,description:i,image:f,originalObject:a[d]};else b.results=[];b.autoMatch&&1===b.results.length&&X(b.results[0],{title:g,desc:e||""},b.searchStr)?b.showDropdown=!1:0!==b.results.length||da?b.showDropdown=!0:b.showDropdown=!1}function $(){b.localData?(b.searching=!1,Z(b.localData,"")):b.remoteApiHandler?(b.searching=!0,T("")):(b.searching=!0,S(""))}var _,aa,ba,ca,da,ea=f.find("input"),fa=p,ga=null,ha=t,ia=null,ja=null,ka=!1,la=f[0].querySelector(".angucomplete-dropdown"),ma=!1,na=null;f.on("mousedown",function(a){a.target.id?(na=a.target.id,na===b.id+"_dropdown"&&document.body.addEventListener("click",x)):na=a.target.className}),b.currentIndex=b.focusFirst?0:null,b.searching=!1,ba=b.$watch("initialValue",function(a){a&&(ba(),w(a,!0))}),b.$watch("fieldRequired",function(a,c){a!==c&&(a?F(ia&&b.currentIndex!==-1?!0:!1):h[b.inputName].$setValidity(ha,!0))}),b.$on("angucomplete-alt:clearInput",function(a,c){c&&c!==b.id||(b.searchStr=null,z(),F(!1),U())}),b.$on("angucomplete-alt:changeInput",function(a,c,d){c&&c===b.id&&w(d)}),b.onFocusHandler=function(){b.focusIn&&b.focusIn(),0!==fa||b.searchStr&&0!==b.searchStr.length||(b.currentIndex=b.focusFirst?0:b.currentIndex,b.showDropdown=!0,$())},b.hideResults=function(){na&&(na===b.id+"_dropdown"||na.indexOf("angucomplete")>=0)?na=null:(_=e(function(){U(),b.$apply(function(){b.searchStr&&b.searchStr.length>0&&ea.val(b.searchStr)})},s),R(),b.focusOut&&b.focusOut(),b.overrideSuggestions&&b.searchStr&&b.searchStr.length>0&&b.currentIndex===-1&&H())},b.resetHideResults=function(){_&&e.cancel(_)},b.hoverRow=function(a){b.currentIndex=a},b.selectResult=function(a){b.matchClass&&(a.title=C(a.originalObject),a.description=D(a.originalObject,b.descriptionField)),b.clearSelected?b.searchStr=null:b.searchStr=a.title,z(a),U()},b.inputChangeHandler=function(a){return a.length<fa?(R(),U()):0===a.length&&0===fa&&$(),b.inputChanged&&(a=b.inputChanged(a)),a},b.fieldRequiredClass&&""!==b.fieldRequiredClass&&(ha=b.fieldRequiredClass),b.minlength&&""!==b.minlength&&(fa=parseInt(b.minlength,10)),b.pause||(b.pause=r),b.clearSelected||(b.clearSelected=!1),b.overrideSuggestions||(b.overrideSuggestions=!1),b.fieldRequired&&h&&F(b.initialValue?!0:!1),b.inputType=g.type?g.type:"text",b.textSearching=g.textSearching?g.textSearching:u,b.textNoResults=g.textNoResults?g.textNoResults:v,ca="false"!==b.textSearching,da="false"!==b.textNoResults,b.maxlength=g.maxlength?g.maxlength:q,ea.on("keydown",O),ea.on("keyup compositionend",G),aa=A("remoteUrlResponseFormatter"),e(function(){var a=getComputedStyle(la);ma=a.maxHeight&&"auto"===a.overflowY})}var i=40,j=39,k=38,l=37,m=27,n=13,o=9,p=3,q=524288,r=500,s=200,t="autocomplete-required",u="Searching...",v="No results found",w="/angucomplete-alt/index.html";return f.put(w,'<div class="angucomplete-holder" ng-class="{\'angucomplete-dropdown-visible\': showDropdown}">  <input id="{{id}}_value" name="{{inputName}}" tabindex="{{fieldTabindex}}" ng-class="{\'angucomplete-input-not-empty\': notEmpty}" ng-model="searchStr" ng-disabled="disableInput" type="{{inputType}}" placeholder="{{placeholder}}" maxlength="{{maxlength}}" ng-focus="onFocusHandler()" class="{{inputClass}}" ng-focus="resetHideResults()" ng-blur="hideResults($event)" autocapitalize="off" autocorrect="off" autocomplete="off" ng-change="inputChangeHandler(searchStr)"/>  <div id="{{id}}_dropdown" class="angucomplete-dropdown" ng-show="showDropdown">    <div class="angucomplete-searching" ng-show="searching" ng-bind="textSearching"></div>    <div class="angucomplete-searching" ng-show="!searching && (!results || results.length == 0)" ng-bind="textNoResults"></div>    <div class="angucomplete-row" ng-repeat="result in results" ng-click="selectResult(result)" ng-mouseenter="hoverRow($index)" ng-class="{\'angucomplete-selected-row\': $index == currentIndex}">      <div ng-if="imageField" class="angucomplete-image-holder">        <img ng-if="result.image && result.image != \'\'" ng-src="{{result.image}}" class="angucomplete-image"/>        <div ng-if="!result.image && result.image != \'\'" class="angucomplete-image-default"></div>      </div>      <div class="angucomplete-title" ng-if="matchClass" ng-bind-html="result.title"></div>      <div class="angucomplete-title" ng-if="!matchClass">{{ result.title }}</div>      <div ng-if="matchClass && result.description && result.description != \'\'" class="angucomplete-description" ng-bind-html="result.description"></div>      <div ng-if="!matchClass && result.description && result.description != \'\'" class="angucomplete-description">{{result.description}}</div>    </div>  </div></div>'),{restrict:"EA",require:"^?form",scope:{selectedObject:"=",selectedObjectData:"=",disableInput:"=",initialValue:"=",localData:"=",localSearch:"&",remoteUrlRequestFormatter:"=",remoteUrlRequestWithCredentials:"@",remoteUrlResponseFormatter:"=",remoteUrlErrorCallback:"=",remoteApiHandler:"=",id:"@",type:"@",placeholder:"@",textSearching:"@",textNoResults:"@",remoteUrl:"@",remoteUrlDataField:"@",titleField:"@",descriptionField:"@",imageField:"@",inputClass:"@",pause:"@",searchFields:"@",minlength:"@",matchClass:"@",clearSelected:"@",overrideSuggestions:"@",fieldRequired:"=",fieldRequiredClass:"@",inputChanged:"=",autoMatch:"@",focusOut:"&",focusIn:"&",fieldTabindex:"@",inputName:"@",focusFirst:"@",parseInput:"&"},templateUrl:function(a,b){return b.templateUrl||w},compile:function(a){var b=g.startSymbol(),c=g.endSymbol();if("{{"!==b||"}}"!==c){var d=a.html().replace(/\{\{/g,b).replace(/\}\}/g,c);a.html(d)}return h}}}])});
+ (function(){
+	'use strict';
+
+	// Key codes
+	var keys = {
+		enter : 13,
+		esc   : 27,
+		left  : 37,
+		right : 39
+	};
+
+	angular
+	.module('thatisuday.ng-image-gallery', ['ngAnimate'])
+	.provider('ngImageGalleryOpts', function(){
+		var defOpts = {
+			thumbnails  	:   true,
+			thumbSize		: 	80,
+			inline      	:   false,
+			bubbles     	:   true,
+			bubbleSize		: 	20,
+			imgBubbles  	:   false,
+			bgClose     	:   false,
+			piracy 			: 	false,
+			imgAnim 		: 	'fadeup',
+			errorPlaceHolder:   'Error when loading the image!'
+		};
+
+		return{
+			setOpts : function(newOpts){
+				angular.extend(defOpts, newOpts);
+			},
+			$get : function(){
+				return defOpts;
+			}
+		}
+	})
+	.filter('ngImageGalleryTrust', ['$sce', function($sce) {
+      return function(value, type) {
+        // Defaults to treating trusted value as `html`
+        return $sce.trustAs(type || 'html', value);
+      }
+    }])
+    .directive('ngRightClick', ['$parse', function($parse){
+	    return {
+	    	restrict: "A",
+			scope : false,
+			link : function(scope, element, attrs){
+				element.bind('contextmenu', function(event){
+					if(scope.piracy == false){
+						event.preventDefault();
+						return scope.piracy;
+					}
+				});
+			}
+	    };
+	}])
+	.directive("showImageAsync", [function(){
+		return {
+			restrict: "A",
+			scope: false,
+			link: function (scope, element, attributes){
+				var image = new Image();
+				image.src = attributes.showImageAsync;
+				image.onload = function(){
+					scope.$apply(function(){
+						if(attributes.asyncKind == 'thumb'){
+							element.css({ backgroundImage: 'url("' + attributes.showImageAsync + '")' });
+							element.empty(); // remove loading animation element
+						}
+						else if(attributes.asyncKind == 'bubble'){
+							element.css({ backgroundImage: 'url("' + attributes.showImageAsync + '")' });
+						}
+					});
+				};
+				image.onerror = function(){
+					element.empty(); // remove loading animation element
+				}
+			}
+		};
+	}])
+	.directive("bubbleAutoFit", ['$window', '$timeout', function($window, $timeout){
+		return {
+			restrict: "A",
+			scope: false,
+			link: {
+				pre : function (scope, element, attributes){
+					var autoFitBubbles = function(){
+						var scrollerWidth = element[0].getBoundingClientRect().width;
+						if(scrollerWidth == 0) return;
+
+						var bubbleSize = scope.bubbleSize;
+						var minMargin = 4 + 4; // left+right
+						var bubbleSpace = (bubbleSize + minMargin);
+						var rawQuotient = scrollerWidth / bubbleSpace;
+						var bubblesInView = Math.floor(rawQuotient);
+						var extraSpace = scrollerWidth - (bubblesInView * bubbleSpace);
+						var extraMargin = extraSpace / bubblesInView;
+						var bubbleMargin = minMargin + extraMargin;
+						var finalBubbleSpace = bubbleMargin + bubbleSize;
+
+						scope._bubblesInView = bubblesInView;
+						scope._finalBubbleSpace = finalBubbleSpace;
+						scope._bubbleMargin = '0 ' + (bubbleMargin/2) + 'px';
+
+						scope._safeApply(angular.noop);
+					};
+
+					$timeout(autoFitBubbles);
+
+					angular.element($window).bind('resize', function(){
+						$timeout(autoFitBubbles);
+					});
+					scope.$watch('inline', function(){
+						$timeout(autoFitBubbles);
+					});
+					scope.$watch('bubbleSize', function(){
+						$timeout(autoFitBubbles);
+					});
+					scope.$watchCollection('images', function(){
+						$timeout(autoFitBubbles);
+					});
+				}
+			}
+		};
+	}])
+	.directive("bubbleAutoScroll", ['$window', '$timeout', function($window, $timeout){
+		return {
+			restrict: "A",
+			scope: false,
+			link: function (scope, element, attributes){
+
+				var indexCalc = function(){
+					var relativeIndexToBubbleWrapper = scope._bubblesInView - (scope._bubblesInView - scope._activeImageIndex);
+
+					$timeout(function(){
+						if(relativeIndexToBubbleWrapper > scope._bubblesInView - 2){
+							var outBubbles = ((scope._activeImageIndex+1) - scope._bubblesInView) + 1;
+
+							if(scope._activeImageIndex != (scope.images.length - 1)){
+								scope._bubblesContainerMarginLeft = '-' + (scope._finalBubbleSpace * outBubbles) + 'px';
+							}
+							else{
+								scope._bubblesContainerMarginLeft = '-' + (scope._finalBubbleSpace * (outBubbles - 1)) + 'px';
+							}
+						}
+						else{
+							scope._bubblesContainerMarginLeft = '0px';
+						}
+					});
+				}
+
+				angular.element($window).bind('resize', function(){
+					$timeout(indexCalc);
+				});
+				scope.$watch('_bubblesInView', function(){
+					$timeout(indexCalc);
+				});
+				scope.$watch('_activeImageIndex', function(){
+					$timeout(indexCalc);
+				});
+				scope.$watchCollection('images', function(){
+					$timeout(indexCalc);
+				});
+			}
+		};
+	}])
+	.directive('ngImageGallery', ['$rootScope', '$timeout', '$q', 'ngImageGalleryOpts',
+	function($rootScope, $timeout, $q, ngImageGalleryOpts){
+		return {
+			replace : true,
+			transclude : false,
+			restrict : 'AE',
+			scope : {
+				images 			: 	'=',		// []
+				methods 		: 	'=?',		// {}
+				conf 			: 	'=?',		// {}
+
+				thumbnails 		: 	'=?',		// true|false
+				thumbSize		: 	'=?', 		// px
+				inline 			: 	'=?',		// true|false
+				bubbles 		: 	'=?',		// true|false
+				bubbleSize 		: 	'=?',		// px
+				imgBubbles 		: 	'=?',		// true|false
+				bgClose 		: 	'=?',		// true|false
+				piracy			: 	'=?',		// true|false
+				imgAnim 		: 	'@?',		// {name}
+				errorPlaceHolder: 	'@?',		// {name}
+
+				onOpen 			: 	'&?',		// function
+				onClose 		: 	'&?',		// function,
+				onDelete		: 	'&?'
+			},
+			template : 	'<div class="ng-image-gallery img-move-dir-{{_imgMoveDirection}}" ng-class="{inline:inline}" ng-hide="images.length == 0">'+
+
+							// Thumbnails container
+							//  Hide for inline gallery
+							'<div ng-if="thumbnails && !inline" class="ng-image-gallery-thumbnails">' +
+ 								'<div class="thumb" ng-repeat="image in images track by image.url" ng-click="methods.open($index);" show-image-async="{{image.thumbUrl || image.url}}" async-kind="thumb" ng-style="{\'width\' : thumbSize+\'px\', \'height\' : thumbSize+\'px\'}">'+
+ 									'<div class="loader"></div>'+
+ 								'</div>' +
+ 							'</div>' +
+
+							// Modal container
+							// (inline container for inline modal)
+							'<div class="ng-image-gallery-modal" ng-if="opened" ng-cloak>' +
+
+								// Gallery backdrop container
+								// (hide for inline gallery)
+								'<div class="ng-image-gallery-backdrop" ng-if="!inline"></div>'+
+
+								// Gallery contents container
+								// (hide when image is loading)
+								'<div class="ng-image-gallery-content" ng-show="!imgLoading" ng-click="backgroundClose($event);">'+
+
+									// actions icons container
+									'<div class="actions-icons-container">'+
+										// Delete image icon
+										'<div class="delete-img" ng-repeat="image in images track by image.id" ng-if="_activeImg == image && image.deletable" title="Delete this image..." ng-click="_deleteImg(image)"></div>'+
+									'</div>'+
+
+									// control icons container
+									'<div class="control-icons-container">'+
+										// External link icon
+										'<a class="ext-url" ng-repeat="image in images track by image.id" ng-if="_activeImg == image && image.extUrl" href="{{image.extUrl}}" target="_blank" title="Open image in new tab..."></a>'+
+
+										// Close Icon (hidden in inline gallery)
+										'<div class="close" ng-click="methods.close();" ng-if="!inline"></div>'+
+									'</div>'+
+
+									// Prev-Next Icons
+									// Add `bubbles-on` class when bubbles are enabled (for offset)
+									'<div class="prev" ng-click="methods.prev();" ng-class="{\'bubbles-on\':bubbles}" ng-hide="images.length == 1"></div>'+
+									'<div class="next" ng-click="methods.next();" ng-class="{\'bubbles-on\':bubbles}" ng-hide="images.length == 1"></div>'+
+
+									// Galleria container
+									'<div class="galleria">'+
+
+										// Images container
+										'<div class="galleria-images img-anim-{{imgAnim}} img-move-dir-{{_imgMoveDirection}}">'+
+											'<img class="galleria-image" ng-right-click ng-repeat="image in images track by image.id" ng-if="_activeImg == image" ng-src="{{image.url}}" ondragstart="return false;" ng-attr-alt="{{image.alt || undefined}}"/>'+
+										'</div>'+
+
+										// Image description container
+										'<div class="galleria-title-description-wrapper">'+
+											'<div ng-repeat="image in images track by image.id" ng-if="(image.title || image.desc) && (_activeImg == image)">'+
+												'<div class="title" ng-if="image.title" ng-bind-html="image.title | ngImageGalleryTrust"></div>'+
+												'<div class="desc" ng-if="image.desc" ng-bind-html="image.desc | ngImageGalleryTrust"></div>'+
+											'</div>'+
+										'</div>'+
+
+										// Bubble navigation container
+										'<div class="galleria-bubbles-wrapper" ng-if="bubbles && !imgBubbles" ng-hide="images.length == 1" ng-style="{\'height\' : bubbleSize+\'px\'}" bubble-auto-fit>'+
+											'<div class="galleria-bubbles" bubble-auto-scroll ng-style="{\'margin-left\': _bubblesContainerMarginLeft}">'+
+												'<span class="galleria-bubble" ng-click="_setActiveImg(image);" ng-repeat="image in images track by image.id" ng-class="{active : (_activeImg == image)}" ng-style="{\'width\' : bubbleSize+\'px\', \'height\' : bubbleSize+\'px\', margin: _bubbleMargin}"></span>'+
+											'</div>'+
+										'</div>'+
+
+										// Image bubble navigation container
+										'<div class="galleria-bubbles-wrapper" ng-if="bubbles && imgBubbles" ng-hide="images.length == 1" ng-style="{\'height\' : bubbleSize+\'px\'}" bubble-auto-fit>'+
+											'<div class="galleria-bubbles" bubble-auto-scroll ng-style="{\'margin-left\': _bubblesContainerMarginLeft}">'+
+												'<span class="galleria-bubble img-bubble" ng-click="_setActiveImg(image);" ng-repeat="image in images track by image.id" ng-class="{active : (_activeImg == image)}" show-image-async="{{image.bubbleUrl || image.thumbUrl || image.url}}" async-kind="bubble" ng-style="{\'width\' : bubbleSize+\'px\', \'height\' : bubbleSize+\'px\', \'border-width\' : bubbleSize/10+\'px\', margin: _bubbleMargin}"></span>'+
+											'</div>'+
+										'</div>'+
+
+									'</div>'+
+
+								'</div>'+
+
+								// Loading animation overlay container
+								// (show when image is loading)
+								'<div class="ng-image-gallery-loader" ng-show="imgLoading">'+
+									'<div class="spinner">'+
+										'<div class="rect1"></div>'+
+										'<div class="rect2"></div>'+
+										'<div class="rect3"></div>'+
+										'<div class="rect4"></div>'+
+										'<div class="rect5"></div>'+
+									'</div>'+
+								'</div>'+
+
+								// (show when image cannot be loaded)
+								'<div class="ng-image-gallery-errorplaceholder" ng-show="imgError">'+
+									'<div class="ng-image-gallery-error-placeholder" ng-bind-html="errorPlaceHolder | ngImageGalleryTrust"></div>'+
+								'</div>'+
+							'</div>'+
+						'</div>',
+
+			link : {
+				pre : function(scope, elem, attr){
+
+					/*
+					 *	Operational functions
+					**/
+
+					// Show gallery loader
+					scope._showLoader = function(){
+						scope.imgLoading = true;
+					}
+
+					// Hide gallery loader
+					scope._hideLoader = function(){
+						scope.imgLoading = false;
+					}
+
+					// Image load complete promise
+					scope._loadImg = function(imgObj){
+
+						// Return rejected promise
+						// if not image object received
+						if(!imgObj) return $q.reject();
+
+						var deferred =  $q.defer();
+
+						// Show loder
+						if(!imgObj.hasOwnProperty('cached')) scope._showLoader();
+
+						// Process image
+						var img = new Image();
+						img.src = imgObj.url;
+						img.onload = function(){
+							// Hide loder
+							if(!imgObj.hasOwnProperty('cached')) scope._hideLoader();
+
+							// Cache image
+							if(!imgObj.hasOwnProperty('cached')) imgObj.cached = true;
+
+							deferred.resolve(imgObj);
+						}
+						img.onerror = function(){
+							if(!imgObj.hasOwnProperty('cached')) scope._hideLoader();
+
+							deferred.reject('Error when loading img');
+						}
+
+						return deferred.promise;
+					}
+
+					scope._setActiveImg = function(imgObj){
+						// Get images move direction
+						if(
+							scope.images.indexOf(scope._activeImg) - scope.images.indexOf(imgObj) == (scope.images.length - 1) ||
+							(
+								scope.images.indexOf(scope._activeImg) - scope.images.indexOf(imgObj) <= 0 &&
+								scope.images.indexOf(scope._activeImg) - scope.images.indexOf(imgObj) != -(scope.images.length - 1)
+							)
+
+						){
+							scope._imgMoveDirection = 'forward';
+						}
+						else{
+							scope._imgMoveDirection = 'backward';
+						}
+
+						// Load image
+						scope._loadImg(imgObj).then(function(imgObj){
+							scope._activeImg = imgObj;
+							scope._activeImageIndex = scope.images.indexOf(imgObj);
+							scope.imgError = false;
+						}, function(){
+							scope._activeImg = null;
+							scope._activeImageIndex = scope.images.indexOf(imgObj);
+							scope.imgError = true;
+						})
+						;
+					}
+
+					scope._safeApply = function(fn){
+						var phase = this.$root.$$phase;
+						if(phase == '$apply' || phase == '$digest'){
+							if(fn && (typeof(fn) === 'function')){
+								fn();
+							}
+						}else{
+							this.$apply(fn);
+						}
+					};
+
+					scope._deleteImg = function(img){
+						var _deleteImgCallback = function(){
+							var index = scope.images.indexOf(img);
+							console.log(index);
+							scope.images.splice(index, 1);
+							scope._activeImageIndex = 0;
+
+							/**/
+						}
+
+						scope.onDelete({img: img, cb: _deleteImgCallback});
+					}
+
+
+					/***************************************************/
+
+
+					/*
+					 *	Gallery settings
+					**/
+
+					// Modify scope models
+					scope.images 	 	 = 	(scope.images 		!= undefined) ? scope.images 	 : 	[];
+					scope.methods 	 	 = 	(scope.methods 		!= undefined) ? scope.methods 	 : 	{};
+					scope.conf 	 		 = 	(scope.conf 		!= undefined) ? scope.conf 		 : 	{};
+
+					// setting options
+					scope.$watchCollection('conf', function(conf){
+						scope.thumbnails 	 = 	(conf.thumbnails 	!= undefined) ? conf.thumbnails 	: 	(scope.thumbnails 	!= undefined) 	?  scope.thumbnails		: 	ngImageGalleryOpts.thumbnails;
+						scope.thumbSize 	 = 	(conf.thumbSize 	!= undefined) ? conf.thumbSize 		: 	(scope.thumbSize 	!= undefined) 	?  scope.thumbSize		: 	ngImageGalleryOpts.thumbSize;
+						scope.inline 	 	 = 	(conf.inline 		!= undefined) ? conf.inline 	 	: 	(scope.inline 		!= undefined) 	?  scope.inline			: 	ngImageGalleryOpts.inline;
+						scope.bubbles 	 	 = 	(conf.bubbles 		!= undefined) ? conf.bubbles 	 	: 	(scope.bubbles 		!= undefined) 	?  scope.bubbles		: 	ngImageGalleryOpts.bubbles;
+						scope.bubbleSize 	 = 	(conf.bubbleSize 	!= undefined) ? conf.bubbleSize 	 : 	(scope.bubbleSize 	!= undefined) 	?  scope.bubbleSize		: 	ngImageGalleryOpts.bubbleSize;
+						scope.imgBubbles 	 = 	(conf.imgBubbles 	!= undefined) ? conf.imgBubbles 	: 	(scope.imgBubbles 	!= undefined) 	?  scope.imgBubbles		: 	ngImageGalleryOpts.imgBubbles;
+						scope.bgClose 	 	 = 	(conf.bgClose 		!= undefined) ? conf.bgClose 	 	: 	(scope.bgClose 		!= undefined) 	?  scope.bgClose		: 	ngImageGalleryOpts.bgClose;
+						scope.piracy 	 	 = 	(conf.piracy 		!= undefined) ? conf.piracy 	 	: 	(scope.piracy 		!= undefined) 	?  scope.piracy			: 	ngImageGalleryOpts.piracy;
+						scope.imgAnim 	 	 = 	(conf.imgAnim 		!= undefined) ? conf.imgAnim 	 	: 	(scope.imgAnim 		!= undefined) 	?  scope.imgAnim		: 	ngImageGalleryOpts.imgAnim;
+						scope.errorPlaceHolder = (conf.errorPlaceHolder != undefined) ? conf.errorPlaceHolder : (scope.errorPlaceHolder != undefined) ? scope.errorPlaceHolder : ngImageGalleryOpts.errorPlaceHolder;
+					});
+
+					scope.onOpen 	 = 	(scope.onOpen 	!= undefined) ? scope.onOpen 	 : 	angular.noop;
+					scope.onClose 	 = 	(scope.onClose 	!= undefined) ? scope.onClose 	 : 	angular.noop;
+					scope.onDelete 	 = 	(scope.onDelete != undefined) ? scope.onDelete 	 : 	angular.noop;
+
+					// If images populate dynamically, reset gallery
+					var imagesFirstWatch = true;
+					scope.$watchCollection('images', function(){
+						if(imagesFirstWatch){
+							imagesFirstWatch = false;
+						}
+						else if(scope.images.length){
+							scope._setActiveImg(scope.images[scope._activeImageIndex || 0]);
+						}
+					});
+
+					// Watch index of visible/active image
+					// If index changes, make sure to load/change image
+					var activeImageIndexFirstWatch = true;
+					scope.$watch('_activeImageIndex', function(newImgIndex){
+						if(activeImageIndexFirstWatch){
+							activeImageIndexFirstWatch = false;
+						}
+						else if(scope.images.length){
+							scope._setActiveImg(
+								scope.images[newImgIndex]
+							);
+						}
+					});
+
+					// Open modal automatically if inline
+					scope.$watch('inline', function(){
+						$timeout(function(){
+							if(scope.inline) scope.methods.open();
+						});
+					});
+
+
+					/***************************************************/
+
+
+					/*
+					 *	Methods
+					**/
+
+					// Open gallery modal
+					scope.methods.open = function(imgIndex){
+						// Open modal from an index if one passed
+						scope._activeImageIndex = (imgIndex) ? imgIndex : 0;
+
+						scope.opened = true;
+
+						// set overflow hidden to body
+						if(!scope.inline) angular.element(document.body).addClass('body-overflow-hidden');
+
+						// call open event after transition
+						$timeout(function(){
+							scope.onOpen();
+						}, 300);
+					}
+
+					// Close gallery modal
+					scope.methods.close = function(){
+						scope.opened = false; // Model closed
+
+						// set overflow hidden to body
+						angular.element(document.body).removeClass('body-overflow-hidden');
+
+						// call close event after transition
+						$timeout(function(){
+							scope.onClose();
+							scope._activeImageIndex = 0; // Reset index
+						}, 300);
+					}
+
+					// Change image to next
+					scope.methods.next = function(){
+						if(scope._activeImageIndex == (scope.images.length - 1)){
+							scope._activeImageIndex = 0;
+						}
+						else{
+							scope._activeImageIndex = scope._activeImageIndex + 1;
+						}
+					}
+
+					// Change image to prev
+					scope.methods.prev = function(){
+						if(scope._activeImageIndex == 0){
+							scope._activeImageIndex = scope.images.length - 1;
+						}
+						else{
+							scope._activeImageIndex--;
+						}
+					}
+
+					// Close gallery on background click
+					scope.backgroundClose = function(e){
+						if(!scope.bgClose || scope.inline) return;
+
+						var noCloseClasses = [
+							'galleria-image',
+							'destroy-icons-container',
+							'ext-url',
+							'close',
+							'next',
+							'prev',
+							'galleria-bubble'
+						];
+
+						// check if clicked element has a class that
+						// belongs to `noCloseClasses`
+						for(var i = 0; i < e.target.classList.length; i++){
+							if(noCloseClasses.indexOf(e.target.classList[i]) != -1){
+								break;
+							}
+							else{
+								scope.methods.close();
+							}
+						}
+					}
+
+
+					/***************************************************/
+
+
+					/*
+					 *	User interactions
+					**/
+
+					// Key events
+					angular.element(document).bind('keyup', function(event){
+						// If inline modal, do not interact
+						if(scope.inline) return;
+
+						if(event.which == keys.right || event.which == keys.enter){
+							$timeout(function(){
+								scope.methods.next();
+							});
+						}
+						else if(event.which == keys.left){
+							$timeout(function(){
+								scope.methods.prev();
+							});
+						}
+						else if(event.which == keys.esc){
+							$timeout(function(){
+								scope.methods.close();
+							});
+						}
+					});
+
+					// Swipe events
+					if(window.Hammer){
+						var hammerElem = new Hammer(elem[0]);
+						hammerElem.on('swiperight', function(ev){
+							$timeout(function(){
+								scope.methods.prev();
+							});
+						});
+						hammerElem.on('swipeleft', function(ev){
+							$timeout(function(){
+								scope.methods.next();
+							});
+						});
+						hammerElem.on('doubletap', function(ev){
+							if(scope.inline) return;
+
+							$timeout(function(){
+								scope.methods.close();
+							});
+						});
+					};
+
+
+					/***********************************************************/
+
+
+					/*
+					 *	Actions on angular events
+					**/
+
+					var removeClassFromDocumentBody = function(){
+						angular.element(document.body).removeClass('body-overflow-hidden');
+					};
+
+					$rootScope.$on('$stateChangeSuccess', removeClassFromDocumentBody);
+					$rootScope.$on('$routeChangeSuccess', removeClassFromDocumentBody);
+
+				}
+			}
+		}
+	}]);
+ })();
 /**
  * bootbox.js [master branch]
  *
@@ -46033,6 +46642,11 @@ function setEndOfContenteditable(contentEditableElement)
 }
 function allowDrop(ev) {
     ev.preventDefault();
+}
+
+function upload()
+{
+	$('input[type="file"]').click();
 }
 
 // кол-во смс

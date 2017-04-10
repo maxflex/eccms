@@ -21,6 +21,8 @@ Route::group(['middleware' => ['login']], function () {
 
     Route::resource('sass', 'SassController');
 
+    Route::resource('photos', 'PhotosController');
+
     # Templates for angular directives
     Route::get('directives/{directive}', function($directive) {
         return view("directives.{$directive}");
