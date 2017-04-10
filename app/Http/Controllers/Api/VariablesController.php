@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
 use App\Models\Variable;
+use Illuminate\Support\Facades\Schema;
 
 class VariablesController extends Controller
 {
@@ -90,21 +91,42 @@ class VariablesController extends Controller
 
     public function push(Request $request)
     {
-        if (Api::API_KEY == $request->input('API_KEY')) {
+        if (env('API_KEY') == $request->input('API_KEY')) {
+            Schema::disableForeignKeyConstraints();
+
             DB::table('variable_groups')->truncate();
-            DB::table('variable_groups')->insert($request->groups);
+            if (count($request->groups)) {
+                DB::table('variable_groups')->insert($request->groups);
+            }
+
             DB::table('variables')->truncate();
-            DB::table('variables')->insert($request->variables);
+            if (count($request->variables)) {
+                DB::table('variables')->insert($request->variables);
+            }
+
+            DB::table('page_useful')->truncate();
+            if (count($request->useful)) {
+                DB::table('page_useful')->insert($request->useful);
+            }
+
+            DB::table('pages')->truncate();
+            if (count($request->pages)) {
+                DB::table('pages')->insert($request->pages);
+            }
+
+            Schema::enableForeignKeyConstraints();
         } else {
             return false;
         }
     }
 
-    public function pull(Request $request)
+    public function pull()
     {
         return [
             DB::table('variables')->get()->all(),
-            DB::table('variable_groups')->get()->all()
+            DB::table('variable_groups')->get()->all(),
+            DB::table('pages')->get()->all(),
+            DB::table('page_useful')->get()->all(),
         ];
     }
 }

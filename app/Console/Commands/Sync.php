@@ -2,9 +2,11 @@
 
 namespace App\Console\Commands;
 
+use App\Models\PageUseful;
 use DB;
 use App\Models\Service\Api;
 use App\Models\Variable;
+use App\Models\VariableGroup;
 use App\Models\Page;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Schema;
@@ -16,7 +18,7 @@ class Sync extends Command
      *
      * @var string
      */
-    protected $signature = 'vars {cmd}';
+    protected $signature = 'sync {cmd}';
 
     /**
      * The console command description.
@@ -47,26 +49,46 @@ class Sync extends Command
 
     public function push()
     {
-        $this->info('Pushing variables to server...');
+        $this->info('pushing db data ...');
         Api::exec('variables/push', [
             'variables' => Variable::all()->toArray(),
             'groups'    => VariableGroup::all()->toArray(),
+            'pages'     => Page::all()->toArray(),
+            'useful'    => PageUseful::all()->toArray()
         ]);
     }
 
     public function pull()
     {
-        $this->info('Pulling variables from server...');
-        list($variables, $groups) = Api::exec('variables/pull');
+        $this->info('pulling db data ...');
+        list($variables, $groups, $pages, $useful) = Api::exec('variables/pull');
         Schema::disableForeignKeyConstraints();
         DB::table('variables')->truncate();
         DB::table('variable_groups')->truncate();
+        DB::table('pages')->truncate();
+        DB::table('page_useful')->truncate();
         Schema::enableForeignKeyConstraints();
-        foreach ($groups as $group) {
-            DB::table('variable_groups')->insert((array)$group);
+        if (count($groups)) {
+            foreach ($groups as $group) {
+                DB::table('variable_groups')->insert((array)$group);
+            }
         }
-        foreach ($variables as $var) {
-            DB::table('variables')->insert((array)$var);
+
+        if (count($variables)) {
+            foreach ($variables as $var) {
+                DB::table('variables')->insert((array)$var);
+            }
+        }
+
+        if (count($pages)) {
+            foreach ($pages as $var) {
+                DB::table('pages')->insert((array)$var);
+            }
+        }
+        if (count($useful)) {
+            foreach ($useful as $var) {
+                DB::table('page_useful')->insert((array)$var);
+            }
         }
     }
 }
