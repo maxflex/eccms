@@ -29,8 +29,4 @@ class AddPhotosTable extends Migration
     {
         Schema::dropIfExists('photos');
     }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> d68b3ef8cff5b65808ab16b41e681dfc242ca5f3
