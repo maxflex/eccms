@@ -23,6 +23,7 @@ Route::group(['middleware' => ['login']], function () {
 
     Route::resource('photos', 'PhotosController');
 
+    Route::resource('faq', 'FaqController');
     # Templates for angular directives
     Route::get('directives/{directive}', function($directive) {
         return view("directives.{$directive}");

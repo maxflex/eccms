@@ -9,6 +9,9 @@ Route::group(['namespace' => 'Api', 'as' => 'api.'], function () {
     Route::group(['prefix' => 'variables'], function() {
         Route::resource('groups', 'VariableGroupsController');
     });
+    Route::group(['prefix' => 'pages'], function() {
+        Route::resource('groups', 'PageGroupsController');
+    });
 
     # Pages
     Route::post('pages/checkExistance/{id?}', 'PagesController@checkExistance');
@@ -23,6 +26,12 @@ Route::group(['namespace' => 'Api', 'as' => 'api.'], function () {
 
     Route::resource('sass', 'SassController');
     Route::resource('photos', 'PhotosController');
+
+
+    Route::resource('photos/upload', 'PhotosController@upload');
+    Route::resource('photos', 'PhotosController');
+
+    Route::resource('faq', 'FaqController');
 
     # Factory
     Route::post('factory', 'FactoryController@get');

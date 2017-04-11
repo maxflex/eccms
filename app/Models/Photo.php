@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use Illuminate\Contracts\Auth\StatefulGuard;
+
 use Illuminate\Database\Eloquent\Model;
 
 class Photo extends Model
 {
     const UPLOAD_DIR = 'images/';
+    const THUMB_PREFIX = 'thumb_';
 
     public $timestamps = false;
 
@@ -30,11 +33,11 @@ class Photo extends Model
 
     public function getUrlAttribute()
     {
-        return env('EC_CMS_STORAGE') . $this->filename;
+        return \Storage::url(static::UPLOAD_DIR . $this->filename);
     }
 
     public function getThumbUrlAttribute()
     {
-        return env('EC_CMS_STORAGE') . '' . $this->filename;
+        return \Storage::url(static::UPLOAD_DIR . $this->filename);
     }
 }

@@ -9,30 +9,52 @@
 @stop
 
 @section('content')
-    <table class="table reverse-borders">
-        <div class="row mbs">
-            <div class='col-sm-12'>
-                <order-by options="['по алфавиту', 'по времени сохранения']"></order-by>
-            </div>
+    <span ng-init='groups = {{ \App\Models\PageGroup::getIds() }}'></span>
+    <div ng-repeat="group in groups">
+        <div>
+            <h4 class='inline-block' editable='@{{ group.id }}' ng-class="{'disable-events': !group.id}">@{{ group.title }}</h4>
+            <a ng-if='group.id' class='link-like text-danger show-on-hover' ng-click='removeGroup(group)'>удалить</a>
         </div>
-        {{-- <tbody ui-sortable='sortableOptions' ng-model="IndexService.page.data" > --}}
-        <tbody>
-            <tr ng-repeat="model in IndexService.page.data">
-                <td width='35%'>
-                    <a href="pages/@{{ model.id }}/edit">@{{ model.keyphrase }}</a>
-                </td>
-                <td width='20%'>
-                    <span class="link-like" ng-class="{'link-gray': 0 == +model.published}" ng-click="toggleEnumServer(model, 'published', Published, Page)">@{{ Published[model.published].title }}</span>
-                </td>
-                <td width='20%'>
-                    @{{ formatDateTime(model.updated_at) }}
-                </td>
-                <td style="text-align: right; width: 25%">
-                    <a href="{{ config('app.web-url') }}@{{ model.url }}" target="_blank">просмотреть страницу на сайте</a>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-    @include('modules.pagination')
+        <div class='droppable-table' ondragover="allowDrop(event)"
+            ng-dragenter="dnd.over = group.id" ng-dragleave="dnd.over = undefined" ng-drop="drop(group.id)"
+            ng-class="{'over': dnd.over === group.id && dnd.over != getPage(dnd.page_id).group_id}">
+            <table class="table droppable-table">
+                <tr ng-repeat="page in getPages(group.id)" draggable="true"
+                     ng-dragstart="dragStart(page.id)" ng-dragend='dnd.page_id = null'>
+                     <td width='35%'>
+                         <a href="pages/@{{ page.id }}/edit">@{{ page.keyphrase }}</a>
+                     </td>
+                     <td width='20%'>
+                         <span class="link-like" ng-class="{'link-gray': 0 == +page.published}" ng-click="toggleEnumServer(page, 'published', Published, Page)">@{{ Published[page.published].title }}</span>
+                     </td>
+                     <td width='20%'>
+                         @{{ formatDateTime(page.updated_at) }}
+                     </td>
+                     <td style="text-align: right; width: 25%">
+                         <a href="{{ config('app.web-url') }}@{{ page.url }}" target="_blank">просмотреть страницу на сайте</a>
+                     </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div>
+    <div ng-show='dnd.page_id > 0'>
+        <h4>{{ \App\Models\PageGroup::DEFAULT_TITLE }}</h4>
+        <div class='droppable-table' ondragover="allowDrop(event)"
+            ng-dragenter="dnd.over = -1" ng-dragleave="dnd.over = undefined" ng-drop="drop(-1)"
+            ng-class="{'over': dnd.over == -1}">
+            <table class="table">
+                <tr ng-repeat="i in [1, 2, 3, 4]">
+                    <td style='width: 30%'>
+                        <div class='fake-info'></div>
+                    </td>
+                    <td style='width: 70%'>
+                        <div class='fake-info' style='width: 300px'></div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    {{-- @include('modules.pagination') --}}
     @include('modules._export_dialog')
 @stop

@@ -1,14 +1,12 @@
 angular.module 'Egecms'
     .service 'PhotoService', ($http, Photo, FileUploader, FormService, PhotosUploadDir) ->
-        getFullUrl = (image) ->
-            'storage/' + PhotosUploadDir + image
+        this.getUrl = (model) ->
+            return '' if !model || !model.filename
+            PhotosUploadDir + model.filename
 
-        this.test = ->
-            console.log(this.test2, this.onSuccessItemCallback)
-            return '==========================================='
         this.Uploader = new FileUploader
-            url: 'api/photos'
-            alias: 'photos'
+            url: 'api/photos/upload'
+            alias: 'file'
             filters: [
                 name: 'imageFilter',
                 fn: (file, options) ->
@@ -18,28 +16,26 @@ angular.module 'Egecms'
             autoUpload: true
             removeAfterUpload: true
 
-
         this.Uploader.onSuccessItem = (item, response) =>
-            FormService.model.photos = [] if not FormService.model.photos
-            FormService.model.photos.push response
-            console.log('func', this.onSuccessItemCallback)
+            FormService.model.filename = response
+
             if typeof this.onSuccessItemCallback is 'function'
                 this.onSuccessItemCallback()
-                console.log('CB')
+
+        this.Uploader.onBeforeUploadItem = (item) ->
+            item.formData.push
+                old_file: FormService.model.filename
 
         this.getImages = ->
             images = []
-            FormService.model.photos.forEach (image) ->
-                images.push({url: getFullUrl(image)})
+            IndexService.page.datas.forEach (image) ->
+                images.push url: image.url
             images
 
-        this.delete = (index) ->
-            console.log('Deleting', index)
-            photo = FormService.model.photos[index]
+        this.delete = ->
             Photo.delete
-                id:     scope.id or 0
-                photo:  photo
+                id: scope.id
 
-            FormService.model.photos = _.without FormService.model.photos, photo
+            redirect '/photos'
 
         this

@@ -24,7 +24,8 @@ class Page extends Model
         'seo_desktop',
         'seo_mobile',
         'variable_id',
-        'useful'
+        'useful',
+        'group_id'
     ];
 
     protected static $hidden_on_export = [

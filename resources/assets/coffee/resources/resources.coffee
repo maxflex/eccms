@@ -5,6 +5,9 @@ angular.module('Egecms')
     .factory 'VariableGroup', ($resource) ->
         $resource apiPath('variables/groups'), {id: '@id'}, updatable()
 
+    .factory 'PageGroup', ($resource) ->
+        $resource apiPath('pages/groups'), {id: '@id'}, updatable()
+
     .factory 'Sass', ($resource) ->
         $resource apiPath('sass'), {id: '@id'}, updatable()
 
@@ -20,7 +23,10 @@ angular.module('Egecms')
         $resource apiPath('programs'), {id: '@id'}, updatable()
 
     .factory 'Photo', ($resource) ->
-        $resource apiPath('programs'), {id: '@id'}, updatable()
+        $resource apiPath('photos'), {id: '@id'}, updatable()
+
+    .factory 'Faq', ($resource) ->
+        $resource apiPath('faq'), {id: '@id'}, updatable()
 
 apiPath = (entity, additional = '') ->
     "api/#{entity}/" + (if additional then additional + '/' else '') + ":id"

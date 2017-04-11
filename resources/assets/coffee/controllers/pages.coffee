@@ -1,11 +1,51 @@
 angular
     .module 'Egecms'
-    .controller 'PagesIndex', ($scope, $attrs, $timeout, IndexService, Page, Published, ExportService) ->
+    .controller 'PagesIndex', ($scope, $attrs, $timeout, IndexService, Page, Published, ExportService, PageGroup) ->
         bindArguments($scope, arguments)
         ExportService.init({controller: 'pages'})
 
         angular.element(document).ready ->
-            IndexService.init(Page, $scope.current_page, $attrs, false)
+            IndexService.init(Page, $scope.current_page, $attrs)
+
+        $scope.dnd = {}
+
+        $scope.dragStart = (page_id) ->
+            $timeout ->
+                console.log('drag start', page_id)
+                $scope.dnd.page_id = page_id
+
+        $scope.drop = (group_id) ->
+            if group_id is -1
+                page_id = $scope.dnd.page_id
+                PageGroup.save {page_id: page_id}, (response) ->
+                    $scope.groups.push(response)
+                    IndexService.page.data.find (page) ->
+                        page.id is page_id
+                    .group_id = response.id
+            else if group_id
+                Page.update({id: $scope.dnd.page_id, group_id: group_id})
+                IndexService.page.data.find (page) ->
+                    page.id is $scope.dnd.page_id
+                .group_id = group_id
+            $scope.dnd = {}
+
+        $scope.getPages = (group_id) ->
+            if IndexService.page then IndexService.page.data.filter (d) ->
+                d.group_id is group_id
+
+        $scope.getPage = (page_id) ->
+            _.findWhere(IndexService.page.data, {id: parseInt(page_id)})
+
+        $scope.removeGroup = (group) ->
+            bootbox.confirm "Вы уверены, что хотите удалить группу «#{group.title}»", (response) ->
+                if response is true
+                    PageGroup.remove {id: group.id}
+                    $scope.groups = removeById($scope.groups, group.id)
+                    _.where(IndexService.page.data, {group_id: group.id}).forEach (page) ->
+                        page.group_id = null
+
+        $scope.onEdit = (id, event) ->
+            PageGroup.update {id: id, title: $(event.target).text()}
 
     .controller 'PagesForm', ($scope, $http, $attrs, $timeout, FormService, AceService, Page, Published, UpDown) ->
         bindArguments($scope, arguments)

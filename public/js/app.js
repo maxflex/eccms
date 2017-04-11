@@ -1,7 +1,7 @@
 (function() {
   var indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
-  angular.module("Egecms", ['ngSanitize', 'ngResource', 'ngAnimate', 'ui.sortable', 'ui.bootstrap', 'angular-ladda', 'angularFileUpload', 'angucomplete-alt', 'ngDrag', 'thatisuday.ng-image-gallery']).config([
+  angular.module("Egecms", ['ngSanitize', 'ngResource', 'ngAnimate', 'ui.sortable', 'ui.bootstrap', 'angular-ladda', 'angularFileUpload', 'angucomplete-alt', 'ngDrag', 'ngAnimate', 'thatisuday.ng-image-gallery']).config([
     '$compileProvider', function($compileProvider) {
       return $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|chrome-extension|sip):/);
     }
@@ -192,6 +192,21 @@
 }).call(this);
 
 (function() {
+  angular.module('Egecms').controller('FaqIndex', function($scope, $attrs, $timeout, IndexService, Faq, VariableGroup) {
+    bindArguments($scope, arguments);
+    return angular.element(document).ready(function() {
+      return IndexService.init(Faq, $scope.current_page, $attrs);
+    });
+  }).controller('FaqForm', function($scope, $attrs, $timeout, FormService, AceService, Faq) {
+    bindArguments($scope, arguments);
+    return angular.element(document).ready(function() {
+      return FormService.init(Faq, $scope.id, $scope.model);
+    });
+  });
+
+}).call(this);
+
+(function() {
   angular.module('Egecms').controller('LoginCtrl', function($scope, $http) {
     angular.element(document).ready(function() {
       return $scope.l = Ladda.create(document.querySelector('#login-submit'));
@@ -219,14 +234,77 @@
 }).call(this);
 
 (function() {
-  angular.module('Egecms').controller('PagesIndex', function($scope, $attrs, $timeout, IndexService, Page, Published, ExportService) {
+  angular.module('Egecms').controller('PagesIndex', function($scope, $attrs, $timeout, IndexService, Page, Published, ExportService, PageGroup) {
     bindArguments($scope, arguments);
     ExportService.init({
       controller: 'pages'
     });
-    return angular.element(document).ready(function() {
-      return IndexService.init(Page, $scope.current_page, $attrs, false);
+    angular.element(document).ready(function() {
+      return IndexService.init(Page, $scope.current_page, $attrs);
     });
+    $scope.dnd = {};
+    $scope.dragStart = function(page_id) {
+      return $timeout(function() {
+        console.log('drag start', page_id);
+        return $scope.dnd.page_id = page_id;
+      });
+    };
+    $scope.drop = function(group_id) {
+      var page_id;
+      if (group_id === -1) {
+        page_id = $scope.dnd.page_id;
+        PageGroup.save({
+          page_id: page_id
+        }, function(response) {
+          $scope.groups.push(response);
+          return IndexService.page.data.find(function(page) {
+            return page.id === page_id;
+          }).group_id = response.id;
+        });
+      } else if (group_id) {
+        Page.update({
+          id: $scope.dnd.page_id,
+          group_id: group_id
+        });
+        IndexService.page.data.find(function(page) {
+          return page.id === $scope.dnd.page_id;
+        }).group_id = group_id;
+      }
+      return $scope.dnd = {};
+    };
+    $scope.getPages = function(group_id) {
+      if (IndexService.page) {
+        return IndexService.page.data.filter(function(d) {
+          return d.group_id === group_id;
+        });
+      }
+    };
+    $scope.getPage = function(page_id) {
+      return _.findWhere(IndexService.page.data, {
+        id: parseInt(page_id)
+      });
+    };
+    $scope.removeGroup = function(group) {
+      return bootbox.confirm("Вы уверены, что хотите удалить группу «" + group.title + "»", function(response) {
+        if (response === true) {
+          PageGroup.remove({
+            id: group.id
+          });
+          $scope.groups = removeById($scope.groups, group.id);
+          return _.where(IndexService.page.data, {
+            group_id: group.id
+          }).forEach(function(page) {
+            return page.group_id = null;
+          });
+        }
+      });
+    };
+    return $scope.onEdit = function(id, event) {
+      return PageGroup.update({
+        id: id,
+        title: $(event.target).text()
+      });
+    };
   }).controller('PagesForm', function($scope, $http, $attrs, $timeout, FormService, AceService, Page, Published, UpDown) {
     var empty_useful;
     bindArguments($scope, arguments);
@@ -336,10 +414,20 @@
       bgClose: true,
       imgAnim: 'fadeup'
     });
-  }).controller('PhotosIndex', function($scope, $attrs, IndexService, Photo) {
+  }).controller('PhotosIndex', function($scope, $attrs, IndexService, Photo, PhotoService) {
     bindArguments($scope, arguments);
     return angular.element(document).ready(function() {
       return IndexService.init(Photo, $scope.current_page, $attrs);
+    });
+  }).controller('PhotosForm', function($scope, $attrs, FormService, Photo, PhotoService) {
+    bindArguments($scope, arguments);
+    angular.element(document).ready(function() {
+      return FormService.init(Photo, $scope.id, $scope.model);
+    });
+    return $scope.$watchCollection('FormService.model.photos', function(newVal, oldVal) {
+      if (newVal !== void 0) {
+        return $scope.images = PhotoService.getImages();
+      }
     });
   });
 
@@ -475,6 +563,27 @@
       };
     });
   });
+
+}).call(this);
+
+(function() {
+  angular.module('Egecms').value('Published', [
+    {
+      id: 0,
+      title: 'не опубликовано'
+    }, {
+      id: 1,
+      title: 'опубликовано'
+    }
+  ]).value('UpDown', [
+    {
+      id: 1,
+      title: 'вверху'
+    }, {
+      id: 2,
+      title: 'внизу'
+    }
+  ]);
 
 }).call(this);
 
@@ -966,27 +1075,6 @@
 }).call(this);
 
 (function() {
-  angular.module('Egecms').value('Published', [
-    {
-      id: 0,
-      title: 'не опубликовано'
-    }, {
-      id: 1,
-      title: 'опубликовано'
-    }
-  ]).value('UpDown', [
-    {
-      id: 1,
-      title: 'вверху'
-    }, {
-      id: 2,
-      title: 'внизу'
-    }
-  ]);
-
-}).call(this);
-
-(function() {
   var apiPath, countable, updatable;
 
   angular.module('Egecms').factory('Variable', function($resource) {
@@ -995,6 +1083,10 @@
     }, updatable());
   }).factory('VariableGroup', function($resource) {
     return $resource(apiPath('variables/groups'), {
+      id: '@id'
+    }, updatable());
+  }).factory('PageGroup', function($resource) {
+    return $resource(apiPath('pages/groups'), {
       id: '@id'
     }, updatable());
   }).factory('Sass', function($resource) {
@@ -1018,7 +1110,11 @@
       id: '@id'
     }, updatable());
   }).factory('Photo', function($resource) {
-    return $resource(apiPath('programs'), {
+    return $resource(apiPath('photos'), {
+      id: '@id'
+    }, updatable());
+  }).factory('Faq', function($resource) {
+    return $resource(apiPath('faq'), {
       id: '@id'
     }, updatable());
   });
@@ -1302,17 +1398,15 @@
 
 (function() {
   angular.module('Egecms').service('PhotoService', function($http, Photo, FileUploader, FormService, PhotosUploadDir) {
-    var getFullUrl;
-    getFullUrl = function(image) {
-      return 'storage/' + PhotosUploadDir + image;
-    };
-    this.test = function() {
-      console.log(this.test2, this.onSuccessItemCallback);
-      return '===========================================';
+    this.getUrl = function(model) {
+      if (!model || !model.filename) {
+        return '';
+      }
+      return PhotosUploadDir + model.filename;
     };
     this.Uploader = new FileUploader({
-      url: 'api/photos',
-      alias: 'photos',
+      url: 'api/photos/upload',
+      alias: 'file',
       filters: [
         {
           name: 'imageFilter',
@@ -1328,36 +1422,32 @@
     });
     this.Uploader.onSuccessItem = (function(_this) {
       return function(item, response) {
-        if (!FormService.model.photos) {
-          FormService.model.photos = [];
-        }
-        FormService.model.photos.push(response);
-        console.log('func', _this.onSuccessItemCallback);
+        FormService.model.filename = response;
         if (typeof _this.onSuccessItemCallback === 'function') {
-          _this.onSuccessItemCallback();
-          return console.log('CB');
+          return _this.onSuccessItemCallback();
         }
       };
     })(this);
+    this.Uploader.onBeforeUploadItem = function(item) {
+      return item.formData.push({
+        old_file: FormService.model.filename
+      });
+    };
     this.getImages = function() {
       var images;
       images = [];
-      FormService.model.photos.forEach(function(image) {
+      IndexService.page.datas.forEach(function(image) {
         return images.push({
-          url: getFullUrl(image)
+          url: image.url
         });
       });
       return images;
     };
-    this["delete"] = function(index) {
-      var photo;
-      console.log('Deleting', index);
-      photo = FormService.model.photos[index];
+    this["delete"] = function() {
       Photo["delete"]({
-        id: scope.id || 0,
-        photo: photo
+        id: scope.id
       });
-      return FormService.model.photos = _.without(FormService.model.photos, photo);
+      return redirect('/photos');
     };
     return this;
   });

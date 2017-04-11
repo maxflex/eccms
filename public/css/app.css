@@ -19754,6 +19754,10 @@ select[multiple] {
   display: inline-block;
 }
 
+.gallery-image {
+  max-width: 100%;
+}
+
 .list-group-item .search-icon {
   float: right;
   cursor: pointer;

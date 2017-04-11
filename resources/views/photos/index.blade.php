@@ -2,12 +2,18 @@
 @section('title', 'Галлерея')
 @section('controller', 'PhotosIndex')
 
-@section('content')
-    @include('photos._form')
+@section('title-right')
+    {{ link_to_route('photos.create', 'добавить фото') }}
+@endsection
 
-    <div class="row">
-        <div class="col-sm-12">
-            <ng-image-gallery images="IndexService.page.data"></ng-image-gallery>
-        </div>
-    </div>
+@section('content')
+    <table class="table reverse-borders">
+        <tbody>
+        <tr ng-repeat="model in IndexService.page.data">
+            <td>
+                <a ng-href="photos/@{{ model.id }}/edit">@{{ model.title ? model.title : 'не указано' }}</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
 @stop

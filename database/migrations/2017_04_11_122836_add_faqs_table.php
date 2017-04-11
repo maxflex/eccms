@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AddPhotosTable extends Migration
+class AddFaqsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,10 +13,10 @@ class AddPhotosTable extends Migration
      */
     public function up()
     {
-        Schema::create('photos', function (Blueprint $table) {
+        Schema::create('faqs', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('filename')->unique();
-            $table->string('title')->nullable();
+            $table->string('question');
+            $table->string('answer');
         });
     }
 
@@ -27,10 +27,6 @@ class AddPhotosTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('photos');
+        Schema::dropIfExists('faqs');
     }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> d68b3ef8cff5b65808ab16b41e681dfc242ca5f3
