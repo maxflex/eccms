@@ -16,7 +16,7 @@ class FaqController extends Controller
      */
     public function index()
     {
-        return Faq::paginate(30);
+        return Faq::paginate(PHP_INT_MAX);
     }
 
     /**

@@ -11,7 +11,7 @@ class FaqController extends Controller
     public function index(Request $request)
     {
         return view('faq.index')->with(ngInit([
-            'current_page'      => $request->page,
+            'current_page' => $request->page,
         ]));
     }
 
