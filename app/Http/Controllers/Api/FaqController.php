@@ -27,7 +27,7 @@ class FaqController extends Controller
      */
     public function store(Request $request)
     {
-        return Faq::create($request->all())->fresh();
+        return Faq::create($request->input())->fresh();
     }
 
     /**
@@ -50,7 +50,7 @@ class FaqController extends Controller
      */
     public function update(Request $request, $id)
     {
-        Faq::find($id)->update($request->all());
+        Faq::find($id)->update($request->input());
     }
 
     /**

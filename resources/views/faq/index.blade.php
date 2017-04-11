@@ -7,13 +7,42 @@
 @stop
 
 @section('content')
-    <table class="table reverse-borders">
-        <tbody>
-            <tr ng-repeat="model in IndexService.page.data">
-                <td>
-                    <a href="faq/@{{ model.id }}/edit">@{{ model.question }}</a>
-                </td>
-            </tr>
-        </tbody>
-    </table>
+    <span ng-init='groups = {{ \App\Models\FaqGroup::getIds() }}'></span>
+    <div ng-repeat="group in groups">
+        <div>
+            <h4 class='inline-block' editable='@{{ group.id }}' ng-class="{'disable-events': !group.id}">@{{ group.title }}</h4>
+            <a ng-if='group.id' class='link-like text-danger show-on-hover' ng-click='removeGroup(group)'>удалить</a>
+        </div>
+        <div class='droppable-table' ondragover="allowDrop(event)"
+             ng-dragenter="dnd.over = group.id" ng-dragleave="dnd.over = undefined" ng-drop="drop(group.id)"
+             ng-class="{'over': dnd.over === group.id && dnd.over != getFaqs(dnd.faq_id).group_id}">
+            <table class="table droppable-table">
+                <tr ng-repeat="faq in getFaqs(group.id)" draggable="true"
+                    ng-dragstart="dragStart(faq.id)" ng-dragend='dnd.faq_id = null'>
+                    <td>
+                        <a href='faq/@{{ faq.id }}/edit'>@{{ faq.question }}</a>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div>
+        <div ng-show='dnd.faq_id > 0'>
+            <h4>{{ \App\Models\FaqGroup::DEFAULT_TITLE }}</h4>
+            <div class='droppable-table' ondragover="allowDrop(event)"
+                 ng-dragenter="dnd.over = -1" ng-dragleave="dnd.over = undefined" ng-drop="drop(-1)"
+                 ng-class="{'over': dnd.over == -1}">
+                <table class="table">
+                    <tr ng-repeat="i in [1, 2, 3, 4]">
+                        <td>
+                            <div class='fake-info'></div>
+                        </td>
+                        <td>
+                            <div class='fake-info' style='width: 50px'></div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    @include('modules.pagination')
 @stop

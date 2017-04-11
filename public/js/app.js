@@ -192,11 +192,74 @@
 }).call(this);
 
 (function() {
-  angular.module('Egecms').controller('FaqIndex', function($scope, $attrs, $timeout, IndexService, Faq, VariableGroup) {
+  angular.module('Egecms').controller('FaqIndex', function($scope, $attrs, $timeout, IndexService, Faq, FaqGroup) {
     bindArguments($scope, arguments);
-    return angular.element(document).ready(function() {
+    angular.element(document).ready(function() {
       return IndexService.init(Faq, $scope.current_page, $attrs);
     });
+    $scope.dnd = {};
+    $scope.dragStart = function(faq_id) {
+      return $timeout(function() {
+        console.log('drag start', faq_id);
+        return $scope.dnd.faq_id = faq_id;
+      });
+    };
+    $scope.drop = function(group_id) {
+      var faq_id;
+      if (group_id === -1) {
+        faq_id = $scope.dnd.faq_id;
+        FaqGroup.save({
+          faq_id: faq_id
+        }, function(response) {
+          $scope.groups.push(response);
+          return IndexService.page.data.find(function(faq) {
+            return faq.id === faq_id;
+          }).group_id = response.id;
+        });
+      } else if (group_id) {
+        Faq.update({
+          id: $scope.dnd.faq_id,
+          group_id: group_id
+        });
+        IndexService.page.data.find(function(faq) {
+          return faq.id === $scope.dnd.faq_id;
+        }).group_id = group_id;
+      }
+      return $scope.dnd = {};
+    };
+    $scope.getFaqs = function(group_id) {
+      if (IndexService.page) {
+        return IndexService.page.data.filter(function(d) {
+          return d.group_id === group_id;
+        });
+      }
+    };
+    $scope.getFaq = function(faq_id) {
+      return _.findWhere(IndexService.page.data, {
+        id: parseInt(faq_id)
+      });
+    };
+    $scope.removeGroup = function(group) {
+      return bootbox.confirm("Вы уверены, что хотите удалить группу «" + group.title + "»", function(response) {
+        if (response === true) {
+          FaqGroup.remove({
+            id: group.id
+          });
+          $scope.groups = removeById($scope.groups, group.id);
+          return _.where(IndexService.page.data, {
+            group_id: group.id
+          }).forEach(function(faq) {
+            return faq.group_id = null;
+          });
+        }
+      });
+    };
+    return $scope.onEdit = function(id, event) {
+      return FaqGroup.update({
+        id: id,
+        title: $(event.target).text()
+      });
+    };
   }).controller('FaqForm', function($scope, $attrs, $timeout, FormService, AceService, Faq) {
     bindArguments($scope, arguments);
     return angular.element(document).ready(function() {
@@ -500,27 +563,6 @@
       };
     });
   });
-
-}).call(this);
-
-(function() {
-  angular.module('Egecms').value('Published', [
-    {
-      id: 0,
-      title: 'не опубликовано'
-    }, {
-      id: 1,
-      title: 'опубликовано'
-    }
-  ]).value('UpDown', [
-    {
-      id: 1,
-      title: 'вверху'
-    }, {
-      id: 2,
-      title: 'внизу'
-    }
-  ]);
 
 }).call(this);
 
@@ -1012,6 +1054,27 @@
 }).call(this);
 
 (function() {
+  angular.module('Egecms').value('Published', [
+    {
+      id: 0,
+      title: 'не опубликовано'
+    }, {
+      id: 1,
+      title: 'опубликовано'
+    }
+  ]).value('UpDown', [
+    {
+      id: 1,
+      title: 'вверху'
+    }, {
+      id: 2,
+      title: 'внизу'
+    }
+  ]);
+
+}).call(this);
+
+(function() {
   var apiPath, countable, updatable;
 
   angular.module('Egecms').factory('Variable', function($resource) {
@@ -1048,6 +1111,10 @@
     }, updatable());
   }).factory('Faq', function($resource) {
     return $resource(apiPath('faq'), {
+      id: '@id'
+    }, updatable());
+  }).factory('FaqGroup', function($resource) {
+    return $resource(apiPath('faq/groups'), {
       id: '@id'
     }, updatable());
   });
