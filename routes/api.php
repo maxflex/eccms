@@ -27,6 +27,8 @@ Route::group(['namespace' => 'Api', 'as' => 'api.'], function () {
     Route::resource('photos/upload', 'PhotosController@upload');
     Route::resource('photos', 'PhotosController');
 
+    Route::resource('faq', 'FaqController');
+
     # Factory
     Route::post('factory', 'FactoryController@get');
 });

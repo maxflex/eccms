@@ -192,6 +192,21 @@
 }).call(this);
 
 (function() {
+  angular.module('Egecms').controller('FaqIndex', function($scope, $attrs, $timeout, IndexService, Faq, VariableGroup) {
+    bindArguments($scope, arguments);
+    return angular.element(document).ready(function() {
+      return IndexService.init(Faq, $scope.current_page, $attrs);
+    });
+  }).controller('FaqForm', function($scope, $attrs, $timeout, FormService, AceService, Faq) {
+    bindArguments($scope, arguments);
+    return angular.element(document).ready(function() {
+      return FormService.init(Faq, $scope.id, $scope.model);
+    });
+  });
+
+}).call(this);
+
+(function() {
   angular.module('Egecms').controller('LoginCtrl', function($scope, $http) {
     angular.element(document).ready(function() {
       return $scope.l = Ladda.create(document.querySelector('#login-submit'));
@@ -997,6 +1012,72 @@
 }).call(this);
 
 (function() {
+  var apiPath, countable, updatable;
+
+  angular.module('Egecms').factory('Variable', function($resource) {
+    return $resource(apiPath('variables'), {
+      id: '@id'
+    }, updatable());
+  }).factory('VariableGroup', function($resource) {
+    return $resource(apiPath('variables/groups'), {
+      id: '@id'
+    }, updatable());
+  }).factory('Sass', function($resource) {
+    return $resource(apiPath('sass'), {
+      id: '@id'
+    }, updatable());
+  }).factory('Page', function($resource) {
+    return $resource(apiPath('pages'), {
+      id: '@id'
+    }, {
+      update: {
+        method: 'PUT'
+      },
+      checkExistance: {
+        method: 'POST',
+        url: apiPath('pages', 'checkExistance')
+      }
+    });
+  }).factory('Program', function($resource) {
+    return $resource(apiPath('programs'), {
+      id: '@id'
+    }, updatable());
+  }).factory('Photo', function($resource) {
+    return $resource(apiPath('photos'), {
+      id: '@id'
+    }, updatable());
+  }).factory('Faq', function($resource) {
+    return $resource(apiPath('faq'), {
+      id: '@id'
+    }, updatable());
+  });
+
+  apiPath = function(entity, additional) {
+    if (additional == null) {
+      additional = '';
+    }
+    return ("api/" + entity + "/") + (additional ? additional + '/' : '') + ":id";
+  };
+
+  updatable = function() {
+    return {
+      update: {
+        method: 'PUT'
+      }
+    };
+  };
+
+  countable = function() {
+    return {
+      count: {
+        method: 'GET'
+      }
+    };
+  };
+
+}).call(this);
+
+(function() {
   angular.module('Egecms').service('AceService', function() {
     this.initEditor = function(FormService, minLines, id, mode) {
       if (minLines == null) {
@@ -1303,68 +1384,6 @@
     };
     return this;
   });
-
-}).call(this);
-
-(function() {
-  var apiPath, countable, updatable;
-
-  angular.module('Egecms').factory('Variable', function($resource) {
-    return $resource(apiPath('variables'), {
-      id: '@id'
-    }, updatable());
-  }).factory('VariableGroup', function($resource) {
-    return $resource(apiPath('variables/groups'), {
-      id: '@id'
-    }, updatable());
-  }).factory('Sass', function($resource) {
-    return $resource(apiPath('sass'), {
-      id: '@id'
-    }, updatable());
-  }).factory('Page', function($resource) {
-    return $resource(apiPath('pages'), {
-      id: '@id'
-    }, {
-      update: {
-        method: 'PUT'
-      },
-      checkExistance: {
-        method: 'POST',
-        url: apiPath('pages', 'checkExistance')
-      }
-    });
-  }).factory('Program', function($resource) {
-    return $resource(apiPath('programs'), {
-      id: '@id'
-    }, updatable());
-  }).factory('Photo', function($resource) {
-    return $resource(apiPath('photos'), {
-      id: '@id'
-    }, updatable());
-  });
-
-  apiPath = function(entity, additional) {
-    if (additional == null) {
-      additional = '';
-    }
-    return ("api/" + entity + "/") + (additional ? additional + '/' : '') + ":id";
-  };
-
-  updatable = function() {
-    return {
-      update: {
-        method: 'PUT'
-      }
-    };
-  };
-
-  countable = function() {
-    return {
-      count: {
-        method: 'GET'
-      }
-    };
-  };
 
 }).call(this);
 

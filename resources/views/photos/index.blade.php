@@ -7,9 +7,13 @@
 @endsection
 
 @section('content')
-    <div class="row">
-        <div class="col-sm-12">
-            <a ng-href="@{{ 'photos/' + image.id + '/edit' }}" ng-repeat="image in IndexService.page.data">@{{ image.title ? image.title : 'нет описания' }}</a>
-        </div>
-    </div>
+    <table class="table reverse-borders">
+        <tbody>
+        <tr ng-repeat="model in IndexService.page.data">
+            <td>
+                <a ng-href="photos/@{{ model.id }}/edit">@{{ model.title ? model.title : 'не указано' }}</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
 @stop
