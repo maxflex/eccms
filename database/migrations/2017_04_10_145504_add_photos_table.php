@@ -13,9 +13,9 @@ class AddPhotosTable extends Migration
      */
     public function up()
     {
-        chema::create('photos', function (Blueprint $table) {
+        Schema::create('photos', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('filename');
+            $table->string('extension');
             $table->string('title');
         });
     }

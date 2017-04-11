@@ -13,7 +13,7 @@ class RenameProgrammsTableToPrograms extends Migration
      */
     public function up()
     {
-        Schema::rename('programms', 'programs');
+        // Schema::rename('programms', 'programs');
     }
 
     /**

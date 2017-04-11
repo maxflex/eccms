@@ -19,11 +19,11 @@
             <table class="table droppable-table">
                 <tr ng-repeat="variable in getVariables(group.id)" draggable="true"
                      ng-dragstart="dragStart(variable.id)" ng-dragend='dnd.variable_id = null'>
-                    <td>
+                    <td style='width: 30%'>
                         <a href='variables/@{{ variable.id }}/edit'>@{{ variable.name }}</a>
                     </td>
-                    <td>
-                        @{{ model.desc }}
+                    <td style='width: 70%'>
+                        @{{ variable.desc }}
                     </td>
                 </tr>
             </table>
@@ -37,11 +37,11 @@
             ng-class="{'over': dnd.over == -1}">
             <table class="table">
                 <tr ng-repeat="i in [1, 2, 3, 4]">
-                    <td>
+                    <td style='width: 30%'>
                         <div class='fake-info'></div>
                     </td>
-                    <td>
-                        <div class='fake-info' style='width: 50px'></div>
+                    <td style='width: 70%'>
+                        <div class='fake-info' style='width: 300px'></div>
                     </td>
                 </tr>
             </table>
