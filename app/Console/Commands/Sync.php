@@ -44,7 +44,13 @@ class Sync extends Command
      */
     public function handle()
     {
-        $this->{$this->argument('cmd')}();
+        // $this->{$this->argument('cmd')}();
+        $this->info("Syncing variables");
+        $server_variables = Api::exec('sync/getData/variables');
+        $local_variables = DB::table('variables')->get();
+        foreach($server_variables as $server_variable) {
+
+        }
     }
 
     public function push()
