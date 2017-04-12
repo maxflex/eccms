@@ -28,6 +28,10 @@ angular.module('Egecms')
     .factory 'Faq', ($resource) ->
         $resource apiPath('faq'), {id: '@id'}, updatable()
 
+    .factory 'FaqGroup', ($resource) ->
+        $resource apiPath('faq/groups'), {id: '@id'}, updatable()
+
+
 apiPath = (entity, additional = '') ->
     "api/#{entity}/" + (if additional then additional + '/' else '') + ":id"
 
