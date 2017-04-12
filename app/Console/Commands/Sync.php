@@ -44,7 +44,22 @@ class Sync extends Command
      */
     public function handle()
     {
-        $this->{$this->argument('cmd')}();
+        // $this->{$this->argument('cmd')}();
+        $this->info("Syncing variables");
+        $server_variables = Api::exec('sync/getData/variables');
+        $local_variables = DB::table('variables')->get();
+        foreach($server_variables as $server_variable) {
+            // пытаемся найти такую переменную на локалхосте
+            $local_variable = $local_variables->where('name', $server_variable->name)->first();
+
+            // если переменная найдена, проверяем на различие
+            if ($local_variable !== null) {
+                // если переменные отличаются, добавляем в массив отличий
+                if (md5($local_variable) !== md5($server_variable)) {
+                    $this->error("Server variable {$local_variable->name} differs from local");
+                }
+            }
+        }
     }
 
     public function push()

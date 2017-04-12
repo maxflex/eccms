@@ -17,8 +17,6 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         Sync::class,
-        FixTags::class,
-        DeleteUrl::class,
     ];
 
     /**

@@ -38,4 +38,10 @@ Route::group(['namespace' => 'Api', 'as' => 'api.'], function () {
 
     # Factory
     Route::post('factory', 'FactoryController@get');
+
+    # Sync
+    Route::group(['prefix' => 'sync'], function() {
+        Route::get('getData/{table}', 'SyncController@getData');
+    });
+
 });
