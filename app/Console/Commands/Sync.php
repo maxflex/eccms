@@ -18,7 +18,7 @@ class Sync extends Command
      *
      * @var string
      */
-    protected $signature = 'sync {cmd}';
+    protected $signature = 'sync';
 
     /**
      * The console command description.
@@ -45,7 +45,7 @@ class Sync extends Command
     public function handle()
     {
         // $this->{$this->argument('cmd')}();
-        $this->info("Syncing variables");
+        $this->line("\n\tSYNCING VARIABLES\n");
         $server_variables = Api::exec('sync/getData/variables');
         $local_variables = DB::table('variables')->get();
         foreach($server_variables as $server_variable) {

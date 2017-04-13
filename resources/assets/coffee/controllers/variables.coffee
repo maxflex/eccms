@@ -51,5 +51,6 @@ angular
             FormService.init(Variable, $scope.id, $scope.model)
             FormService.dataLoaded.promise.then ->
                 AceService.initEditor(FormService, 30)
+                AceService.editor.getSession().setMode('ace/mode/json') if FormService.model.html[0] is '{'
             FormService.beforeSave = ->
                 FormService.model.html = AceService.editor.getValue()

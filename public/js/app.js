@@ -619,13 +619,37 @@
     return angular.element(document).ready(function() {
       FormService.init(Variable, $scope.id, $scope.model);
       FormService.dataLoaded.promise.then(function() {
-        return AceService.initEditor(FormService, 30);
+        AceService.initEditor(FormService, 30);
+        if (FormService.model.html[0] === '{') {
+          return AceService.editor.getSession().setMode('ace/mode/json');
+        }
       });
       return FormService.beforeSave = function() {
         return FormService.model.html = AceService.editor.getValue();
       };
     });
   });
+
+}).call(this);
+
+(function() {
+  angular.module('Egecms').value('Published', [
+    {
+      id: 0,
+      title: 'не опубликовано'
+    }, {
+      id: 1,
+      title: 'опубликовано'
+    }
+  ]).value('UpDown', [
+    {
+      id: 1,
+      title: 'вверху'
+    }, {
+      id: 2,
+      title: 'внизу'
+    }
+  ]);
 
 }).call(this);
 
@@ -1113,27 +1137,6 @@
 
 (function() {
 
-
-}).call(this);
-
-(function() {
-  angular.module('Egecms').value('Published', [
-    {
-      id: 0,
-      title: 'не опубликовано'
-    }, {
-      id: 1,
-      title: 'опубликовано'
-    }
-  ]).value('UpDown', [
-    {
-      id: 1,
-      title: 'вверху'
-    }, {
-      id: 2,
-      title: 'внизу'
-    }
-  ]);
 
 }).call(this);
 
