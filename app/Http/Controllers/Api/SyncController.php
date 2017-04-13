@@ -17,11 +17,9 @@ class SyncController extends Controller
 
     public function setData($table, Request $request)
     {
-        return $request->all();
-        // forceTruncate($table);
-        // foreach($request->data as $data) {
-        //
-        // }
-        // return DB::table($table)->get()->all();
+        forceTruncate($table);
+        foreach($request->all() as $data) {
+            DB::table($table)->insert($data);
+        }
     }
 }

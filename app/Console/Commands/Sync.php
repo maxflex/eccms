@@ -77,6 +77,12 @@ class Sync extends Command
                 }
             }
         }
+
+        $this->info("\nPushing to server...\n");
+        Api::post("sync/setData/{$table}", [
+            'form_params' => DB::table($table)->get()->all()
+        ]);
+
         $this->info("\tOK");
     }
 
