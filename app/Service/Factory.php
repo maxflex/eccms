@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Service;
+namespace App\Service;
 use DB;
 
 class Factory

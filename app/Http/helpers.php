@@ -180,7 +180,7 @@
     */
     function fact($table, $select = null, $orderBy = null)
     {
-        return \App\Models\Service\Factory::json($table, $select, $orderBy);
+        return \App\Service\Factory::json($table, $select, $orderBy);
     }
 
     function camelize($input, $separator = '_')
@@ -192,4 +192,14 @@
    {
        $allowed = \App\Models\User::fromSession()->allowed($right);
        return $return_int ? (int)$allowed : $allowed;
+   }
+
+   /**
+    * truncate without foreign key check
+    */
+   function forceTruncate($table)
+   {
+       \Illuminate\Support\Facades\Schema::disableForeignKeyConstraints();
+       \DB::table($table)->truncate();
+       \Illuminate\Support\Facades\Schema::enableForeignKeyConstraints();
    }

@@ -42,6 +42,7 @@ Route::group(['namespace' => 'Api', 'as' => 'api.'], function () {
     # Sync
     Route::group(['prefix' => 'sync'], function() {
         Route::get('getData/{table}', 'SyncController@getData');
+        Route::post('setData/{table}', 'SyncController@setData');
     });
 
 });

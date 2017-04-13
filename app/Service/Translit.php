@@ -1,5 +1,5 @@
 <?php
-    namespace App\Models\Service;
+    namespace App\Service;
 
     /**
      * Translit

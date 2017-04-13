@@ -4,12 +4,14 @@ namespace App\Console\Commands;
 
 use App\Models\PageUseful;
 use DB;
-use App\Models\Service\Api;
+use App\Service\Api;
 use App\Models\Variable;
 use App\Models\VariableGroup;
+use App\Models\PageGroup;
 use App\Models\Page;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Schema;
+use Storage;
 
 class Sync extends Command
 {
@@ -44,65 +46,77 @@ class Sync extends Command
      */
     public function handle()
     {
-        // $this->{$this->argument('cmd')}();
-        $this->line("\n\tSYNCING VARIABLES\n");
-        $server_variables = Api::exec('sync/getData/variables');
-        $local_variables = DB::table('variables')->get();
-        foreach($server_variables as $server_variable) {
-            // пытаемся найти такую переменную на локалхосте
-            $local_variable = $local_variables->where('name', $server_variable->name)->first();
+        $this->syncGroup('variable_groups');
+        $this->syncGroup('page_groups');
+        $this->sync(Variable::class, 'name', 'html');
+        $this->sync(Page::class, 'keyphrase', 'html');
+    }
 
-            // если переменная найдена, проверяем на различие
-            if ($local_variable !== null) {
-                // если переменные отличаются, добавляем в массив отличий
-                if (md5($local_variable) !== md5($server_variable)) {
-                    $this->error("Server variable {$local_variable->name} differs from local");
+    private function sync($class, $id, $content)
+    {
+        $class_plural = explode("\\", $class);
+        $class_plural = end($class_plural) . 's';
+        $table = strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $class_plural)); // CamelCase to snake_case
+        $class_plural = strtolower($class_plural);
+
+        $this->line("\n\tSYNCING " . strtoupper($class_plural) . "\n");
+        $server = Api::get("sync/getData/{$table}");
+        $local = DB::table($table)->get();
+        foreach($server as $s) {
+            // пытаемся найти такую переменную на локалхосте
+            $l = $local->where($id, $s->{$id})->first();
+
+            // если переменная не найдена на локалхосте, добавляем её
+            if ($l === null) {
+                $this->info("Adding «" . $s->{$id} . "»...");
+                $class::create((array)$s);
+            } else {
+                // если переменная найдена, проверяем на различие
+                if ($this->diff($l->{$content}, $s->{$content}, $s->{$id}) == 'server') {
+                    $class::where($id, $l->{$id})->first()->update((array)$s);
                 }
             }
         }
+        $this->info("\tOK");
     }
 
-    public function push()
+    private function diff($local, $server, $name)
     {
-        $this->info('pushing db data ...');
-        Api::exec('variables/push', [
-            'variables' => Variable::all()->toArray(),
-            'groups'    => VariableGroup::all()->toArray(),
-            'pages'     => Page::all()->toArray(),
-            'useful'    => PageUseful::all()->toArray()
-        ]);
+        if (md5($local) !== md5($server)) {
+            $this->error("Server «{$name}» differs from local");
+            $local_lines = explode("\n", $local);
+            $server_lines = explode("\n", $server);
+            $differences = 0;
+            foreach(range(0, count($local_lines) - 1) as $index) {
+                if (@$local_lines[$index] != @$server_lines[$index]) {
+                    $differences++;
+                    $this->error("Line " . ($index + 1));
+                    $this->error("Local: " . @$local_lines[$index]);
+                    $this->error("Server: " . @$server_lines[$index] . "\n");
+                }
+                // если много различий, не засорять консоль
+                if ($differences > 5) {
+                    $this->error("etc...");
+                    break;
+                }
+            }
+            $choice = $this->choice('Choose action', ['server', 'local', 'abort'], 1);
+            if ($choice == 'abort') {
+                exit();
+            }
+            return $choice;
+        }
+        return false;
     }
 
-    public function pull()
+    private function syncGroup($table)
     {
-        $this->info('pulling db data ...');
-        list($variables, $groups, $pages, $useful) = Api::exec('variables/pull');
-        Schema::disableForeignKeyConstraints();
-        DB::table('variables')->truncate();
-        DB::table('variable_groups')->truncate();
-        DB::table('pages')->truncate();
-        DB::table('page_useful')->truncate();
-        Schema::enableForeignKeyConstraints();
+        forceTruncate($table);
+        $this->info('Syncing «' . $table . '»...');
+        $groups = Api::get('sync/getData/' . $table);
         if (count($groups)) {
             foreach ($groups as $group) {
-                DB::table('variable_groups')->insert((array)$group);
-            }
-        }
-
-        if (count($variables)) {
-            foreach ($variables as $var) {
-                DB::table('variables')->insert((array)$var);
-            }
-        }
-
-        if (count($pages)) {
-            foreach ($pages as $var) {
-                DB::table('pages')->insert((array)$var);
-            }
-        }
-        if (count($useful)) {
-            foreach ($useful as $var) {
-                DB::table('page_useful')->insert((array)$var);
+                DB::table($table)->insert((array)$group);
             }
         }
     }

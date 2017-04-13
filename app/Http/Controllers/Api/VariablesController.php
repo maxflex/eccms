@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use DB;
-use App\Models\Service\Api;
+use App\Service\Api;
 use Illuminate\Http\Request;
 
 use App\Http\Requests;
