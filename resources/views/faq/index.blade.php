@@ -16,7 +16,7 @@
             </div>
             <div class='droppable-table' ondragover="allowDrop(event)"
                  ng-dragenter="dnd.over = group.id" ng-dragleave="dnd.over = undefined" ng-drop="drop(group.id)"
-                 ng-class="{'over': dnd.over === group.id && dnd.over != getFaqs(dnd.faq_id).group_id}">
+                 ng-class="{'over': dnd.faq_id && dnd.over === group.id && dnd.over != getFaqs(dnd.faq_id).group_id}">
                 <table class="table droppable-table">
                     <tbody ng-sortable='sortableFaqConf'>
                         <tr ng-repeat="faq in group.data" draggable="true"
