@@ -193,6 +193,7 @@
 
 (function() {
   angular.module('Egecms').controller('FaqIndex', function($scope, $rootScope, $attrs, $timeout, Faq, FaqGroup) {
+    var moveToGroup;
     bindArguments($scope, arguments);
     $scope.sortableFaqConf = {
       animation: 150,
@@ -225,22 +226,30 @@
     };
     $scope.drop = function(group_id) {
       var faq_id;
+      faq_id = $scope.dnd.faq_id;
       if (group_id === -1) {
-        faq_id = $scope.dnd.faq_id;
         FaqGroup.save({
           faq_id: faq_id
         }, function(response) {
           $scope.groups.push(response);
-          return $scope.getFaq(faq_id).group_id = response.id;
+          return moveToGroup(faq_id, response.id);
         });
       } else if (group_id) {
         Faq.update({
-          id: $scope.dnd.faq_id,
+          id: faq_id,
           group_id: group_id
         });
-        $scope.getFaq($scope.dnd.faq_id).group_id = group_id;
+        moveToGroup(faq_id, group_id);
       }
       return $scope.dnd = {};
+    };
+    moveToGroup = function(faq_id, group_id) {
+      var faq, group_from, group_to;
+      group_to = $rootScope.findById($scope.groups, group_id);
+      group_from = $scope.getGroup(faq_id);
+      faq = $rootScope.findById(group_from.faq, faq_id);
+      group_from.faq = removeById(group_from.faq, faq_id);
+      return group_to.faq.push(faq);
     };
     $scope.getGroup = function(faq_id) {
       var group_found;
@@ -645,27 +654,6 @@
       };
     });
   });
-
-}).call(this);
-
-(function() {
-  angular.module('Egecms').value('Published', [
-    {
-      id: 0,
-      title: 'не опубликовано'
-    }, {
-      id: 1,
-      title: 'опубликовано'
-    }
-  ]).value('UpDown', [
-    {
-      id: 1,
-      title: 'вверху'
-    }, {
-      id: 2,
-      title: 'внизу'
-    }
-  ]);
 
 }).call(this);
 
@@ -1227,6 +1215,27 @@
       }
     };
   };
+
+}).call(this);
+
+(function() {
+  angular.module('Egecms').value('Published', [
+    {
+      id: 0,
+      title: 'не опубликовано'
+    }, {
+      id: 1,
+      title: 'опубликовано'
+    }
+  ]).value('UpDown', [
+    {
+      id: 1,
+      title: 'вверху'
+    }, {
+      id: 2,
+      title: 'внизу'
+    }
+  ]);
 
 }).call(this);
 

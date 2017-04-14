@@ -23,15 +23,25 @@ angular
                 $scope.dnd.faq_id = faq_id
 
         $scope.drop = (group_id) ->
+            faq_id = $scope.dnd.faq_id
             if group_id is -1
-                faq_id = $scope.dnd.faq_id
                 FaqGroup.save {faq_id: faq_id}, (response) ->
                     $scope.groups.push(response)
-                    $scope.getFaq(faq_id).group_id = response.id
+                    moveToGroup(faq_id, response.id)
             else if group_id
-                Faq.update({id: $scope.dnd.faq_id, group_id: group_id})
-                $scope.getFaq($scope.dnd.faq_id).group_id = group_id
+                Faq.update({id: faq_id, group_id: group_id})
+                moveToGroup(faq_id, group_id)
             $scope.dnd = {}
+
+        # переместить в группу
+        moveToGroup = (faq_id, group_id) ->
+            group_to = $rootScope.findById($scope.groups, group_id)
+            group_from = $scope.getGroup(faq_id)
+            faq = $rootScope.findById(group_from.faq, faq_id)
+            group_from.faq = removeById(group_from.faq, faq_id)
+            group_to.faq.push(faq)
+
+
 
         $scope.getGroup = (faq_id) ->
             group_found = null
