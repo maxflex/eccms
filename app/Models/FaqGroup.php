@@ -14,8 +14,8 @@ class FaqGroup extends Model
 
     public static function getIds()
     {
-        $groups = self::get();
-        $groups = $groups->orderBy('position', 'asc')->all();
+        $groups = self::orderBy('position', 'asc')->get();
+        $groups = $groups->all();
         $groups[] = (object)[
             'id'    => null,
             'title' => 'Остальные',
