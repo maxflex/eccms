@@ -14,4 +14,12 @@ class Faq extends Model
         'group_id',
         'position'
     ];
+
+    protected static function boot()
+    {
+        // @todo: присвоение группы перенести в интерфейс
+        static::creating(function($model) {
+            $model->group_id = FaqGroup::value('id');
+        });
+    }
 }
