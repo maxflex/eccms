@@ -8,22 +8,26 @@
 
 @section('content')
     <span ng-init='groups = {{ \App\Models\FaqGroup::getIds() }}'></span>
-    <div ng-repeat="group in groups">
-        <div>
-            <h4 class='inline-block' editable='@{{ group.id }}' ng-class="{'disable-events': !group.id}">@{{ group.title }}</h4>
-            <a ng-if='group.id' class='link-like text-danger show-on-hover' ng-click='removeGroup(group)'>удалить</a>
-        </div>
-        <div class='droppable-table' ondragover="allowDrop(event)"
-             ng-dragenter="dnd.over = group.id" ng-dragleave="dnd.over = undefined" ng-drop="drop(group.id)"
-             ng-class="{'over': dnd.over === group.id && dnd.over != getFaqs(dnd.faq_id).group_id}">
-            <table class="table droppable-table">
-                <tr ng-repeat="faq in getFaqs(group.id)" draggable="true"
-                    ng-dragstart="dragStart(faq.id)" ng-dragend='dnd.faq_id = null'>
-                    <td>
-                        <a href='faq/@{{ faq.id }}/edit'>@{{ faq.question }}</a>
-                    </td>
-                </tr>
-            </table>
+    <div ng-sortable='sortableGroupConf'>
+        <div ng-repeat="group in groups">
+            <div>
+                <h4 class='inline-block' editable='@{{ group.id }}' ng-class="{'disable-events': !group.id}">@{{ group.title }}</h4>
+                <a ng-if='group.id' class='link-like text-danger show-on-hover' ng-click='removeGroup(group)'>удалить</a>
+            </div>
+            <div class='droppable-table' ondragover="allowDrop(event)"
+                 ng-dragenter="dnd.over = group.id" ng-dragleave="dnd.over = undefined" ng-drop="drop(group.id)"
+                 ng-class="{'over': dnd.over === group.id && dnd.over != getFaqs(dnd.faq_id).group_id}">
+                <table class="table droppable-table">
+                    <tbody ng-sortable='sortableFaqConf'>
+                        <tr ng-repeat="faq in group.data" draggable="true"
+                            ng-dragstart="dragStart(faq.id)" ng-dragend='dnd.faq_id = null'>
+                            <td>
+                                <a href='faq/@{{ faq.id }}/edit'>@{{ faq.question }}</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
     <div>

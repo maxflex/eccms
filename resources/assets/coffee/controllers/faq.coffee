@@ -5,6 +5,18 @@ angular
         angular.element(document).ready ->
             IndexService.init(Faq, $scope.current_page, $attrs)
 
+        $scope.sortableFaqConf =
+            animation: 150
+            onUpdate: (event) ->
+                angular.forEach event.models, (obj, index) ->
+                    Faq.update({id: obj.id, position: index})
+
+        $scope.sortableGroupConf =
+            animation: 150
+            onUpdate: (event) ->
+                angular.forEach event.models, (obj, index) ->
+                    FaqGroup.update({id: obj.id, position: index})
+
         $scope.dnd = {}
 
         $scope.dragStart = (faq_id) ->

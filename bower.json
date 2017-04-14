@@ -39,7 +39,6 @@
     "nya-bootstrap-select": "~2.1.2",
     "animate.css": "^3.5.1",
     "bootstrap-datepicker": "^1.6.0",
-    "angular-ui-sortable": "^0.13.4",
     "angular-bootstrap": "0.13.0",
     "ng-img-crop": "ngImgCrop#^0.3.2",
     "ng-cropper": "^0.4.1",
@@ -62,6 +61,7 @@
     "angucomplete-alt": "^3.0.0",
     "angular-aria": "1.6.3",
     "angular-messages": "1.6.3",
-    "ng-image-gallery": "^2.1.1"
+    "ng-image-gallery": "^2.1.1",
+    "Sortable": "^1.5.1"
   }
 }
