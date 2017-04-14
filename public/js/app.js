@@ -192,11 +192,8 @@
 }).call(this);
 
 (function() {
-  angular.module('Egecms').controller('FaqIndex', function($scope, $attrs, $timeout, IndexService, Faq, FaqGroup) {
+  angular.module('Egecms').controller('FaqIndex', function($scope, $rootScope, $attrs, $timeout, Faq, FaqGroup) {
     bindArguments($scope, arguments);
-    angular.element(document).ready(function() {
-      return IndexService.init(Faq, $scope.current_page, $attrs);
-    });
     $scope.sortableFaqConf = {
       animation: 150,
       onUpdate: function(event) {
@@ -234,32 +231,34 @@
           faq_id: faq_id
         }, function(response) {
           $scope.groups.push(response);
-          return IndexService.page.data.find(function(faq) {
-            return faq.id === faq_id;
-          }).group_id = response.id;
+          return $scope.getFaq(faq_id).group_id = response.id;
         });
       } else if (group_id) {
         Faq.update({
           id: $scope.dnd.faq_id,
           group_id: group_id
         });
-        IndexService.page.data.find(function(faq) {
-          return faq.id === $scope.dnd.faq_id;
-        }).group_id = group_id;
+        $scope.getFaq($scope.dnd.faq_id).group_id = group_id;
       }
       return $scope.dnd = {};
     };
-    $scope.getFaqs = function(group_id) {
-      if (IndexService.page) {
-        return IndexService.page.data.filter(function(d) {
-          return d.group_id === group_id;
+    $scope.getGroup = function(faq_id) {
+      var group_found;
+      group_found = null;
+      $scope.groups.forEach(function(group) {
+        if (group_found !== null) {
+          return;
+        }
+        return group.faq.forEach(function(faq) {
+          if (faq.id === parseInt(faq_id)) {
+            group_found = group;
+          }
         });
-      }
+      });
+      return group_found;
     };
     $scope.getFaq = function(faq_id) {
-      return _.findWhere(IndexService.page.data, {
-        id: parseInt(faq_id)
-      });
+      return $rootScope.findById($scope.getGroup(faq_id).faq, faq_id);
     };
     $scope.removeGroup = function(group) {
       return bootbox.confirm("Вы уверены, что хотите удалить группу «" + group.title + "»", function(response) {
@@ -267,12 +266,7 @@
           FaqGroup.remove({
             id: group.id
           });
-          $scope.groups = removeById($scope.groups, group.id);
-          return _.where(IndexService.page.data, {
-            group_id: group.id
-          }).forEach(function(faq) {
-            return faq.group_id = null;
-          });
+          return $scope.groups = removeById($scope.groups, group.id);
         }
       });
     };
@@ -651,6 +645,27 @@
       };
     });
   });
+
+}).call(this);
+
+(function() {
+  angular.module('Egecms').value('Published', [
+    {
+      id: 0,
+      title: 'не опубликовано'
+    }, {
+      id: 1,
+      title: 'опубликовано'
+    }
+  ]).value('UpDown', [
+    {
+      id: 1,
+      title: 'вверху'
+    }, {
+      id: 2,
+      title: 'внизу'
+    }
+  ]);
 
 }).call(this);
 
@@ -1142,23 +1157,76 @@
 }).call(this);
 
 (function() {
-  angular.module('Egecms').value('Published', [
-    {
-      id: 0,
-      title: 'не опубликовано'
+  var apiPath, countable, updatable;
+
+  angular.module('Egecms').factory('Variable', function($resource) {
+    return $resource(apiPath('variables'), {
+      id: '@id'
+    }, updatable());
+  }).factory('VariableGroup', function($resource) {
+    return $resource(apiPath('variables/groups'), {
+      id: '@id'
+    }, updatable());
+  }).factory('PageGroup', function($resource) {
+    return $resource(apiPath('pages/groups'), {
+      id: '@id'
+    }, updatable());
+  }).factory('Sass', function($resource) {
+    return $resource(apiPath('sass'), {
+      id: '@id'
+    }, updatable());
+  }).factory('Page', function($resource) {
+    return $resource(apiPath('pages'), {
+      id: '@id'
     }, {
-      id: 1,
-      title: 'опубликовано'
+      update: {
+        method: 'PUT'
+      },
+      checkExistance: {
+        method: 'POST',
+        url: apiPath('pages', 'checkExistance')
+      }
+    });
+  }).factory('Program', function($resource) {
+    return $resource(apiPath('programs'), {
+      id: '@id'
+    }, updatable());
+  }).factory('Photo', function($resource) {
+    return $resource(apiPath('photos'), {
+      id: '@id'
+    }, updatable());
+  }).factory('Faq', function($resource) {
+    return $resource(apiPath('faq'), {
+      id: '@id'
+    }, updatable());
+  }).factory('FaqGroup', function($resource) {
+    return $resource(apiPath('faq/groups'), {
+      id: '@id'
+    }, updatable());
+  });
+
+  apiPath = function(entity, additional) {
+    if (additional == null) {
+      additional = '';
     }
-  ]).value('UpDown', [
-    {
-      id: 1,
-      title: 'вверху'
-    }, {
-      id: 2,
-      title: 'внизу'
-    }
-  ]);
+    return ("api/" + entity + "/") + (additional ? additional + '/' : '') + ":id";
+  };
+
+  updatable = function() {
+    return {
+      update: {
+        method: 'PUT'
+      }
+    };
+  };
+
+  countable = function() {
+    return {
+      count: {
+        method: 'GET'
+      }
+    };
+  };
 
 }).call(this);
 
@@ -1469,80 +1537,6 @@
     };
     return this;
   });
-
-}).call(this);
-
-(function() {
-  var apiPath, countable, updatable;
-
-  angular.module('Egecms').factory('Variable', function($resource) {
-    return $resource(apiPath('variables'), {
-      id: '@id'
-    }, updatable());
-  }).factory('VariableGroup', function($resource) {
-    return $resource(apiPath('variables/groups'), {
-      id: '@id'
-    }, updatable());
-  }).factory('PageGroup', function($resource) {
-    return $resource(apiPath('pages/groups'), {
-      id: '@id'
-    }, updatable());
-  }).factory('Sass', function($resource) {
-    return $resource(apiPath('sass'), {
-      id: '@id'
-    }, updatable());
-  }).factory('Page', function($resource) {
-    return $resource(apiPath('pages'), {
-      id: '@id'
-    }, {
-      update: {
-        method: 'PUT'
-      },
-      checkExistance: {
-        method: 'POST',
-        url: apiPath('pages', 'checkExistance')
-      }
-    });
-  }).factory('Program', function($resource) {
-    return $resource(apiPath('programs'), {
-      id: '@id'
-    }, updatable());
-  }).factory('Photo', function($resource) {
-    return $resource(apiPath('photos'), {
-      id: '@id'
-    }, updatable());
-  }).factory('Faq', function($resource) {
-    return $resource(apiPath('faq'), {
-      id: '@id'
-    }, updatable());
-  }).factory('FaqGroup', function($resource) {
-    return $resource(apiPath('faq/groups'), {
-      id: '@id'
-    }, updatable());
-  });
-
-  apiPath = function(entity, additional) {
-    if (additional == null) {
-      additional = '';
-    }
-    return ("api/" + entity + "/") + (additional ? additional + '/' : '') + ":id";
-  };
-
-  updatable = function() {
-    return {
-      update: {
-        method: 'PUT'
-      }
-    };
-  };
-
-  countable = function() {
-    return {
-      count: {
-        method: 'GET'
-      }
-    };
-  };
 
 }).call(this);
 

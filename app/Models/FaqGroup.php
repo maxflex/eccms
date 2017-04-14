@@ -12,18 +12,14 @@ class FaqGroup extends Model
 
     const DEFAULT_TITLE = 'Новая группа';
 
-    public static function getIds()
+    public function faq()
     {
-        $groups = self::orderBy('position', 'asc')->get();
-        $groups = $groups->all();
-        $groups[] = (object)[
-            'id'    => null,
-            'title' => 'Остальные',
-        ];
-        foreach($groups as $group) {
-            $group->data = Faq::where('group_id', $group->id)->orderBy('position', 'asc')->get();
-        }
-        return json_encode($groups);
+        return $this->hasMany(Faq::class, 'group_id')->orderBy('position');
+    }
+
+    public static function get()
+    {
+        return self::with('faq')->orderBy('position')->get()->all();
     }
 
     public static function boot()

@@ -7,7 +7,7 @@
 @stop
 
 @section('content')
-    <span ng-init='groups = {{ \App\Models\FaqGroup::getIds() }}'></span>
+    <span ng-init='groups = {{ json_encode(\App\Models\FaqGroup::get()) }}'></span>
     <div ng-sortable='sortableGroupConf'>
         <div ng-repeat="group in groups">
             <div>
@@ -19,7 +19,7 @@
                  ng-class="{'over': dnd.faq_id && dnd.over === group.id && dnd.over != getFaqs(dnd.faq_id).group_id}">
                 <table class="table droppable-table">
                     <tbody ng-sortable='sortableFaqConf'>
-                        <tr ng-repeat="faq in group.data" draggable="true"
+                        <tr ng-repeat="faq in group.faq" draggable="true"
                             ng-dragstart="dragStart(faq.id)" ng-dragend='dnd.faq_id = null'>
                             <td>
                                 <a href='faq/@{{ faq.id }}/edit'>@{{ faq.question }}</a>
@@ -48,5 +48,4 @@
                 </table>
             </div>
         </div>
-    @include('modules.pagination')
 @stop

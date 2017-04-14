@@ -1,9 +1,7 @@
 angular
     .module 'Egecms'
-    .controller 'FaqIndex', ($scope, $attrs, $timeout, IndexService, Faq, FaqGroup) ->
+    .controller 'FaqIndex', ($scope, $rootScope, $attrs, $timeout, Faq, FaqGroup) ->
         bindArguments($scope, arguments)
-        angular.element(document).ready ->
-            IndexService.init(Faq, $scope.current_page, $attrs)
 
         $scope.sortableFaqConf =
             animation: 150
@@ -29,30 +27,30 @@ angular
                 faq_id = $scope.dnd.faq_id
                 FaqGroup.save {faq_id: faq_id}, (response) ->
                     $scope.groups.push(response)
-                    IndexService.page.data.find (faq) ->
-                        faq.id is faq_id
-                    .group_id = response.id
+                    $scope.getFaq(faq_id).group_id = response.id
             else if group_id
                 Faq.update({id: $scope.dnd.faq_id, group_id: group_id})
-                IndexService.page.data.find (faq) ->
-                        faq.id is $scope.dnd.faq_id
-                    .group_id = group_id
+                $scope.getFaq($scope.dnd.faq_id).group_id = group_id
             $scope.dnd = {}
 
-        $scope.getFaqs = (group_id) ->
-            if IndexService.page then IndexService.page.data.filter (d) ->
-                d.group_id is group_id
+        $scope.getGroup = (faq_id) ->
+            group_found = null
+            $scope.groups.forEach (group) ->
+                return if group_found isnt null
+                group.faq.forEach (faq) ->
+                    if faq.id is parseInt(faq_id)
+                        group_found = group
+                        return
+            group_found
 
         $scope.getFaq = (faq_id) ->
-            _.findWhere(IndexService.page.data, {id: parseInt(faq_id)})
+            $rootScope.findById($scope.getGroup(faq_id).faq, faq_id)
 
         $scope.removeGroup = (group) ->
             bootbox.confirm "Вы уверены, что хотите удалить группу «#{group.title}»", (response) ->
                 if response is true
                     FaqGroup.remove {id: group.id}
                     $scope.groups = removeById($scope.groups, group.id)
-                    _.where(IndexService.page.data, {group_id: group.id}).forEach (faq) ->
-                        faq.group_id = null
 
         $scope.onEdit = (id, event) ->
             FaqGroup.update {id: id, title: $(event.target).text()}
