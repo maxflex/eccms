@@ -22,6 +22,8 @@ class Faq extends Model
             if (! isset($model->group_id)) {
                 $model->group_id = FaqGroup::orderBy('position', 'desc')->value('id');
             }
+
+            $model->position = static::where('group_id', $model->group_id)->max('position') + 1;
         });
     }
 }
