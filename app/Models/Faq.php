@@ -19,7 +19,9 @@ class Faq extends Model
     {
         // @todo: присвоение группы перенести в интерфейс
         static::creating(function($model) {
-            $model->group_id = FaqGroup::orderBy('position', 'desc')->value('id');
+            if (! isset($model->group_id)) {
+                $model->group_id = FaqGroup::orderBy('position', 'desc')->value('id');
+            }
         });
     }
 }
