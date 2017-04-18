@@ -1,6 +1,6 @@
 <div class="row mbs">
     <div class="col-sm-3">
-        <ng-select-new model="FormService.model.group_id" object="{{ \App\Models\FaqGroup::orderBy('position')->get()->toJSON() }}" label="title" none-text="Выберите раздел"></ng-select-new>
+        <ng-select-new model="FormService.model.group_id" object="{{ \App\Models\FaqGroup::orderBy('position')->get()->toJSON() }}" label="title" field="id"></ng-select-new>
     </div>
 </div>
 
