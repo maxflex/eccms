@@ -25,13 +25,15 @@ class Page extends Model
         'seo_mobile',
         'variable_id',
         'useful',
-        'group_id'
+        'group_id',
+        'position'
     ];
 
     protected static $hidden_on_export = [
         'id',
         'created_at',
-        'updated_at'
+        'updated_at',
+        'position'
     ];
 
     protected static $selects_on_export = [
@@ -104,5 +106,17 @@ class Page extends Model
         }
 
         return $query;
+    }
+
+    protected static function boot()
+    {
+        // @todo: присвоение группы перенести в интерфейс
+        static::creating(function($model) {
+            if (! isset($model->group_id)) {
+                $model->group_id = PageGroup::orderBy('position', 'desc')->value('id');
+            }
+
+            $model->position = static::where('group_id', $model->group_id)->max('position') + 1;
+        });
     }
 }

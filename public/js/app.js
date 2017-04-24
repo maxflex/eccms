@@ -323,13 +323,33 @@
 
 (function() {
   angular.module('Egecms').controller('PagesIndex', function($scope, $attrs, $timeout, IndexService, Page, Published, ExportService, PageGroup) {
+    var moveToGroup;
     bindArguments($scope, arguments);
     ExportService.init({
       controller: 'pages'
     });
-    angular.element(document).ready(function() {
-      return IndexService.init(Page, $scope.current_page, $attrs);
-    });
+    $scope.sortablePageConf = {
+      animation: 150,
+      onUpdate: function(event) {
+        return angular.forEach(event.models, function(obj, index) {
+          return Page.update({
+            id: obj.id,
+            position: index
+          });
+        });
+      }
+    };
+    $scope.sortableGroupConf = {
+      animation: 150,
+      onUpdate: function(event) {
+        return angular.forEach(event.models, function(obj, index) {
+          return PageGroup.update({
+            id: obj.id,
+            position: index
+          });
+        });
+      }
+    };
     $scope.dnd = {};
     $scope.dragStart = function(page_id) {
       return $timeout(function() {
@@ -339,38 +359,48 @@
     };
     $scope.drop = function(group_id) {
       var page_id;
+      page_id = $scope.dnd.page_id;
       if (group_id === -1) {
-        page_id = $scope.dnd.page_id;
         PageGroup.save({
           page_id: page_id
         }, function(response) {
           $scope.groups.push(response);
-          return IndexService.page.data.find(function(page) {
-            return page.id === page_id;
-          }).group_id = response.id;
+          return moveToGroup(page_id, response.id);
         });
       } else if (group_id) {
         Page.update({
           id: $scope.dnd.page_id,
           group_id: group_id
         });
-        IndexService.page.data.find(function(page) {
-          return page.id === $scope.dnd.page_id;
-        }).group_id = group_id;
+        moveToGroup(page_id, group_id);
       }
       return $scope.dnd = {};
     };
-    $scope.getPages = function(group_id) {
-      if (IndexService.page) {
-        return IndexService.page.data.filter(function(d) {
-          return d.group_id === group_id;
+    moveToGroup = function(page_id, group_id) {
+      var group_from, group_to, page;
+      group_to = $rootScope.findById($scope.groups, group_id);
+      group_from = $scope.getGroup(page_id);
+      page = $rootScope.findById(group_from.page, page_id);
+      group_from.page = removeById(group_from.page, page_id);
+      return group_to.page.push(page);
+    };
+    $scope.getGroup = function(page_id) {
+      var group_found;
+      group_found = null;
+      $scope.groups.forEach(function(group) {
+        if (group_found !== null) {
+          return;
+        }
+        return group.page.forEach(function(page) {
+          if (page.id === parseInt(page_id)) {
+            group_found = group;
+          }
         });
-      }
+      });
+      return group_found;
     };
     $scope.getPage = function(page_id) {
-      return _.findWhere(IndexService.page.data, {
-        id: parseInt(page_id)
-      });
+      return $rootScope.findById($scope.getGroup(page_id).page, page_id);
     };
     $scope.removeGroup = function(group) {
       return bootbox.confirm("Вы уверены, что хотите удалить группу «" + group.title + "»", function(response) {
@@ -378,12 +408,7 @@
           PageGroup.remove({
             id: group.id
           });
-          $scope.groups = removeById($scope.groups, group.id);
-          return _.where(IndexService.page.data, {
-            group_id: group.id
-          }).forEach(function(page) {
-            return page.group_id = null;
-          });
+          return $scope.groups = removeById($scope.groups, group.id);
         }
       });
     };
@@ -692,27 +717,6 @@
       };
     });
   });
-
-}).call(this);
-
-(function() {
-  angular.module('Egecms').value('Published', [
-    {
-      id: 0,
-      title: 'не опубликовано'
-    }, {
-      id: 1,
-      title: 'опубликовано'
-    }
-  ]).value('UpDown', [
-    {
-      id: 1,
-      title: 'вверху'
-    }, {
-      id: 2,
-      title: 'внизу'
-    }
-  ]);
 
 }).call(this);
 
@@ -1200,6 +1204,27 @@
 
 (function() {
 
+
+}).call(this);
+
+(function() {
+  angular.module('Egecms').value('Published', [
+    {
+      id: 0,
+      title: 'не опубликовано'
+    }, {
+      id: 1,
+      title: 'опубликовано'
+    }
+  ]).value('UpDown', [
+    {
+      id: 1,
+      title: 'вверху'
+    }, {
+      id: 2,
+      title: 'внизу'
+    }
+  ]);
 
 }).call(this);
 
