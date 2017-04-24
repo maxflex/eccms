@@ -17,18 +17,6 @@ class PagesController extends Controller
      */
     public function index(Request $request)
     {
-        // откуда обращаемся – с поиска или с общей страницы?
-        // $controller_with_params = collect(explode('/', $request->header('referer')))->last();
-        // $controller = collect(explode('?', $controller_with_params))->first();
-        // $search = isset($_COOKIE[$controller]) ? json_decode($_COOKIE[$controller]) : (object)[];
-        // $query = Page::search($search);
-        // if ($request->sort) {
-        //     $query->orderBy('updated_at', 'desc');
-        // } else {
-        //     $query->orderBy('keyphrase');
-        // }
-        $query = Page::query();
-        return $query->paginate(PHP_INT_MAX);
     }
 
     /**

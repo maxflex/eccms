@@ -2,8 +2,17 @@ angular
     .module 'Egecms'
     .controller 'VariablesIndex', ($scope, $attrs, $timeout, IndexService, Variable, VariableGroup) ->
         bindArguments($scope, arguments)
-        angular.element(document).ready ->
-            IndexService.init(Variable, $scope.current_page, $attrs)
+        $scope.sortableVariableConf =
+            animation: 150
+            onUpdate: (event) ->
+                angular.forEach event.models, (obj, index) ->
+                    Variable.update({id: obj.id, position: index})
+
+        $scope.sortableGroupConf =
+            animation: 150
+            onUpdate: (event) ->
+                angular.forEach event.models, (obj, index) ->
+                    VariableGroup.update({id: obj.id, position: index})
 
         $scope.dnd = {}
 
@@ -13,34 +22,42 @@ angular
                 $scope.dnd.variable_id = variable_id
 
         $scope.drop = (group_id) ->
+            variable_id = $scope.dnd.variable_id
             if group_id is -1
-                variable_id = $scope.dnd.variable_id
                 VariableGroup.save {variable_id: variable_id}, (response) ->
                     $scope.groups.push(response)
-                    IndexService.page.data.find (variable) ->
-                        variable.id is variable_id
-                    .group_id = response.id
+                    moveToGroup(faq_id, response.id)
             else if group_id
                 Variable.update({id: $scope.dnd.variable_id, group_id: group_id})
-                IndexService.page.data.find (variable) ->
-                    variable.id is $scope.dnd.variable_id
-                .group_id = group_id
+                moveToGroup(faq_id, response.id)
             $scope.dnd = {}
 
-        $scope.getVariables = (group_id) ->
-            if IndexService.page then IndexService.page.data.filter (d) ->
-                d.group_id is group_id
+        # переместить в группу
+        moveToGroup = (variable_id, group_id) ->
+            group_to = $rootScope.findById($scope.groups, group_id)
+            group_from = $scope.getGroup(variable_id)
+            variable = $rootScope.findById(group_from.variable, variable_id)
+            group_from.variable = removeById(group_from.variable, variable_id)
+            group_to.variable.push(variable)
+
+        $scope.getGroup = (variable_id) ->
+            group_found = null
+            $scope.groups.forEach (group) ->
+                return if group_found isnt null
+                group.variable.forEach (variable) ->
+                    if variable.id is parseInt(variable_id)
+                        group_found = group
+                        return
+            group_found
 
         $scope.getVariable = (variable_id) ->
-            _.findWhere(IndexService.page.data, {id: parseInt(variable_id)})
+            $rootScope.findById($scope.getGroup(variable_id).variable, variable_id)
 
         $scope.removeGroup = (group) ->
             bootbox.confirm "Вы уверены, что хотите удалить группу «#{group.title}»", (response) ->
                 if response is true
                     VariableGroup.remove {id: group.id}
                     $scope.groups = removeById($scope.groups, group.id)
-                    _.where(IndexService.page.data, {group_id: group.id}).forEach (variable) ->
-                        variable.group_id = null
 
         $scope.onEdit = (id, event) ->
             VariableGroup.update {id: id, title: $(event.target).text()}

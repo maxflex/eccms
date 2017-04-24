@@ -20,7 +20,6 @@ class VariablesController extends Controller
      */
     public function index()
     {
-        return Variable::orderBy('name')->paginate(100);
     }
 
     /**

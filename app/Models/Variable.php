@@ -10,11 +10,19 @@ class Variable extends Model
         'name',
         'html',
         'desc',
-        'group_id'
+        'group_id',
+        'position'
     ];
 
-    public static function getLight()
+    protected static function boot()
     {
-        return self::select('id', 'name')->get();
+        // @todo: присвоение группы перенести в интерфейс
+        static::creating(function($model) {
+            if (! isset($model->group_id)) {
+                $model->group_id = VariableGroup::orderBy('position', 'desc')->value('id');
+            }
+
+            $model->position = static::where('group_id', $model->group_id)->max('position') + 1;
+        });
     }
 }
