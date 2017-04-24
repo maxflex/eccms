@@ -12,7 +12,10 @@ angular
 
         $scope.sortableGroupConf =
             animation: 150
+            onStart: (event) ->
+                $scope.group_sorting = true
             onUpdate: (event) ->
+                $scope.group_sorting = false
                 angular.forEach event.models, (obj, index) ->
                     PageGroup.update({id: obj.id, position: index})
 

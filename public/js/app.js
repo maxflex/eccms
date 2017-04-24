@@ -208,7 +208,11 @@
     };
     $scope.sortableGroupConf = {
       animation: 150,
+      onStart: function(event) {
+        return $scope.group_sorting = true;
+      },
       onUpdate: function(event) {
+        $scope.group_sorting = false;
         return angular.forEach(event.models, function(obj, index) {
           return FaqGroup.update({
             id: obj.id,
@@ -341,7 +345,11 @@
     };
     $scope.sortableGroupConf = {
       animation: 150,
+      onStart: function(event) {
+        return $scope.group_sorting = true;
+      },
       onUpdate: function(event) {
+        $scope.group_sorting = false;
         return angular.forEach(event.models, function(obj, index) {
           return PageGroup.update({
             id: obj.id,
@@ -625,7 +633,11 @@
     };
     $scope.sortableGroupConf = {
       animation: 150,
+      onStart: function(event) {
+        return $scope.group_sorting = true;
+      },
       onUpdate: function(event) {
+        $scope.group_sorting = false;
         return angular.forEach(event.models, function(obj, index) {
           return VariableGroup.update({
             id: obj.id,
@@ -1208,6 +1220,27 @@
 }).call(this);
 
 (function() {
+  angular.module('Egecms').value('Published', [
+    {
+      id: 0,
+      title: 'не опубликовано'
+    }, {
+      id: 1,
+      title: 'опубликовано'
+    }
+  ]).value('UpDown', [
+    {
+      id: 1,
+      title: 'вверху'
+    }, {
+      id: 2,
+      title: 'внизу'
+    }
+  ]);
+
+}).call(this);
+
+(function() {
   var apiPath, countable, updatable;
 
   angular.module('Egecms').factory('Variable', function($resource) {
@@ -1286,27 +1319,6 @@
       }
     };
   };
-
-}).call(this);
-
-(function() {
-  angular.module('Egecms').value('Published', [
-    {
-      id: 0,
-      title: 'не опубликовано'
-    }, {
-      id: 1,
-      title: 'опубликовано'
-    }
-  ]).value('UpDown', [
-    {
-      id: 1,
-      title: 'вверху'
-    }, {
-      id: 2,
-      title: 'внизу'
-    }
-  ]);
 
 }).call(this);
 
