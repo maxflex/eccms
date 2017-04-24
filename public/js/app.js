@@ -322,7 +322,7 @@
 }).call(this);
 
 (function() {
-  angular.module('Egecms').controller('PagesIndex', function($scope, $attrs, $timeout, IndexService, Page, Published, ExportService, PageGroup) {
+  angular.module('Egecms').controller('PagesIndex', function($scope, $attrs, $rootScope, $timeout, IndexService, Page, Published, ExportService, PageGroup) {
     var moveToGroup;
     bindArguments($scope, arguments);
     ExportService.init({
@@ -609,7 +609,7 @@
 }).call(this);
 
 (function() {
-  angular.module('Egecms').controller('VariablesIndex', function($scope, $attrs, $timeout, IndexService, Variable, VariableGroup) {
+  angular.module('Egecms').controller('VariablesIndex', function($scope, $attrs, $rootScope, $timeout, IndexService, Variable, VariableGroup) {
     var moveToGroup;
     bindArguments($scope, arguments);
     $scope.sortableVariableConf = {
@@ -649,14 +649,14 @@
           variable_id: variable_id
         }, function(response) {
           $scope.groups.push(response);
-          return moveToGroup(faq_id, response.id);
+          return moveToGroup(variable_id, response.id);
         });
       } else if (group_id) {
         Variable.update({
           id: $scope.dnd.variable_id,
           group_id: group_id
         });
-        moveToGroup(faq_id, response.id);
+        moveToGroup(variable_id, group_id);
       }
       return $scope.dnd = {};
     };
@@ -1208,27 +1208,6 @@
 }).call(this);
 
 (function() {
-  angular.module('Egecms').value('Published', [
-    {
-      id: 0,
-      title: 'не опубликовано'
-    }, {
-      id: 1,
-      title: 'опубликовано'
-    }
-  ]).value('UpDown', [
-    {
-      id: 1,
-      title: 'вверху'
-    }, {
-      id: 2,
-      title: 'внизу'
-    }
-  ]);
-
-}).call(this);
-
-(function() {
   var apiPath, countable, updatable;
 
   angular.module('Egecms').factory('Variable', function($resource) {
@@ -1307,6 +1286,27 @@
       }
     };
   };
+
+}).call(this);
+
+(function() {
+  angular.module('Egecms').value('Published', [
+    {
+      id: 0,
+      title: 'не опубликовано'
+    }, {
+      id: 1,
+      title: 'опубликовано'
+    }
+  ]).value('UpDown', [
+    {
+      id: 1,
+      title: 'вверху'
+    }, {
+      id: 2,
+      title: 'внизу'
+    }
+  ]);
 
 }).call(this);
 

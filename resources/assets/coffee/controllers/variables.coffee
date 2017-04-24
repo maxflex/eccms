@@ -1,6 +1,6 @@
 angular
     .module 'Egecms'
-    .controller 'VariablesIndex', ($scope, $attrs, $timeout, IndexService, Variable, VariableGroup) ->
+    .controller 'VariablesIndex', ($scope, $attrs, $rootScope, $timeout, IndexService, Variable, VariableGroup) ->
         bindArguments($scope, arguments)
         $scope.sortableVariableConf =
             animation: 150
@@ -26,10 +26,10 @@ angular
             if group_id is -1
                 VariableGroup.save {variable_id: variable_id}, (response) ->
                     $scope.groups.push(response)
-                    moveToGroup(faq_id, response.id)
+                    moveToGroup(variable_id, response.id)
             else if group_id
                 Variable.update({id: $scope.dnd.variable_id, group_id: group_id})
-                moveToGroup(faq_id, response.id)
+                moveToGroup(variable_id, group_id)
             $scope.dnd = {}
 
         # переместить в группу

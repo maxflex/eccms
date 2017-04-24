@@ -18,7 +18,7 @@
             </div>
             <div class='droppable-table' ondragover="allowDrop(event)"
                 ng-dragenter="dnd.over = group.id" ng-dragleave="dnd.over = undefined" ng-drop="drop(group.id)"
-                ng-class="{'over': dnd.variable_id && dnd.over === group.id && dnd.over != getPage(dnd.page_id).group_id}">
+                ng-class="{'over': dnd.page_id && dnd.over === group.id && dnd.over != getPage(dnd.page_id).group_id}">
                 <table class="table droppable-table">
                     <tbody ng-sortable='sortablePageConf'>
                         <tr ng-repeat="page in group.page" draggable="true"

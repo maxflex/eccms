@@ -1,6 +1,6 @@
 angular
     .module 'Egecms'
-    .controller 'PagesIndex', ($scope, $attrs, $timeout, IndexService, Page, Published, ExportService, PageGroup) ->
+    .controller 'PagesIndex', ($scope, $attrs, $rootScope, $timeout, IndexService, Page, Published, ExportService, PageGroup) ->
         bindArguments($scope, arguments)
         ExportService.init({controller: 'pages'})
 
