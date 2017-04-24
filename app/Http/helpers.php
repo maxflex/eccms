@@ -203,3 +203,15 @@
        \DB::table($table)->truncate();
        \Illuminate\Support\Facades\Schema::enableForeignKeyConstraints();
    }
+
+   /**
+     * Factory connection helper
+     */
+    function dbFactory($table)
+    {
+        return \DB::connection('factory')->table($table);
+    }
+
+    function mb_ucfirst($text) {
+        return mb_strtoupper(mb_substr($text, 0, 1)) . mb_substr($text, 1);
+    }

@@ -16,3 +16,20 @@ use Illuminate\Foundation\Inspiring;
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->describe('Display an inspiring quote');
+
+
+Artisan::command('seed:courses', function () {
+    $subjects = dbFactory('subjects')->get();
+    $html = \DB::table('pages')->whereId(174)->value('html');
+    foreach($subjects as $subject) {
+        \App\Models\Page::create([
+            'keyphrase' => 'Лэндинг ОГЭ – ' . mb_ucfirst($subject->name),
+            'title'     => 'Лэндинг ОГЭ – ' . mb_ucfirst($subject->name),
+            'url' => 'landing/oge/' . $subject->eng,
+            'published' => 1,
+            'h1' => 'Варианты подготовки к ОГЭ по ' . $subject->dative,
+            'html' => $html,
+            'group_id' => 4
+        ]);
+    }
+})->describe('Seed courses pages');
