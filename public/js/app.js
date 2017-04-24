@@ -585,10 +585,30 @@
 
 (function() {
   angular.module('Egecms').controller('VariablesIndex', function($scope, $attrs, $timeout, IndexService, Variable, VariableGroup) {
+    var moveToGroup;
     bindArguments($scope, arguments);
-    angular.element(document).ready(function() {
-      return IndexService.init(Variable, $scope.current_page, $attrs);
-    });
+    $scope.sortableVariableConf = {
+      animation: 150,
+      onUpdate: function(event) {
+        return angular.forEach(event.models, function(obj, index) {
+          return Variable.update({
+            id: obj.id,
+            position: index
+          });
+        });
+      }
+    };
+    $scope.sortableGroupConf = {
+      animation: 150,
+      onUpdate: function(event) {
+        return angular.forEach(event.models, function(obj, index) {
+          return VariableGroup.update({
+            id: obj.id,
+            position: index
+          });
+        });
+      }
+    };
     $scope.dnd = {};
     $scope.dragStart = function(variable_id) {
       return $timeout(function() {
@@ -598,38 +618,48 @@
     };
     $scope.drop = function(group_id) {
       var variable_id;
+      variable_id = $scope.dnd.variable_id;
       if (group_id === -1) {
-        variable_id = $scope.dnd.variable_id;
         VariableGroup.save({
           variable_id: variable_id
         }, function(response) {
           $scope.groups.push(response);
-          return IndexService.page.data.find(function(variable) {
-            return variable.id === variable_id;
-          }).group_id = response.id;
+          return moveToGroup(faq_id, response.id);
         });
       } else if (group_id) {
         Variable.update({
           id: $scope.dnd.variable_id,
           group_id: group_id
         });
-        IndexService.page.data.find(function(variable) {
-          return variable.id === $scope.dnd.variable_id;
-        }).group_id = group_id;
+        moveToGroup(faq_id, response.id);
       }
       return $scope.dnd = {};
     };
-    $scope.getVariables = function(group_id) {
-      if (IndexService.page) {
-        return IndexService.page.data.filter(function(d) {
-          return d.group_id === group_id;
+    moveToGroup = function(variable_id, group_id) {
+      var group_from, group_to, variable;
+      group_to = $rootScope.findById($scope.groups, group_id);
+      group_from = $scope.getGroup(variable_id);
+      variable = $rootScope.findById(group_from.variable, variable_id);
+      group_from.variable = removeById(group_from.variable, variable_id);
+      return group_to.variable.push(variable);
+    };
+    $scope.getGroup = function(variable_id) {
+      var group_found;
+      group_found = null;
+      $scope.groups.forEach(function(group) {
+        if (group_found !== null) {
+          return;
+        }
+        return group.variable.forEach(function(variable) {
+          if (variable.id === parseInt(variable_id)) {
+            group_found = group;
+          }
         });
-      }
+      });
+      return group_found;
     };
     $scope.getVariable = function(variable_id) {
-      return _.findWhere(IndexService.page.data, {
-        id: parseInt(variable_id)
-      });
+      return $rootScope.findById($scope.getGroup(variable_id).variable, variable_id);
     };
     $scope.removeGroup = function(group) {
       return bootbox.confirm("Вы уверены, что хотите удалить группу «" + group.title + "»", function(response) {
@@ -637,12 +667,7 @@
           VariableGroup.remove({
             id: group.id
           });
-          $scope.groups = removeById($scope.groups, group.id);
-          return _.where(IndexService.page.data, {
-            group_id: group.id
-          }).forEach(function(variable) {
-            return variable.group_id = null;
-          });
+          return $scope.groups = removeById($scope.groups, group.id);
         }
       });
     };
@@ -667,6 +692,27 @@
       };
     });
   });
+
+}).call(this);
+
+(function() {
+  angular.module('Egecms').value('Published', [
+    {
+      id: 0,
+      title: 'не опубликовано'
+    }, {
+      id: 1,
+      title: 'опубликовано'
+    }
+  ]).value('UpDown', [
+    {
+      id: 1,
+      title: 'вверху'
+    }, {
+      id: 2,
+      title: 'внизу'
+    }
+  ]);
 
 }).call(this);
 
@@ -1154,27 +1200,6 @@
 
 (function() {
 
-
-}).call(this);
-
-(function() {
-  angular.module('Egecms').value('Published', [
-    {
-      id: 0,
-      title: 'не опубликовано'
-    }, {
-      id: 1,
-      title: 'опубликовано'
-    }
-  ]).value('UpDown', [
-    {
-      id: 1,
-      title: 'вверху'
-    }, {
-      id: 2,
-      title: 'внизу'
-    }
-  ]);
 
 }).call(this);
 
