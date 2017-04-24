@@ -23,7 +23,12 @@ angular.module('Egecms')
         $resource apiPath('programs'), {id: '@id'}, updatable()
 
     .factory 'Photo', ($resource) ->
-        $resource apiPath('photos'), {id: '@id'}, updatable()
+        $resource apiPath('photos'), {id: '@id'},
+            update:
+                method: 'PUT'
+            updateAll:
+                method: 'POST'
+                url: apiPath('photos', 'updateAll')
 
     .factory 'Faq', ($resource) ->
         $resource apiPath('faq'), {id: '@id'}, updatable()

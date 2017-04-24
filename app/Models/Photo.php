@@ -15,7 +15,8 @@ class Photo extends Model
 
     protected $fillable = [
         'filename',
-        'title'
+        'title',
+        'position'
     ];
 
     protected $appends = [
@@ -39,5 +40,12 @@ class Photo extends Model
     public function getThumbUrlAttribute()
     {
         return \Storage::url(static::UPLOAD_DIR . $this->filename);
+    }
+
+    protected static function boot()
+    {
+        static::creating(function($model) {
+            $model->position = static::max('position') + 1;
+        });
     }
 }

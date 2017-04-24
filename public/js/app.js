@@ -504,9 +504,22 @@
     });
   }).controller('PhotosIndex', function($scope, $attrs, IndexService, Photo, PhotoService) {
     bindArguments($scope, arguments);
-    return angular.element(document).ready(function() {
+    angular.element(document).ready(function() {
       return IndexService.init(Photo, $scope.current_page, $attrs);
     });
+    return $scope.sortablePhotosConf = {
+      animation: 150,
+      onUpdate: function(event) {
+        var positions;
+        positions = {};
+        angular.forEach(event.models, function(obj, index) {
+          return positions[obj.id] = index;
+        });
+        return Photo.updateAll({
+          positions: positions
+        });
+      }
+    };
   }).controller('PhotosForm', function($scope, $attrs, FormService, Photo, PhotoService) {
     bindArguments($scope, arguments);
     angular.element(document).ready(function() {
@@ -1203,7 +1216,15 @@
   }).factory('Photo', function($resource) {
     return $resource(apiPath('photos'), {
       id: '@id'
-    }, updatable());
+    }, {
+      update: {
+        method: 'PUT'
+      },
+      updateAll: {
+        method: 'POST',
+        url: apiPath('photos', 'updateAll')
+      }
+    });
   }).factory('Faq', function($resource) {
     return $resource(apiPath('faq'), {
       id: '@id'

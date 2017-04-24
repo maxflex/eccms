@@ -16,7 +16,7 @@ class PhotosController extends Controller
      */
     public function index()
     {
-        return Photo::paginate(100);
+        return Photo::orderBy('position')->paginate(100);
     }
 
     public function show($id)
@@ -71,6 +71,13 @@ class PhotosController extends Controller
     {
         if ($filename) {
             \Storage::disk('public')->delete(Photo::UPLOAD_DIR . $filename);
+        }
+    }
+
+    public function updateAll(Request $request)
+    {
+        foreach($request->positions as $id => $position) {
+            Photo::whereId($id)->update(['position' => $position]);
         }
     }
 }

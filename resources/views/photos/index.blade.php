@@ -8,7 +8,7 @@
 
 @section('content')
     <table class="table reverse-borders">
-        <tbody>
+        <tbody ng-sortable='sortablePhotosConf'>
         <tr ng-repeat="model in IndexService.page.data">
             <td>
                 <a ng-href="photos/@{{ model.id }}/edit">@{{ model.title ? model.title : 'не указано' }}</a>
