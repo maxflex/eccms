@@ -27,13 +27,14 @@ angular
 
         $scope.drop = (group_id) ->
             faq_id = $scope.dnd.faq_id
-            if group_id is -1
-                FaqGroup.save {faq_id: faq_id}, (response) ->
-                    $scope.groups.push(response)
-                    moveToGroup(faq_id, response.id)
-            else if group_id
-                Faq.update({id: faq_id, group_id: group_id})
-                moveToGroup(faq_id, group_id)
+            if group_id isnt $scope.getGroup(faq_id).id
+                if group_id is -1
+                    FaqGroup.save {faq_id: faq_id}, (response) ->
+                        $scope.groups.push(response)
+                        moveToGroup(faq_id, response.id)
+                else if group_id
+                    Faq.update({id: faq_id, group_id: group_id})
+                    moveToGroup(faq_id, group_id)
             $scope.dnd = {}
 
         # переместить в группу

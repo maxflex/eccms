@@ -26,13 +26,14 @@ angular
 
         $scope.drop = (group_id) ->
             variable_id = $scope.dnd.variable_id
-            if group_id is -1
-                VariableGroup.save {variable_id: variable_id}, (response) ->
-                    $scope.groups.push(response)
-                    moveToGroup(variable_id, response.id)
-            else if group_id
-                Variable.update({id: $scope.dnd.variable_id, group_id: group_id})
-                moveToGroup(variable_id, group_id)
+            if group_id isnt $scope.getGroup(variable_id).id
+                if group_id is -1
+                    VariableGroup.save {variable_id: variable_id}, (response) ->
+                        $scope.groups.push(response)
+                        moveToGroup(variable_id, response.id)
+                else if group_id
+                    Variable.update({id: $scope.dnd.variable_id, group_id: group_id})
+                    moveToGroup(variable_id, group_id)
             $scope.dnd = {}
 
         # переместить в группу

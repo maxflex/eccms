@@ -231,19 +231,21 @@
     $scope.drop = function(group_id) {
       var faq_id;
       faq_id = $scope.dnd.faq_id;
-      if (group_id === -1) {
-        FaqGroup.save({
-          faq_id: faq_id
-        }, function(response) {
-          $scope.groups.push(response);
-          return moveToGroup(faq_id, response.id);
-        });
-      } else if (group_id) {
-        Faq.update({
-          id: faq_id,
-          group_id: group_id
-        });
-        moveToGroup(faq_id, group_id);
+      if (group_id !== $scope.getGroup(faq_id).id) {
+        if (group_id === -1) {
+          FaqGroup.save({
+            faq_id: faq_id
+          }, function(response) {
+            $scope.groups.push(response);
+            return moveToGroup(faq_id, response.id);
+          });
+        } else if (group_id) {
+          Faq.update({
+            id: faq_id,
+            group_id: group_id
+          });
+          moveToGroup(faq_id, group_id);
+        }
       }
       return $scope.dnd = {};
     };
@@ -368,19 +370,21 @@
     $scope.drop = function(group_id) {
       var page_id;
       page_id = $scope.dnd.page_id;
-      if (group_id === -1) {
-        PageGroup.save({
-          page_id: page_id
-        }, function(response) {
-          $scope.groups.push(response);
-          return moveToGroup(page_id, response.id);
-        });
-      } else if (group_id) {
-        Page.update({
-          id: $scope.dnd.page_id,
-          group_id: group_id
-        });
-        moveToGroup(page_id, group_id);
+      if (group_id !== $scope.getGroup(page_id).id) {
+        if (group_id === -1) {
+          PageGroup.save({
+            page_id: page_id
+          }, function(response) {
+            $scope.groups.push(response);
+            return moveToGroup(page_id, response.id);
+          });
+        } else if (group_id) {
+          Page.update({
+            id: $scope.dnd.page_id,
+            group_id: group_id
+          });
+          moveToGroup(page_id, group_id);
+        }
       }
       return $scope.dnd = {};
     };
@@ -656,19 +660,21 @@
     $scope.drop = function(group_id) {
       var variable_id;
       variable_id = $scope.dnd.variable_id;
-      if (group_id === -1) {
-        VariableGroup.save({
-          variable_id: variable_id
-        }, function(response) {
-          $scope.groups.push(response);
-          return moveToGroup(variable_id, response.id);
-        });
-      } else if (group_id) {
-        Variable.update({
-          id: $scope.dnd.variable_id,
-          group_id: group_id
-        });
-        moveToGroup(variable_id, group_id);
+      if (group_id !== $scope.getGroup(variable_id).id) {
+        if (group_id === -1) {
+          VariableGroup.save({
+            variable_id: variable_id
+          }, function(response) {
+            $scope.groups.push(response);
+            return moveToGroup(variable_id, response.id);
+          });
+        } else if (group_id) {
+          Variable.update({
+            id: $scope.dnd.variable_id,
+            group_id: group_id
+          });
+          moveToGroup(variable_id, group_id);
+        }
       }
       return $scope.dnd = {};
     };
