@@ -12,7 +12,10 @@ angular
 
         $scope.sortableGroupConf =
             animation: 150
+            onStart: (event) ->
+                $scope.group_sorting = true
             onUpdate: (event) ->
+                $scope.group_sorting = false
                 angular.forEach event.models, (obj, index) ->
                     PageGroup.update({id: obj.id, position: index})
 
@@ -25,13 +28,14 @@ angular
 
         $scope.drop = (group_id) ->
             page_id = $scope.dnd.page_id
-            if group_id is -1
-                PageGroup.save {page_id: page_id}, (response) ->
-                    $scope.groups.push(response)
-                    moveToGroup(page_id, response.id)
-            else if group_id
-                Page.update({id: $scope.dnd.page_id, group_id: group_id})
-                moveToGroup(page_id, group_id)
+            if group_id isnt $scope.getGroup(page_id).id
+                if group_id is -1
+                    PageGroup.save {page_id: page_id}, (response) ->
+                        $scope.groups.push(response)
+                        moveToGroup(page_id, response.id)
+                else if group_id
+                    Page.update({id: $scope.dnd.page_id, group_id: group_id})
+                    moveToGroup(page_id, group_id)
             $scope.dnd = {}
 
         # переместить в группу
@@ -75,9 +79,11 @@ angular
             FormService.init(Page, $scope.id, $scope.model)
             FormService.dataLoaded.promise.then ->
                 FormService.model.useful = [angular.copy(empty_useful)] if (not FormService.model.useful or not FormService.model.useful.length)
-                AceService.initEditor(FormService, 15)
+                AceService.initEditor(FormService, 15, 'editor')
+                AceService.initEditor(FormService, 15, 'editor_mobile')
             FormService.beforeSave = ->
-                FormService.model.html = AceService.editor.getValue()
+                FormService.model.html = AceService.getEditor('editor').getValue()
+                FormService.model.html_mobile = AceService.getEditor('editor_mobile').getValue()
 
         $scope.generateUrl = (event) ->
             $http.post '/api/translit/to-url',

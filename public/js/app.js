@@ -208,7 +208,11 @@
     };
     $scope.sortableGroupConf = {
       animation: 150,
+      onStart: function(event) {
+        return $scope.group_sorting = true;
+      },
       onUpdate: function(event) {
+        $scope.group_sorting = false;
         return angular.forEach(event.models, function(obj, index) {
           return FaqGroup.update({
             id: obj.id,
@@ -227,19 +231,21 @@
     $scope.drop = function(group_id) {
       var faq_id;
       faq_id = $scope.dnd.faq_id;
-      if (group_id === -1) {
-        FaqGroup.save({
-          faq_id: faq_id
-        }, function(response) {
-          $scope.groups.push(response);
-          return moveToGroup(faq_id, response.id);
-        });
-      } else if (group_id) {
-        Faq.update({
-          id: faq_id,
-          group_id: group_id
-        });
-        moveToGroup(faq_id, group_id);
+      if (group_id !== $scope.getGroup(faq_id).id) {
+        if (group_id === -1) {
+          FaqGroup.save({
+            faq_id: faq_id
+          }, function(response) {
+            $scope.groups.push(response);
+            return moveToGroup(faq_id, response.id);
+          });
+        } else if (group_id) {
+          Faq.update({
+            id: faq_id,
+            group_id: group_id
+          });
+          moveToGroup(faq_id, group_id);
+        }
       }
       return $scope.dnd = {};
     };
@@ -341,7 +347,11 @@
     };
     $scope.sortableGroupConf = {
       animation: 150,
+      onStart: function(event) {
+        return $scope.group_sorting = true;
+      },
       onUpdate: function(event) {
+        $scope.group_sorting = false;
         return angular.forEach(event.models, function(obj, index) {
           return PageGroup.update({
             id: obj.id,
@@ -360,19 +370,21 @@
     $scope.drop = function(group_id) {
       var page_id;
       page_id = $scope.dnd.page_id;
-      if (group_id === -1) {
-        PageGroup.save({
-          page_id: page_id
-        }, function(response) {
-          $scope.groups.push(response);
-          return moveToGroup(page_id, response.id);
-        });
-      } else if (group_id) {
-        Page.update({
-          id: $scope.dnd.page_id,
-          group_id: group_id
-        });
-        moveToGroup(page_id, group_id);
+      if (group_id !== $scope.getGroup(page_id).id) {
+        if (group_id === -1) {
+          PageGroup.save({
+            page_id: page_id
+          }, function(response) {
+            $scope.groups.push(response);
+            return moveToGroup(page_id, response.id);
+          });
+        } else if (group_id) {
+          Page.update({
+            id: $scope.dnd.page_id,
+            group_id: group_id
+          });
+          moveToGroup(page_id, group_id);
+        }
       }
       return $scope.dnd = {};
     };
@@ -431,10 +443,12 @@
         if (!FormService.model.useful || !FormService.model.useful.length) {
           FormService.model.useful = [angular.copy(empty_useful)];
         }
-        return AceService.initEditor(FormService, 15);
+        AceService.initEditor(FormService, 15, 'editor');
+        return AceService.initEditor(FormService, 15, 'editor_mobile');
       });
       return FormService.beforeSave = function() {
-        return FormService.model.html = AceService.editor.getValue();
+        FormService.model.html = AceService.getEditor('editor').getValue();
+        return FormService.model.html_mobile = AceService.getEditor('editor_mobile').getValue();
       };
     });
     $scope.generateUrl = function(event) {
@@ -625,7 +639,11 @@
     };
     $scope.sortableGroupConf = {
       animation: 150,
+      onStart: function(event) {
+        return $scope.group_sorting = true;
+      },
       onUpdate: function(event) {
+        $scope.group_sorting = false;
         return angular.forEach(event.models, function(obj, index) {
           return VariableGroup.update({
             id: obj.id,
@@ -644,19 +662,21 @@
     $scope.drop = function(group_id) {
       var variable_id;
       variable_id = $scope.dnd.variable_id;
-      if (group_id === -1) {
-        VariableGroup.save({
-          variable_id: variable_id
-        }, function(response) {
-          $scope.groups.push(response);
-          return moveToGroup(variable_id, response.id);
-        });
-      } else if (group_id) {
-        Variable.update({
-          id: $scope.dnd.variable_id,
-          group_id: group_id
-        });
-        moveToGroup(variable_id, group_id);
+      if (group_id !== $scope.getGroup(variable_id).id) {
+        if (group_id === -1) {
+          VariableGroup.save({
+            variable_id: variable_id
+          }, function(response) {
+            $scope.groups.push(response);
+            return moveToGroup(variable_id, response.id);
+          });
+        } else if (group_id) {
+          Variable.update({
+            id: $scope.dnd.variable_id,
+            group_id: group_id
+          });
+          moveToGroup(variable_id, group_id);
+        }
       }
       return $scope.dnd = {};
     };
@@ -1229,89 +1249,8 @@
 }).call(this);
 
 (function() {
-  var apiPath, countable, updatable;
-
-  angular.module('Egecms').factory('Variable', function($resource) {
-    return $resource(apiPath('variables'), {
-      id: '@id'
-    }, updatable());
-  }).factory('VariableGroup', function($resource) {
-    return $resource(apiPath('variables/groups'), {
-      id: '@id'
-    }, updatable());
-  }).factory('PageGroup', function($resource) {
-    return $resource(apiPath('pages/groups'), {
-      id: '@id'
-    }, updatable());
-  }).factory('Sass', function($resource) {
-    return $resource(apiPath('sass'), {
-      id: '@id'
-    }, updatable());
-  }).factory('Page', function($resource) {
-    return $resource(apiPath('pages'), {
-      id: '@id'
-    }, {
-      update: {
-        method: 'PUT'
-      },
-      checkExistance: {
-        method: 'POST',
-        url: apiPath('pages', 'checkExistance')
-      }
-    });
-  }).factory('Program', function($resource) {
-    return $resource(apiPath('programs'), {
-      id: '@id'
-    }, updatable());
-  }).factory('Photo', function($resource) {
-    return $resource(apiPath('photos'), {
-      id: '@id'
-    }, {
-      update: {
-        method: 'PUT'
-      },
-      updateAll: {
-        method: 'POST',
-        url: apiPath('photos', 'updateAll')
-      }
-    });
-  }).factory('Faq', function($resource) {
-    return $resource(apiPath('faq'), {
-      id: '@id'
-    }, updatable());
-  }).factory('FaqGroup', function($resource) {
-    return $resource(apiPath('faq/groups'), {
-      id: '@id'
-    }, updatable());
-  });
-
-  apiPath = function(entity, additional) {
-    if (additional == null) {
-      additional = '';
-    }
-    return ("api/" + entity + "/") + (additional ? additional + '/' : '') + ":id";
-  };
-
-  updatable = function() {
-    return {
-      update: {
-        method: 'PUT'
-      }
-    };
-  };
-
-  countable = function() {
-    return {
-      count: {
-        method: 'GET'
-      }
-    };
-  };
-
-}).call(this);
-
-(function() {
   angular.module('Egecms').service('AceService', function() {
+    this.editors = {};
     this.initEditor = function(FormService, minLines, id, mode) {
       if (minLines == null) {
         minLines = 30;
@@ -1329,7 +1268,7 @@
         minLines: minLines,
         maxLines: 2e308
       });
-      return this.editor.commands.addCommand({
+      this.editor.commands.addCommand({
         name: 'save',
         bindKey: {
           win: 'Ctrl-S',
@@ -1339,6 +1278,29 @@
           return FormService.edit();
         }
       });
+      return this.editors[id] = this.editor;
+    };
+    this.getEditor = function(id) {
+      if (id == null) {
+        id = 'editor';
+      }
+      return this.editors[id];
+    };
+    this.show = function(id) {
+      if (id == null) {
+        id = 'editor';
+      }
+      this.shown_editor = id;
+      return localStorage.setItem('shown_editor', id);
+    };
+    this.isShown = function(id) {
+      if (id == null) {
+        id = 'editor';
+      }
+      if (!localStorage.getItem('shown_editor')) {
+        this.show('editor');
+      }
+      return id === localStorage.getItem('shown_editor');
     };
     return this;
   });
@@ -1617,6 +1579,88 @@
     };
     return this;
   });
+
+}).call(this);
+
+(function() {
+  var apiPath, countable, updatable;
+
+  angular.module('Egecms').factory('Variable', function($resource) {
+    return $resource(apiPath('variables'), {
+      id: '@id'
+    }, updatable());
+  }).factory('VariableGroup', function($resource) {
+    return $resource(apiPath('variables/groups'), {
+      id: '@id'
+    }, updatable());
+  }).factory('PageGroup', function($resource) {
+    return $resource(apiPath('pages/groups'), {
+      id: '@id'
+    }, updatable());
+  }).factory('Sass', function($resource) {
+    return $resource(apiPath('sass'), {
+      id: '@id'
+    }, updatable());
+  }).factory('Page', function($resource) {
+    return $resource(apiPath('pages'), {
+      id: '@id'
+    }, {
+      update: {
+        method: 'PUT'
+      },
+      checkExistance: {
+        method: 'POST',
+        url: apiPath('pages', 'checkExistance')
+      }
+    });
+  }).factory('Program', function($resource) {
+    return $resource(apiPath('programs'), {
+      id: '@id'
+    }, updatable());
+  }).factory('Photo', function($resource) {
+    return $resource(apiPath('photos'), {
+      id: '@id'
+    }, {
+      update: {
+        method: 'PUT'
+      },
+      updateAll: {
+        method: 'POST',
+        url: apiPath('photos', 'updateAll')
+      }
+    });
+  }).factory('Faq', function($resource) {
+    return $resource(apiPath('faq'), {
+      id: '@id'
+    }, updatable());
+  }).factory('FaqGroup', function($resource) {
+    return $resource(apiPath('faq/groups'), {
+      id: '@id'
+    }, updatable());
+  });
+
+  apiPath = function(entity, additional) {
+    if (additional == null) {
+      additional = '';
+    }
+    return ("api/" + entity + "/") + (additional ? additional + '/' : '') + ":id";
+  };
+
+  updatable = function() {
+    return {
+      update: {
+        method: 'PUT'
+      }
+    };
+  };
+
+  countable = function() {
+    return {
+      count: {
+        method: 'GET'
+      }
+    };
+  };
 
 }).call(this);
 

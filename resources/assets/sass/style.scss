@@ -4123,3 +4123,10 @@ select[multiple] {
 .gallery-image {
     max-width: 100%;
 }
+
+.editors label {
+    cursor: pointer;
+    &.active {
+        color: $green-main!important;
+    }
+}

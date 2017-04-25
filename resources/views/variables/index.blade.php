@@ -14,7 +14,7 @@
                 <h4 class='inline-block' editable='@{{ group.id }}' ng-class="{'disable-events': !group.id}">@{{ group.title }}</h4>
                 <a ng-if='group.id' class='link-like text-danger show-on-hover' ng-click='removeGroup(group)'>удалить</a>
             </div>
-            <div class='droppable-table' ondragover="allowDrop(event)"
+            <div class='droppable-table' ondragover="allowDrop(event)" ng-show="! group_sorting"
                 ng-dragenter="dnd.over = group.id" ng-dragleave="dnd.over = undefined" ng-drop="drop(group.id)"
                 ng-class="{'over': dnd.variable_id && dnd.over === group.id && dnd.over != getVariables(dnd.variable_id).group_id}">
                 <table class="table droppable-table">

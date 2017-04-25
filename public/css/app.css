@@ -19758,6 +19758,14 @@ select[multiple] {
   max-width: 100%;
 }
 
+.editors label {
+  cursor: pointer;
+}
+
+.editors label.active {
+  color: #26A65B !important;
+}
+
 .list-group-item .search-icon {
   float: right;
   cursor: pointer;
