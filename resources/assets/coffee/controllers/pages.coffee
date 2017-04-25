@@ -79,9 +79,11 @@ angular
             FormService.init(Page, $scope.id, $scope.model)
             FormService.dataLoaded.promise.then ->
                 FormService.model.useful = [angular.copy(empty_useful)] if (not FormService.model.useful or not FormService.model.useful.length)
-                AceService.initEditor(FormService, 15)
+                AceService.initEditor(FormService, 15, 'editor')
+                AceService.initEditor(FormService, 15, 'editor_mobile')
             FormService.beforeSave = ->
-                FormService.model.html = AceService.editor.getValue()
+                FormService.model.html = AceService.getEditor('editor').getValue()
+                FormService.model.html_mobile = AceService.getEditor('editor_mobile').getValue()
 
         $scope.generateUrl = (event) ->
             $http.post '/api/translit/to-url',

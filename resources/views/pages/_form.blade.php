@@ -93,9 +93,10 @@
     </div>
 </div>
 
-<div class="row mbb">
+<div class="row mbb editors">
     <div class="col-sm-12">
-        <label>содержание раздела</label>
+        <label ng-class="{'active': AceService.isShown('editor')}" ng-click="AceService.show('editor')">стационар</label>
+        <label ng-class="{'active': AceService.isShown('editor_mobile')}" ng-click="AceService.show('editor_mobile')">мобильная</label>
         <label class="pull-right" style='top: 3px; position: relative'>
             <span class='link-like' ng-click='addLinkDialog()'>добавить ссылку</span>
         </label>
@@ -103,7 +104,8 @@
             <span ng-repeat="option in options" class="link-like ng-binding ng-scope" ng-class="{'active': $index == sort}" ng-click="setSort($index)">по алфавиту</span>
             <span ng-repeat="option in options" class="link-like ng-binding ng-scope active" ng-class="{'active': $index == sort}" ng-click="setSort($index)">по времени сохранения</span>
         </div>
-        <div id='editor' style="height: 500px">@{{ FormService.model.html }}</div>
+        <div id='editor' ng-show="AceService.isShown('editor')" style="height: 500px">@{{ FormService.model.html }}</div>
+        <div id='editor_mobile' ng-show="AceService.isShown('editor_mobile')" style="height: 500px">@{{ FormService.model.html_mobile }}</div>
     </div>
 </div>
 @include('pages._modals')

@@ -59,6 +59,7 @@ trait Exportable
                             $exportData[$key][$field] = $item->getClean($field);
                             break;
                         case 'html':
+                        case 'html_mobile':
                             $exportData[$key][$field] = strlen($item->$field);
                             break;
                     }
