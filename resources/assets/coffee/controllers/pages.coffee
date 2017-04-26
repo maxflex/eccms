@@ -28,7 +28,7 @@ angular
 
         $scope.drop = (group_id) ->
             page_id = $scope.dnd.page_id
-            if group_id isnt $scope.getGroup(page_id).id
+            if page_id and group_id and (group_id isnt $scope.getGroup(page_id).id)
                 if group_id is -1
                     PageGroup.save {page_id: page_id}, (response) ->
                         $scope.groups.push(response)

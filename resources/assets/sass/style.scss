@@ -4099,10 +4099,25 @@ select[multiple] {
      & table {
          margin-bottom: 0;
      }
-     &.over {
-         border-color: $green-main;
-         & * {
-             pointer-events: none;
+     &.over-parent table * {
+         pointer-events: none;
+     }
+     &.relative {
+         position: relative;
+     }
+     & .pad {
+         &.over {
+             border-color: $green-main;
+         }
+         background: rgba(0,0,0,0.7);
+         position: absolute;
+         top: 0;
+         bottom:0;
+         left: 0;
+         right:0;
+         margin-bottom: 0;
+         &.padded {
+             padding: 10px;
          }
      }
  }
