@@ -74,10 +74,11 @@ class Sync extends Command
             } else {
                 // если переменная найдена, проверяем на различие
                 if ($this->diff($l->{$content}, $s->{$content}, $s->{$id}, $content) == 'server') {
-                    $class::where($id, $l->{$id})->first()->update([
-                        $id      => $s->{$id},
-                        $content => $s->{$content}
-                    ]);
+                    $server_var = (array)$s;
+                    if ($except) {
+                        unset($server_var[$except]);
+                    }
+                    $class::where($id, $l->{$id})->first()->update($server_var);
                 }
             }
         }
