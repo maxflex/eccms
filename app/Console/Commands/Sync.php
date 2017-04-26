@@ -49,7 +49,6 @@ class Sync extends Command
         $this->syncGroup('variable_groups');
         $this->syncGroup('page_groups');
         $this->sync(Variable::class, 'name', 'html');
-        $this->sync(Variable::class, 'name', 'html_mobile');
         $this->sync(Page::class, 'keyphrase', 'html');
     }
 

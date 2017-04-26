@@ -34,7 +34,7 @@ trait Exportable
         $table_name = (new static)->getTable();
         return Excel::create($table_name . '_' . date('Y-m-d_H-i-s'), function($excel) use ($request, $table_name) {
             $excel->sheet($table_name, function($sheet) use ($request) {
-                $query = static::query();
+                $query = static::query()->orderBy(\DB::raw('group_id', 'position'));
                 // если экспортируем HTML, то только длина символов
                 if(isset(static::$with_comma_on_export) && in_array($request->field, static::$with_comma_on_export)) {
                     $query->with(static::$with_comma_on_export);

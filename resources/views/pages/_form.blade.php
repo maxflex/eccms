@@ -95,8 +95,8 @@
 
 <div class="row mbb editors">
     <div class="col-sm-12">
-        <label ng-class="{'active': AceService.isShown('editor')}" ng-click="AceService.show('editor')">стационар</label>
-        <label ng-class="{'active': AceService.isShown('editor_mobile')}" ng-click="AceService.show('editor_mobile')">мобильная</label>
+        <label ng-class="{'active link-like': !AceService.isShown('editor')}" ng-click="AceService.show('editor')">стационар</label>
+        <label ng-class="{'active link-like': !AceService.isShown('editor_mobile')}" ng-click="AceService.show('editor_mobile')">мобильная</label>
         <label class="pull-right" style='top: 3px; position: relative'>
             <span class='link-like' ng-click='addLinkDialog()'>добавить ссылку</span>
         </label>
