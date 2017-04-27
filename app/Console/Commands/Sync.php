@@ -12,6 +12,7 @@ use App\Models\Page;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Schema;
 use Storage;
+use App\Service\VersionControl;
 
 class Sync extends Command
 {
@@ -49,14 +50,18 @@ class Sync extends Command
         foreach(['pages', 'variables'] as $table) {
             $server_data = Api::get("sync/getData/{$table}");
             foreach($server_data as $server) {
-                $local = DB::table($table)->whereId($server->id)->get();
+                $local = DB::table($table)->whereId($server->id)->get()->first();
                 // если запись не найдена
                 if ($local === null) {
-
+                    DB::table($table)->insert((array)$server);
                 } else {
                 // если запись найдена, проверяем по каждому полю
-                // @todo: сначала проверить целостно, и если равны – пропускать
-                    foreach(Schema::getColumnListing($table) as $column) {
+                    // сначала проверить целостно, и если равны – пропускать
+                    if (md5(json_encode($local)) == md5(json_encode($server))) {
+                        continue;
+                    }
+                    // проверяем различия по колонкам
+                    foreach(array_diff(Schema::getColumnListing($table), VersionControl::EXCLUDE) as $column) {
                         $local_md5 = md5($local->{$column});
                         $server_md5 = md5($server->{$column});
                         // если поля не равны
@@ -65,29 +70,36 @@ class Sync extends Command
                             // хеш на сервере хранит последнюю версию localhost
 
                             // изменилось на локалхосте
-                            $local_changed = $local_md5 != $server->previous_md5[$column];
+                            $local_changed = $local_md5 != $server->previous_md5->{$column};
 
                             // изменилось на сервере
-                            $server_changed = $server_md5 != $server->previous_md5[$column];
+                            $server_changed = $server_md5 != $server->previous_md5->{$column};
 
                             // если изменилось в обеих системах
                             if ($local_changed && $server_changed) {
-
+                                $this->error("$table {$local->id} $column changed on both");
                             } else {
-                                // если изменилось на локалхосте
+                                // если изменилось на локалхосте, то не делать ничего
                                 if ($local_changed) {
-
+                                    $this->info("$table {$local->id} $column changed locally");
                                 }
 
                                 // если изменилось на сервере
                                 if ($server_changed) {
-                                    
+                                    $this->info("$table {$local->id} $column changed on remotely");
+                                    DB::table($table)->whereId($local->id)->update([
+                                        $column => $server->{$column},
+                                    ]);
                                 }
                             }
                         }
                     }
                 }
             }
+            Api::post("sync/setData/{$table}", [
+               'form_params' => DB::table($table)->get()->all()
+           ]);
         }
+        shell_exec('envoy run generate:version_control');
     }
 }

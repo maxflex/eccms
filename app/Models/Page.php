@@ -7,10 +7,13 @@ use DB;
 use Schema;
 use Shared\Model;
 use App\Service\VersionControl;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Page extends Model
 {
-   use Exportable;
+   use Exportable, SoftDeletes;
+
+   protected $dates = ['deleted_at'];
    protected $commaSeparated = ['subjects'];
    protected $fillable = [
         'keyphrase',
@@ -111,13 +114,10 @@ class Page extends Model
         return $query;
     }
 
-    public function getPreviousMd5Attribute()
-    {
-        return VersionControl::get($this->getTable(), $this->id);
-    }
-
     protected static function boot()
     {
+        parent::boot();
+
         // @todo: присвоение группы перенести в интерфейс
         static::creating(function($model) {
             if (! isset($model->group_id)) {

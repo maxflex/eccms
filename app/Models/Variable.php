@@ -2,10 +2,15 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 
 class Variable extends Model
 {
+    use SoftDeletes;
+
+    protected $dates = ['deleted_at'];
+
     protected $fillable = [
         'name',
         'html',
@@ -16,6 +21,8 @@ class Variable extends Model
 
     protected static function boot()
     {
+        parent::boot();
+
         // @todo: присвоение группы перенести в интерфейс
         static::creating(function($model) {
             if (! isset($model->group_id)) {
