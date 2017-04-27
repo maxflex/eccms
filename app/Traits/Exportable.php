@@ -94,6 +94,12 @@ trait Exportable
                         }
                     }
 
+                    foreach ($model as $key => $field) { // numbers app fix
+                        if (! $key) {
+                            unset($model[$key]);
+                        }
+                    }
+
                     static::whereId($model['id'])->update($model);
                 }
             });
