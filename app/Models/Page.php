@@ -6,6 +6,7 @@ use App\Traits\Exportable;
 use DB;
 use Schema;
 use Shared\Model;
+use App\Service\VersionControl;
 
 class Page extends Model
 {
@@ -108,6 +109,11 @@ class Page extends Model
         }
 
         return $query;
+    }
+
+    public function getPreviousMd5Attribute()
+    {
+        return VersionControl::get($this->getTable(), $this->id);
     }
 
     protected static function boot()

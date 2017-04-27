@@ -393,6 +393,7 @@
       group_to = $rootScope.findById($scope.groups, group_id);
       group_from = $scope.getGroup(page_id);
       page = $rootScope.findById(group_from.page, page_id);
+      page.group_id = group_id;
       group_from.page = removeById(group_from.page, page_id);
       return group_to.page.push(page);
     };

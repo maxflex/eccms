@@ -12,7 +12,11 @@ class SyncController extends Controller
 {
     public function getData($table)
     {
-        return DB::table($table)->get()->all();
+        $data = DB::table($table)->get()->all();
+        foreach($data as $d) {
+            $d->previous_md5 = VersionControl::get($table, $d->id);
+        }
+        return $data;
     }
 
     public function setData($table, Request $request)
