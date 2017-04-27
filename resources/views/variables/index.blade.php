@@ -14,9 +14,9 @@
                 <h4 class='inline-block' editable='@{{ group.id }}' ng-class="{'disable-events': !group.id}">@{{ group.title }}</h4>
                 <a ng-if='group.id' class='link-like text-danger show-on-hover' ng-click='removeGroup(group)'>удалить</a>
             </div>
-            <div class='droppable-table' ondragover="allowDrop(event)" ng-show="! group_sorting"
+            <div class='droppable-table relative' ondragover="allowDrop(event)" ng-show="! group_sorting"
                 ng-dragenter="dnd.over = group.id" ng-dragleave="dnd.over = undefined" ng-drop="drop(group.id)"
-                ng-class="{'over': dnd.variable_id && dnd.over === group.id && dnd.over != getVariables(dnd.variable_id).group_id}">
+                ng-class="{'over-parent': dnd.variable_id && dnd.over === group.id && dnd.over != getVariables(dnd.variable_id).group_id}">
                 <table class="table droppable-table">
                     <tbody ng-sortable="sortableVariableConf">
                         <tr ng-repeat="variable in group.variable" draggable="true"
@@ -30,15 +30,18 @@
                         </tr>
                     </tbody>
                 </table>
+                <div class="droppable-table pad" ng-class="{padded: !group.variable.length}" ondragenter="setClass(event, 'over')" ondragleave="unsetClass(event, 'over')"
+                     ng-show="dnd.variable_id && (group.id != getVariable(dnd.variable_id).group_id)"
+                ></div>
             </div>
         </div>
     </div>
     <div>
         <div ng-show='dnd.variable_id > 0'>
             <h4>{{ \App\Models\VariableGroup::DEFAULT_TITLE }}</h4>
-            <div class='droppable-table' ondragover="allowDrop(event)"
+            <div class='droppable-table relative' ondragover="allowDrop(event)"
                 ng-dragenter="dnd.over = -1" ng-dragleave="dnd.over = undefined" ng-drop="drop(-1)"
-                ng-class="{'over': dnd.over == -1}">
+                ng-class="{'over-parent': dnd.over == -1}">
                 <table class="table">
                     <tr ng-repeat="i in [1, 2, 3, 4]">
                         <td style='width: 30%'>
@@ -49,6 +52,7 @@
                         </td>
                     </tr>
                 </table>
+                <div class="droppable-table pad" ondragenter="setClass(event, 'over')" ondragleave="unsetClass(event, 'over')"></div>
             </div>
         </div>
     </div>

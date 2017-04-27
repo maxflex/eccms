@@ -332,6 +332,14 @@ function allowDrop(ev) {
     ev.preventDefault();
 }
 
+function setClass(event, classname) {
+    $(event.target).addClass(classname);
+}
+
+function unsetClass(event, classname) {
+    $(event.target).removeClass(classname);
+}
+
 function upload()
 {
 	$('input[type="file"]').click();

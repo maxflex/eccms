@@ -231,7 +231,7 @@
     $scope.drop = function(group_id) {
       var faq_id;
       faq_id = $scope.dnd.faq_id;
-      if (group_id !== $scope.getGroup(faq_id).id) {
+      if (group_id && faq_id && (group_id !== $scope.getGroup(faq_id).id)) {
         if (group_id === -1) {
           FaqGroup.save({
             faq_id: faq_id
@@ -370,7 +370,7 @@
     $scope.drop = function(group_id) {
       var page_id;
       page_id = $scope.dnd.page_id;
-      if (group_id !== $scope.getGroup(page_id).id) {
+      if (page_id && group_id && (group_id !== $scope.getGroup(page_id).id)) {
         if (group_id === -1) {
           PageGroup.save({
             page_id: page_id
@@ -662,7 +662,7 @@
     $scope.drop = function(group_id) {
       var variable_id;
       variable_id = $scope.dnd.variable_id;
-      if (group_id !== $scope.getGroup(variable_id).id) {
+      if (group_id && variable_id && (group_id !== $scope.getGroup(variable_id).id)) {
         if (group_id === -1) {
           VariableGroup.save({
             variable_id: variable_id
@@ -1249,6 +1249,88 @@
 }).call(this);
 
 (function() {
+  var apiPath, countable, updatable;
+
+  angular.module('Egecms').factory('Variable', function($resource) {
+    return $resource(apiPath('variables'), {
+      id: '@id'
+    }, updatable());
+  }).factory('VariableGroup', function($resource) {
+    return $resource(apiPath('variables/groups'), {
+      id: '@id'
+    }, updatable());
+  }).factory('PageGroup', function($resource) {
+    return $resource(apiPath('pages/groups'), {
+      id: '@id'
+    }, updatable());
+  }).factory('Sass', function($resource) {
+    return $resource(apiPath('sass'), {
+      id: '@id'
+    }, updatable());
+  }).factory('Page', function($resource) {
+    return $resource(apiPath('pages'), {
+      id: '@id'
+    }, {
+      update: {
+        method: 'PUT'
+      },
+      checkExistance: {
+        method: 'POST',
+        url: apiPath('pages', 'checkExistance')
+      }
+    });
+  }).factory('Program', function($resource) {
+    return $resource(apiPath('programs'), {
+      id: '@id'
+    }, updatable());
+  }).factory('Photo', function($resource) {
+    return $resource(apiPath('photos'), {
+      id: '@id'
+    }, {
+      update: {
+        method: 'PUT'
+      },
+      updateAll: {
+        method: 'POST',
+        url: apiPath('photos', 'updateAll')
+      }
+    });
+  }).factory('Faq', function($resource) {
+    return $resource(apiPath('faq'), {
+      id: '@id'
+    }, updatable());
+  }).factory('FaqGroup', function($resource) {
+    return $resource(apiPath('faq/groups'), {
+      id: '@id'
+    }, updatable());
+  });
+
+  apiPath = function(entity, additional) {
+    if (additional == null) {
+      additional = '';
+    }
+    return ("api/" + entity + "/") + (additional ? additional + '/' : '') + ":id";
+  };
+
+  updatable = function() {
+    return {
+      update: {
+        method: 'PUT'
+      }
+    };
+  };
+
+  countable = function() {
+    return {
+      count: {
+        method: 'GET'
+      }
+    };
+  };
+
+}).call(this);
+
+(function() {
   angular.module('Egecms').service('AceService', function() {
     this.editors = {};
     this.initEditor = function(FormService, minLines, id, mode) {
@@ -1579,88 +1661,6 @@
     };
     return this;
   });
-
-}).call(this);
-
-(function() {
-  var apiPath, countable, updatable;
-
-  angular.module('Egecms').factory('Variable', function($resource) {
-    return $resource(apiPath('variables'), {
-      id: '@id'
-    }, updatable());
-  }).factory('VariableGroup', function($resource) {
-    return $resource(apiPath('variables/groups'), {
-      id: '@id'
-    }, updatable());
-  }).factory('PageGroup', function($resource) {
-    return $resource(apiPath('pages/groups'), {
-      id: '@id'
-    }, updatable());
-  }).factory('Sass', function($resource) {
-    return $resource(apiPath('sass'), {
-      id: '@id'
-    }, updatable());
-  }).factory('Page', function($resource) {
-    return $resource(apiPath('pages'), {
-      id: '@id'
-    }, {
-      update: {
-        method: 'PUT'
-      },
-      checkExistance: {
-        method: 'POST',
-        url: apiPath('pages', 'checkExistance')
-      }
-    });
-  }).factory('Program', function($resource) {
-    return $resource(apiPath('programs'), {
-      id: '@id'
-    }, updatable());
-  }).factory('Photo', function($resource) {
-    return $resource(apiPath('photos'), {
-      id: '@id'
-    }, {
-      update: {
-        method: 'PUT'
-      },
-      updateAll: {
-        method: 'POST',
-        url: apiPath('photos', 'updateAll')
-      }
-    });
-  }).factory('Faq', function($resource) {
-    return $resource(apiPath('faq'), {
-      id: '@id'
-    }, updatable());
-  }).factory('FaqGroup', function($resource) {
-    return $resource(apiPath('faq/groups'), {
-      id: '@id'
-    }, updatable());
-  });
-
-  apiPath = function(entity, additional) {
-    if (additional == null) {
-      additional = '';
-    }
-    return ("api/" + entity + "/") + (additional ? additional + '/' : '') + ":id";
-  };
-
-  updatable = function() {
-    return {
-      update: {
-        method: 'PUT'
-      }
-    };
-  };
-
-  countable = function() {
-    return {
-      count: {
-        method: 'GET'
-      }
-    };
-  };
 
 }).call(this);
 

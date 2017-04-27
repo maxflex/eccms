@@ -19734,12 +19734,29 @@ select[multiple] {
   margin-bottom: 0;
 }
 
-.droppable-table.over {
+.droppable-table.over-parent table * {
+  pointer-events: none;
+}
+
+.droppable-table.relative {
+  position: relative;
+}
+
+.droppable-table .pad {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin-bottom: 0;
+}
+
+.droppable-table .pad.over {
   border-color: #26A65B;
 }
 
-.droppable-table.over * {
-  pointer-events: none;
+.droppable-table .pad.padded {
+  padding: 10px;
 }
 
 .disable-events {

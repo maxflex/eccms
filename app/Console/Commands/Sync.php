@@ -49,10 +49,11 @@ class Sync extends Command
         $this->syncGroup('variable_groups');
         $this->syncGroup('page_groups');
         $this->sync(Variable::class, 'name', 'html');
-        $this->sync(Page::class, 'keyphrase', 'html');
+        $this->sync(Page::class, 'keyphrase', 'html', 'html_mobile');
+        $this->sync(Page::class, 'keyphrase', 'html_mobile', 'html');
     }
 
-    private function sync($class, $id, $content)
+    private function sync($class, $id, $content, $except = false)
     {
         $class_plural = explode("\\", $class);
         $class_plural = end($class_plural) . 's';
@@ -72,24 +73,36 @@ class Sync extends Command
                 $class::create((array)$s);
             } else {
                 // если переменная найдена, проверяем на различие
-                if ($this->diff($l->{$content}, $s->{$content}, $s->{$id}) == 'server') {
-                    $class::where($id, $l->{$id})->first()->update((array)$s);
+                if ($this->diff($l->{$content}, $s->{$content}, $s->{$id}, $content) == 'server') {
+                    $server_var = (array)$s;
+                    if ($except) {
+                        unset($server_var[$except]);
+                    }
+                    $class::where($id, $l->{$id})->first()->update($server_var);
                 }
             }
         }
 
+        $server = collect($server);
         $this->info("\nPushing to server...\n");
         Api::post("sync/setData/{$table}", [
-            'form_params' => DB::table($table)->get()->all()
+            'form_params' => DB::table($table)->get()->map(function ($item) use ($server, $id, $except) {
+                                                           if ($except) {
+                                                               if ($server_item = $server->where($id, $item->$id)->first()) {
+                                                                   $item->$except = $server_item->$except;
+                                                               }
+                                                           }
+                                                           return $item;
+                                                       })->all()
         ]);
 
         $this->info("\tOK");
     }
 
-    private function diff($local, $server, $name)
+    private function diff($local, $server, $name, $field)
     {
         if (md5($local) !== md5($server)) {
-            $this->error("Server «{$name}» differs from local");
+            $this->error("Server «{$name}» differs from local (field: {$field})");
             $local_lines = explode("\n", $local);
             $server_lines = explode("\n", $server);
             $differences = 0;
