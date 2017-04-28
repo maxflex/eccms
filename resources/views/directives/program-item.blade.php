@@ -7,11 +7,11 @@
         <span editable="item"
               data-field="lesson_count"
               data-not-required="true"
-              data-positive="true"
+              data-input-digits-only="true"
               class="lesson_count"
               ng-class="{'is-zero': !item.lesson_count}"
-              ng-show="isShownLesson() || item.lesson_count"
-        >@{{ item.lesson_count }}</span>
+              ng-show="isShownLesson() || item.lesson_count > 0"
+              ng-bind="item.lesson_count > 0 ? item.lesson_count : ''">@{{ item.lesson_count }}</span>
     </span>
 
     <span class="show-on-hover">

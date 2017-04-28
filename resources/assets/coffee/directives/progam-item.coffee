@@ -14,19 +14,13 @@ angular.module 'Egecms'
         $scope.onEdit = (item, event) ->
             elem = $(event.target)
             value = elem.text().trim()
-            console.log value
             field = elem.data 'field'
             if value or elem.data 'not-required'
-                if elem.data('positive')
-                    value = value.replace /[^0-9]/g, ''
-                    console.log 'entered' + value
-                    value = '' if not value or not valu e > 0
                 $scope.item[field] = value
             else
                 $(event.target).text $scope.item.title
 
             $scope.hideEmptyLesson()
-            require_update and $timeout -> $scope.$apply()
 
         $scope.addChild = (event)->
             $scope.is_adding = true
@@ -63,9 +57,8 @@ angular.module 'Egecms'
                 $scope.is_tabbing = false
                 return event.preventDefault()
 
-            return event.preventDefault() if event and event.keyCode is TAB and not force
+            return event.preventDefault() if event and event.keyCode is TAB
 
-            console.log 'blurring'
             $scope.is_adding = false
             $scope.is_editing = false
 
@@ -84,6 +77,9 @@ angular.module 'Egecms'
             str = if $scope.levelstring then $scope.levelstring else ''
             str + (child_index + 1) + '.'
 
+        $scope.getLessonCount = ->
+            return $scope.item.lesson_count
+
         $scope.childLessonSum = (item) ->
             return 0 if not (item and item.content)
 
@@ -100,7 +96,6 @@ angular.module 'Egecms'
         $scope.showLesson = ->
             $scope.show_lessons = [] if not $scope.show_lessons
             $scope.show_lessons[$scope.item.id] = true
-            console.log 'be' + $scope.show_lessons
 
         $scope.hideEmptyLesson = ->
             $scope.show_lessons and (delete $scope.show_lessons[$scope.item.id || $scope.item.fake_id])
