@@ -577,9 +577,20 @@
 (function() {
   angular.module('Egecms').controller('ProgramsIndex', function($scope, $attrs, IndexService, Program) {
     bindArguments($scope, arguments);
-    return angular.element(document).ready(function() {
+    angular.element(document).ready(function() {
       return IndexService.init(Program, $scope.current_page, $attrs);
     });
+    return $scope.childLessonSum = function(model) {
+      if (!(model && model.content)) {
+        return 0;
+      }
+      if (!model.content.length) {
+        return +model.lesson_count || 0;
+      }
+      return _.reduce(model.content, function(sum, value) {
+        return sum + parseInt($scope.childLessonSum(value));
+      }, 0);
+    };
   }).controller('ProgramsForm', function($scope, $attrs, $timeout, FormService, Program) {
     bindArguments($scope, arguments);
     return angular.element(document).ready(function() {
@@ -944,7 +955,8 @@
           'lesson': ['занятие', 'занятия', 'занятий'],
           'client': ['клиент', 'клиента', 'клиентов'],
           'mark': ['оценки', 'оценок', 'оценок'],
-          'request': ['заявка', 'заявки', 'заявок']
+          'request': ['заявка', 'заявки', 'заявок'],
+          'hour': ['час', 'часа', 'часов']
         };
       }
     };
@@ -985,7 +997,7 @@
             if (elem.data('positive')) {
               value = value.replace(/[^0-9]/g, '');
               console.log('entered' + value);
-              if (!value) {
+              if (!value || !valu(e > 0)) {
                 value = '';
               }
             }
@@ -994,14 +1006,15 @@
             $(event.target).text($scope.item.title);
           }
           $scope.hideEmptyLesson();
-          return $timeout(function() {
+          return require_update && $timeout(function() {
             return $scope.$apply();
           });
         };
         $scope.addChild = function(event) {
           $scope.is_adding = true;
           return $timeout(function() {
-            if ($scope.item.content.length) {
+            var ref;
+            if ((ref = $scope.item.content) != null ? ref.length : void 0) {
               return $(event.target).parents('li').first().find('input.title').last().focus();
             } else {
               return $(event.target).parents('li').first().find('input.title').last().focus();
@@ -1094,8 +1107,7 @@
           return console.log('be' + $scope.show_lessons);
         };
         $scope.hideEmptyLesson = function() {
-          $scope.show_lessons && (delete $scope.show_lessons[$scope.item.id || $scope.item.fake_id]);
-          return console.log('ad' + $scope.show_lessons);
+          return $scope.show_lessons && (delete $scope.show_lessons[$scope.item.id || $scope.item.fake_id]);
         };
         $scope.isShownLesson = function() {
           var ref;
@@ -1359,84 +1371,23 @@
 }).call(this);
 
 (function() {
-  var apiPath, countable, updatable;
-
-  angular.module('Egecms').factory('Variable', function($resource) {
-    return $resource(apiPath('variables'), {
-      id: '@id'
-    }, updatable());
-  }).factory('VariableGroup', function($resource) {
-    return $resource(apiPath('variables/groups'), {
-      id: '@id'
-    }, updatable());
-  }).factory('PageGroup', function($resource) {
-    return $resource(apiPath('pages/groups'), {
-      id: '@id'
-    }, updatable());
-  }).factory('Sass', function($resource) {
-    return $resource(apiPath('sass'), {
-      id: '@id'
-    }, updatable());
-  }).factory('Page', function($resource) {
-    return $resource(apiPath('pages'), {
-      id: '@id'
+  angular.module('Egecms').value('Published', [
+    {
+      id: 0,
+      title: 'не опубликовано'
     }, {
-      update: {
-        method: 'PUT'
-      },
-      checkExistance: {
-        method: 'POST',
-        url: apiPath('pages', 'checkExistance')
-      }
-    });
-  }).factory('Program', function($resource) {
-    return $resource(apiPath('programs'), {
-      id: '@id'
-    }, updatable());
-  }).factory('Photo', function($resource) {
-    return $resource(apiPath('photos'), {
-      id: '@id'
-    }, {
-      update: {
-        method: 'PUT'
-      },
-      updateAll: {
-        method: 'POST',
-        url: apiPath('photos', 'updateAll')
-      }
-    });
-  }).factory('Faq', function($resource) {
-    return $resource(apiPath('faq'), {
-      id: '@id'
-    }, updatable());
-  }).factory('FaqGroup', function($resource) {
-    return $resource(apiPath('faq/groups'), {
-      id: '@id'
-    }, updatable());
-  });
-
-  apiPath = function(entity, additional) {
-    if (additional == null) {
-      additional = '';
+      id: 1,
+      title: 'опубликовано'
     }
-    return ("api/" + entity + "/") + (additional ? additional + '/' : '') + ":id";
-  };
-
-  updatable = function() {
-    return {
-      update: {
-        method: 'PUT'
-      }
-    };
-  };
-
-  countable = function() {
-    return {
-      count: {
-        method: 'GET'
-      }
-    };
-  };
+  ]).value('UpDown', [
+    {
+      id: 1,
+      title: 'вверху'
+    }, {
+      id: 2,
+      title: 'внизу'
+    }
+  ]);
 
 }).call(this);
 
@@ -1853,27 +1804,6 @@
     };
     return this;
   });
-
-}).call(this);
-
-(function() {
-  angular.module('Egecms').value('Published', [
-    {
-      id: 0,
-      title: 'не опубликовано'
-    }, {
-      id: 1,
-      title: 'опубликовано'
-    }
-  ]).value('UpDown', [
-    {
-      id: 1,
-      title: 'вверху'
-    }, {
-      id: 2,
-      title: 'внизу'
-    }
-  ]);
 
 }).call(this);
 

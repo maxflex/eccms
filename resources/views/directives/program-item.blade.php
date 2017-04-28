@@ -11,7 +11,7 @@
               class="lesson_count"
               ng-class="{'is-zero': !item.lesson_count}"
               ng-show="isShownLesson() || item.lesson_count"
-        >@{{ item.lesson_count || 0 }}</span>
+        >@{{ item.lesson_count }}</span>
     </span>
 
     <span class="show-on-hover">
@@ -40,7 +40,7 @@
                    ng-keydown="createChild($event)"
                    ng-blur="blur($event)"
             >
-            <span ng-show="new_item.lesson_count">ч.</span>
+            <span class="new-item-hour" ng-class="{'invisible': !new_item.lesson_count}"><plural type="hour" count="new_item.lesson_count" text-only hide-zero></plural></span>
         </span>
     </li>
 </ul>

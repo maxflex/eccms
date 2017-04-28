@@ -4158,3 +4158,13 @@ select[multiple] {
     content: ' ч.';
 
 }
+.lesson_count:empty::after {
+    content: '0 ч.';
+
+}
+.new-item-hour {
+    position: relative;
+    left: -110px;
+    display:inline-block;
+    width:50px;
+}

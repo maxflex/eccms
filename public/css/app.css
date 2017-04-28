@@ -14261,7 +14261,7 @@ button.close {
  * http://lab.hakim.se/ladda
  * MIT licensed
  *
- * Copyright (C) 2016 Hakim El Hattab, http://hakim.se
+ * Copyright (C) 2015 Hakim El Hattab, http://hakim.se
  */
 .ladda-button {
   position: relative;
@@ -19795,6 +19795,17 @@ select[multiple] {
 
 .lesson_count::after {
   content: ' ч.';
+}
+
+.lesson_count:empty::after {
+  content: '0 ч.';
+}
+
+.new-item-hour {
+  position: relative;
+  left: -110px;
+  display: inline-block;
+  width: 50px;
 }
 
 .list-group-item .search-icon {

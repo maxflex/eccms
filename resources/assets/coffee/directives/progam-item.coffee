@@ -20,20 +20,18 @@ angular.module 'Egecms'
                 if elem.data('positive')
                     value = value.replace /[^0-9]/g, ''
                     console.log 'entered' + value
-                    value = '' if not value
+                    value = '' if not value or not valu e > 0
                 $scope.item[field] = value
             else
                 $(event.target).text $scope.item.title
 
             $scope.hideEmptyLesson()
-            $timeout ->
-                $scope.$apply()
+            require_update and $timeout -> $scope.$apply()
 
         $scope.addChild = (event)->
             $scope.is_adding = true
             $timeout ->
-
-                if $scope.item.content.length
+                if $scope.item.content?.length
                     $(event.target).parents('li').first().find('input.title').last().focus()
                 else
                     $(event.target).parents('li').first().find('input.title').last().focus()
@@ -106,7 +104,6 @@ angular.module 'Egecms'
 
         $scope.hideEmptyLesson = ->
             $scope.show_lessons and (delete $scope.show_lessons[$scope.item.id || $scope.item.fake_id])
-            console.log 'ad' + $scope.show_lessons
 
         $scope.isShownLesson = ->
             return $scope.show_lessons?[$scope.item.id]
