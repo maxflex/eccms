@@ -11,7 +11,7 @@ use DB;
 
 class SyncController extends Controller
 {
-    public function getData($table)
+    public function get($table)
     {
         $data = DB::table($table)->get()->all();
         foreach($data as $d) {
@@ -20,11 +20,17 @@ class SyncController extends Controller
         return $data;
     }
 
-    public function setData($table, Request $request)
+    public function insert($table, Request $request)
     {
-        forceTruncate($table);
         foreach($request->all() as $data) {
             DB::table($table)->insert($data);
+        }
+    }
+
+    public function update($table, Request $request)
+    {
+        foreach($request->all() as $id => $data) {
+            DB::table($table)->whereId($id)->update($data);
         }
     }
 }
