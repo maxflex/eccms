@@ -4144,3 +4144,17 @@ select[multiple] {
         color: $green-main!important;
     }
 }
+
+.lesson_count:empty:before{
+    content: attr(placeholder);
+    color: $gray-opacity;
+}
+
+.lesson_count.is-zero:not(:focus){
+    color: $gray-opacity;
+}
+
+.lesson_count::after {
+    content: ' ч.';
+
+}

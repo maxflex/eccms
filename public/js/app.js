@@ -741,88 +741,6 @@
 }).call(this);
 
 (function() {
-  var apiPath, countable, updatable;
-
-  angular.module('Egecms').factory('Variable', function($resource) {
-    return $resource(apiPath('variables'), {
-      id: '@id'
-    }, updatable());
-  }).factory('VariableGroup', function($resource) {
-    return $resource(apiPath('variables/groups'), {
-      id: '@id'
-    }, updatable());
-  }).factory('PageGroup', function($resource) {
-    return $resource(apiPath('pages/groups'), {
-      id: '@id'
-    }, updatable());
-  }).factory('Sass', function($resource) {
-    return $resource(apiPath('sass'), {
-      id: '@id'
-    }, updatable());
-  }).factory('Page', function($resource) {
-    return $resource(apiPath('pages'), {
-      id: '@id'
-    }, {
-      update: {
-        method: 'PUT'
-      },
-      checkExistance: {
-        method: 'POST',
-        url: apiPath('pages', 'checkExistance')
-      }
-    });
-  }).factory('Program', function($resource) {
-    return $resource(apiPath('programs'), {
-      id: '@id'
-    }, updatable());
-  }).factory('Photo', function($resource) {
-    return $resource(apiPath('photos'), {
-      id: '@id'
-    }, {
-      update: {
-        method: 'PUT'
-      },
-      updateAll: {
-        method: 'POST',
-        url: apiPath('photos', 'updateAll')
-      }
-    });
-  }).factory('Faq', function($resource) {
-    return $resource(apiPath('faq'), {
-      id: '@id'
-    }, updatable());
-  }).factory('FaqGroup', function($resource) {
-    return $resource(apiPath('faq/groups'), {
-      id: '@id'
-    }, updatable());
-  });
-
-  apiPath = function(entity, additional) {
-    if (additional == null) {
-      additional = '';
-    }
-    return ("api/" + entity + "/") + (additional ? additional + '/' : '') + ":id";
-  };
-
-  updatable = function() {
-    return {
-      update: {
-        method: 'PUT'
-      }
-    };
-  };
-
-  countable = function() {
-    return {
-      count: {
-        method: 'GET'
-      }
-    };
-  };
-
-}).call(this);
-
-(function() {
 
 
 }).call(this);
@@ -846,6 +764,32 @@
         return $timeout(function() {
           return $($element).keyup();
         }, 500);
+      }
+    };
+  });
+
+}).call(this);
+
+(function() {
+  angular.module('Egecms').directive('digitsOnly', function() {
+    return {
+      restricts: 'A',
+      require: 'ngModel',
+      link: function($scope, $element, $attr, $ctrl) {
+        var filter, ref;
+        filter = function(value) {
+          var new_value;
+          if (!value) {
+            return void 0;
+          }
+          new_value = value.replace(/[^0-9]/g, '');
+          if (new_value !== value) {
+            $ctrl.$setViewValue(new_value);
+            $ctrl.$render();
+          }
+          return value;
+        };
+        return (ref = $ctrl.$parsers) != null ? ref.push(filter) : void 0;
       }
     };
   });
@@ -882,6 +826,23 @@
 
 (function() {
 
+
+}).call(this);
+
+(function() {
+  angular.module('Egecms').directive('jumpOnTab', function() {
+    return {
+      restrict: 'A',
+      link: function($scope, $element) {
+        return $element.on('keydown', function(event) {
+          if (event.keyCode === 9) {
+            event.preventDefault();
+            return $(event.target).parent('h2').find('.lesson_count').trigger('click').trigger('focus');
+          }
+        });
+      }
+    };
+  });
 
 }).call(this);
 
@@ -996,6 +957,10 @@
 }).call(this);
 
 (function() {
+  var TAB;
+
+  TAB = 9;
+
   angular.module('Egecms').directive('programItem', function() {
     return {
       restrict: 'E',
@@ -1007,56 +972,139 @@
         "delete": '&delete'
       },
       controller: function($timeout, $element, $scope) {
-        var resetNewItem;
+        var nextField, resetNewItem;
+        $scope.fake_id = 0;
         $scope.onEdit = function(item, event) {
-          var value;
-          value = $(event.target).text().trim();
-          if (value) {
-            return $scope.item.title = value;
+          var elem, field, value;
+          elem = $(event.target);
+          value = elem.text().trim();
+          console.log(value);
+          field = elem.data('field');
+          if (value || elem.data('not-required')) {
+            if (elem.data('positive')) {
+              value = value.replace(/[^0-9]/g, '');
+              console.log('entered' + value);
+              if (!value) {
+                value = '';
+              }
+            }
+            $scope.item[field] = value;
           } else {
-            return $(event.target).text($scope.item.title);
+            $(event.target).text($scope.item.title);
           }
+          $scope.hideEmptyLesson();
+          return $timeout(function() {
+            return $scope.$apply();
+          });
         };
-        $scope.addChild = function() {
+        $scope.addChild = function(event) {
           $scope.is_adding = true;
           return $timeout(function() {
-            return $element.find("input").last().focus();
+            if ($scope.item.content.length) {
+              return $(event.target).parents('li').first().find('input.title').last().focus();
+            } else {
+              return $(event.target).parents('li').first().find('input.title').last().focus();
+            }
           });
         };
         $scope.createChild = function(event) {
-          if ($scope.new_item.title && (event != null ? event.keyCode : void 0) === 13) {
-            if (!$scope.item.content) {
-              $scope.item.content = [];
-            }
-            if ($scope.new_item.title.length) {
-              $scope.item.content.push($scope.new_item);
-              resetNewItem();
+          if ((event != null ? event.keyCode : void 0) === 13) {
+            event.preventDefault();
+            if ($scope.new_item.title) {
+              if (!$scope.item.content) {
+                $scope.item.content = [];
+              }
+              if ($scope.new_item.title.length) {
+                $scope.item.content.push($scope.new_item);
+                resetNewItem(event);
+                if ($(event.target).is(':not(.title)')) {
+                  nextField(event);
+                }
+              }
             }
           }
           if ((event != null ? event.keyCode : void 0) === 27) {
-            return $(event.target).blur();
+            event.preventDefault();
+            $(event.target).blur();
+          }
+          if ((event != null ? event.keyCode : void 0) === TAB) {
+            event.preventDefault();
+            return nextField(event);
           }
         };
         $scope.deleteChild = function(child) {
           return $scope.item.content = _.without($scope.item.content, child);
         };
-        $scope.blur = function() {
+        $scope.blur = function(event) {
+          if ($scope.is_tabbing) {
+            $scope.is_tabbing = false;
+            return event.preventDefault();
+          }
+          if (event && event.keyCode === TAB && !force) {
+            return event.preventDefault();
+          }
+          console.log('blurring');
           $scope.is_adding = false;
           return $scope.is_editing = false;
+        };
+        nextField = function(event) {
+          var context, elem;
+          $scope.is_tabbing = true;
+          elem = $(event.target);
+          context = $(elem.parents('li')[0]);
+          if (elem.is('.title')) {
+            $('.lesson-count', context).focus();
+          } else {
+            $('.title', context).focus();
+          }
+          return elem.is('.lesson-count');
         };
         $scope.getChildLevelString = function(child_index) {
           var str;
           str = $scope.levelstring ? $scope.levelstring : '';
           return str + (child_index + 1) + '.';
         };
-        resetNewItem = function() {
-          return $scope.new_item = {
+        $scope.childLessonSum = function(item) {
+          if (!(item && item.content)) {
+            return 0;
+          }
+          if (!item.content.length) {
+            return +item.lesson_count || 0;
+          }
+          return _.reduce(item.content, function(sum, value) {
+            return sum + parseInt($scope.childLessonSum(value));
+          }, 0);
+        };
+        resetNewItem = function(event) {
+          $scope.new_item = {
             title: '',
-            content: []
+            lesson_count: '',
+            child_lesson_sum: '',
+            content: [],
+            fake_id: $scope.fake_id
           };
+          return $scope.fake_id++;
+        };
+        $scope.showLesson = function() {
+          if (!$scope.show_lessons) {
+            $scope.show_lessons = [];
+          }
+          $scope.show_lessons[$scope.item.id] = true;
+          return console.log('be' + $scope.show_lessons);
+        };
+        $scope.hideEmptyLesson = function() {
+          $scope.show_lessons && (delete $scope.show_lessons[$scope.item.id || $scope.item.fake_id]);
+          return console.log('ad' + $scope.show_lessons);
+        };
+        $scope.isShownLesson = function() {
+          var ref;
+          return (ref = $scope.show_lessons) != null ? ref[$scope.item.id] : void 0;
         };
         if (!$scope.level) {
           $scope.level = 1;
+        }
+        if (!$scope.lesson_count) {
+          $scope.lesson_count = 0;
         }
         return resetNewItem();
       }
@@ -1327,6 +1375,88 @@
       title: 'внизу'
     }
   ]);
+
+}).call(this);
+
+(function() {
+  var apiPath, countable, updatable;
+
+  angular.module('Egecms').factory('Variable', function($resource) {
+    return $resource(apiPath('variables'), {
+      id: '@id'
+    }, updatable());
+  }).factory('VariableGroup', function($resource) {
+    return $resource(apiPath('variables/groups'), {
+      id: '@id'
+    }, updatable());
+  }).factory('PageGroup', function($resource) {
+    return $resource(apiPath('pages/groups'), {
+      id: '@id'
+    }, updatable());
+  }).factory('Sass', function($resource) {
+    return $resource(apiPath('sass'), {
+      id: '@id'
+    }, updatable());
+  }).factory('Page', function($resource) {
+    return $resource(apiPath('pages'), {
+      id: '@id'
+    }, {
+      update: {
+        method: 'PUT'
+      },
+      checkExistance: {
+        method: 'POST',
+        url: apiPath('pages', 'checkExistance')
+      }
+    });
+  }).factory('Program', function($resource) {
+    return $resource(apiPath('programs'), {
+      id: '@id'
+    }, updatable());
+  }).factory('Photo', function($resource) {
+    return $resource(apiPath('photos'), {
+      id: '@id'
+    }, {
+      update: {
+        method: 'PUT'
+      },
+      updateAll: {
+        method: 'POST',
+        url: apiPath('photos', 'updateAll')
+      }
+    });
+  }).factory('Faq', function($resource) {
+    return $resource(apiPath('faq'), {
+      id: '@id'
+    }, updatable());
+  }).factory('FaqGroup', function($resource) {
+    return $resource(apiPath('faq/groups'), {
+      id: '@id'
+    }, updatable());
+  });
+
+  apiPath = function(entity, additional) {
+    if (additional == null) {
+      additional = '';
+    }
+    return ("api/" + entity + "/") + (additional ? additional + '/' : '') + ":id";
+  };
+
+  updatable = function() {
+    return {
+      update: {
+        method: 'PUT'
+      }
+    };
+  };
+
+  countable = function() {
+    return {
+      count: {
+        method: 'GET'
+      }
+    };
+  };
 
 }).call(this);
 
