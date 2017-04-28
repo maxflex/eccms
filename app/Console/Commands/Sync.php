@@ -84,7 +84,15 @@ class Sync extends Command
 
                             if ($local_changed) {
                                 if ($server_changed) {
-                                    $this->error("SKIP: $table {$local->id} $column");
+                                    $this->error("$table {$local->id} $column");
+                                    switch ($this->diff($local->{$column}, $server->{$column})) {
+                                        case 'local':
+                                            $production_update_data[$local->id][$column] = $local->{$column};
+                                            break;
+                                        case 'server':
+                                            DB::table($table)->whereId($local->id)->update([$column => $server->{$column}]);
+                                            break;
+                                    }
                                 } else {
                                     $production_update_data[$local->id][$column] = $local->{$column};
                                     $this->info("$table {$local->id} $column changed locally");
@@ -102,7 +110,15 @@ class Sync extends Command
                                 DB::table($table)->whereId($local->id)->update([$column => $server->{$column}]);
                                 $this->info("$table {$local->id} $column changed remotely (2)");
                             } else {
-                                $this->error("SKIP (2): $table {$local->id} $column");
+                                $this->error("$table {$local->id} $column");
+                                switch ($this->diff($local->{$column}, $server->{$column})) {
+                                    case 'local':
+                                        $production_update_data[$local->id][$column] = $local->{$column};
+                                        break;
+                                    case 'server':
+                                        DB::table($table)->whereId($local->id)->update([$column => $server->{$column}]);
+                                        break;
+                                }
                             }
                         }
                     }
@@ -150,5 +166,21 @@ class Sync extends Command
 
         $this->line("\n************** RE-GENERATE LOCALHOST TABLE ************** \n");
         shell_exec('php artisan generate:version_control');
+    }
+
+
+    public function diff($local, $server)
+    {
+        $server = explode("\n", $server);
+        $local = explode("\n", $local);
+        $length = max(count($server), count($local));
+
+        foreach(range(0, $length) as $i) {
+            if (@$server[$i] != @$local[$i]) {
+                $this->error("Local: " . @$local[$i]);
+                $this->error("Server: " . @$server[$i]);
+                return $this->choice('Choose version', ['local', 'server']);
+            }
+        }
     }
 }
