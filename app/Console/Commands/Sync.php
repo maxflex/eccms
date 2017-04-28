@@ -55,10 +55,11 @@ class Sync extends Command
                 // если запись не найдена
                 if ($local === null) {
                     $this->info("Adding $table " . $server->id);
+                    unset($server->previous_md5);
                     DB::table($table)->insert((array)$server);
                 } else {
                     $local->previous_md5 = VersionControl::get($table, $local->id);
-                    
+
                     // если запись найдена, проверяем по каждому полю
                     // сначала проверить целостно, и если равны – пропускать
                     if (md5(json_encode($local)) == md5(json_encode($server))) {
@@ -96,7 +97,7 @@ class Sync extends Command
                             // если локалхост не изменился, то всегда подтягиваем версию с продакшн
                             if ($local_md5 == $local->previous_md5->{$column}) {
                                 DB::table($table)->whereId($local->id)->update([$column => $server->{$column}]);
-                                $this->info("$table {$local->id} $column changed on remotely (2)");
+                                $this->info("$table {$local->id} $column changed remotely (2)");
                             } else {
                                 $this->error("SKIP (2): $table {$local->id} $column");
                             }
