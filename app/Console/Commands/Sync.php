@@ -51,12 +51,14 @@ class Sync extends Command
             $server_data = Api::get("sync/getData/{$table}");
             foreach($server_data as $server) {
                 $local = DB::table($table)->whereId($server->id)->get()->first();
-                $local->previous_md5 = VersionControl::get($table, $local->id);
+
                 // если запись не найдена
                 if ($local === null) {
                     $this->info("Adding $table " . $server->id);
                     DB::table($table)->insert((array)$server);
                 } else {
+                    $local->previous_md5 = VersionControl::get($table, $local->id);
+                    
                     // если запись найдена, проверяем по каждому полю
                     // сначала проверить целостно, и если равны – пропускать
                     if (md5(json_encode($local)) == md5(json_encode($server))) {
