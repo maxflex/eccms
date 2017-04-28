@@ -142,7 +142,7 @@ class Sync extends Command
 
             // добавляем на локалхост новые сущности
             foreach(array_diff($server_ids, $local_ids) as $id) {
-                $this->info("Adding to localhost $table " . $server->id);
+                $this->info("Adding to localhost $table " . $id);
                 $data = $server_data->where('id', $id)->first();
                 unset($data->previous_md5);
                 DB::table($table)->insert((array)$data);
@@ -151,7 +151,7 @@ class Sync extends Command
             // добавляем на продакшн новые сущности
             $production_insert_data = [];
             foreach(array_diff($local_ids, $server_ids) as $id) {
-                $this->info("Adding to server $table " . $server->id);
+                $this->info("Adding to server $table " . $id);
                 $production_insert_data[] = DB::table($table)->whereId($id)->first();
             }
 

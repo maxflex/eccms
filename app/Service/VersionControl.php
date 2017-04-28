@@ -8,7 +8,7 @@ use Schema;
 class VersionControl
 {
     // какие таблицы нужно синхронизировать
-    const TABLES = ['variables', 'pages'];
+    const TABLES = ['variable_groups', 'page_groups', 'variables', 'pages'];
 
     // название таблицы в БД
     const TABLE = 'version_control';
