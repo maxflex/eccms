@@ -45,6 +45,7 @@ angular
             page = $rootScope.findById(group_from.page, page_id)
             page.group_id = group_id
             group_from.page = removeById(group_from.page, page_id)
+            page.group_id = group_id
             group_to.page.push(page)
 
 

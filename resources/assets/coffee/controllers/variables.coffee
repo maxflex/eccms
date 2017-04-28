@@ -1,12 +1,16 @@
 angular
     .module 'Egecms'
     .controller 'VariablesIndex', ($scope, $attrs, $rootScope, $timeout, IndexService, Variable, VariableGroup) ->
+        $scope.$watchCollection 'dnd', (newVal) ->
+            console.log newVal
         bindArguments($scope, arguments)
         $scope.sortableVariableConf =
             animation: 150
             onUpdate: (event) ->
                 angular.forEach event.models, (obj, index) ->
                     Variable.update({id: obj.id, position: index})
+            onAdd: (event) ->
+                event.preventDefault()
 
         $scope.sortableGroupConf =
             animation: 150
@@ -35,6 +39,7 @@ angular
                     Variable.update({id: $scope.dnd.variable_id, group_id: group_id})
                     moveToGroup(variable_id, group_id)
             $scope.dnd = {}
+            console.log 'handy'
 
         # переместить в группу
         moveToGroup = (variable_id, group_id) ->
@@ -42,6 +47,7 @@ angular
             group_from = $scope.getGroup(variable_id)
             variable = $rootScope.findById(group_from.variable, variable_id)
             group_from.variable = removeById(group_from.variable, variable_id)
+            variable.group_id = group_id
             group_to.variable.push(variable)
 
         $scope.getGroup = (variable_id) ->

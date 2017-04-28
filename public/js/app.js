@@ -255,6 +255,7 @@
       group_from = $scope.getGroup(faq_id);
       faq = $rootScope.findById(group_from.faq, faq_id);
       group_from.faq = removeById(group_from.faq, faq_id);
+      faq.group_id = group_id;
       return group_to.faq.push(faq);
     };
     $scope.getGroup = function(faq_id) {
@@ -395,6 +396,7 @@
       page = $rootScope.findById(group_from.page, page_id);
       page.group_id = group_id;
       group_from.page = removeById(group_from.page, page_id);
+      page.group_id = group_id;
       return group_to.page.push(page);
     };
     $scope.getGroup = function(page_id) {
@@ -637,6 +639,9 @@
 (function() {
   angular.module('Egecms').controller('VariablesIndex', function($scope, $attrs, $rootScope, $timeout, IndexService, Variable, VariableGroup) {
     var moveToGroup;
+    $scope.$watchCollection('dnd', function(newVal) {
+      return console.log(newVal);
+    });
     bindArguments($scope, arguments);
     $scope.sortableVariableConf = {
       animation: 150,
@@ -647,6 +652,9 @@
             position: index
           });
         });
+      },
+      onAdd: function(event) {
+        return event.preventDefault();
       }
     };
     $scope.sortableGroupConf = {
@@ -690,7 +698,8 @@
           moveToGroup(variable_id, group_id);
         }
       }
-      return $scope.dnd = {};
+      $scope.dnd = {};
+      return console.log('handy');
     };
     moveToGroup = function(variable_id, group_id) {
       var group_from, group_to, variable;
@@ -698,6 +707,7 @@
       group_from = $scope.getGroup(variable_id);
       variable = $rootScope.findById(group_from.variable, variable_id);
       group_from.variable = removeById(group_from.variable, variable_id);
+      variable.group_id = group_id;
       return group_to.variable.push(variable);
     };
     $scope.getGroup = function(variable_id) {
@@ -749,88 +759,6 @@
       };
     });
   });
-
-}).call(this);
-
-(function() {
-  var apiPath, countable, updatable;
-
-  angular.module('Egecms').factory('Variable', function($resource) {
-    return $resource(apiPath('variables'), {
-      id: '@id'
-    }, updatable());
-  }).factory('VariableGroup', function($resource) {
-    return $resource(apiPath('variables/groups'), {
-      id: '@id'
-    }, updatable());
-  }).factory('PageGroup', function($resource) {
-    return $resource(apiPath('pages/groups'), {
-      id: '@id'
-    }, updatable());
-  }).factory('Sass', function($resource) {
-    return $resource(apiPath('sass'), {
-      id: '@id'
-    }, updatable());
-  }).factory('Page', function($resource) {
-    return $resource(apiPath('pages'), {
-      id: '@id'
-    }, {
-      update: {
-        method: 'PUT'
-      },
-      checkExistance: {
-        method: 'POST',
-        url: apiPath('pages', 'checkExistance')
-      }
-    });
-  }).factory('Program', function($resource) {
-    return $resource(apiPath('programs'), {
-      id: '@id'
-    }, updatable());
-  }).factory('Photo', function($resource) {
-    return $resource(apiPath('photos'), {
-      id: '@id'
-    }, {
-      update: {
-        method: 'PUT'
-      },
-      updateAll: {
-        method: 'POST',
-        url: apiPath('photos', 'updateAll')
-      }
-    });
-  }).factory('Faq', function($resource) {
-    return $resource(apiPath('faq'), {
-      id: '@id'
-    }, updatable());
-  }).factory('FaqGroup', function($resource) {
-    return $resource(apiPath('faq/groups'), {
-      id: '@id'
-    }, updatable());
-  });
-
-  apiPath = function(entity, additional) {
-    if (additional == null) {
-      additional = '';
-    }
-    return ("api/" + entity + "/") + (additional ? additional + '/' : '') + ":id";
-  };
-
-  updatable = function() {
-    return {
-      update: {
-        method: 'PUT'
-      }
-    };
-  };
-
-  countable = function() {
-    return {
-      count: {
-        method: 'GET'
-      }
-    };
-  };
 
 }).call(this);
 
@@ -1465,6 +1393,88 @@
       title: 'внизу'
     }
   ]);
+
+}).call(this);
+
+(function() {
+  var apiPath, countable, updatable;
+
+  angular.module('Egecms').factory('Variable', function($resource) {
+    return $resource(apiPath('variables'), {
+      id: '@id'
+    }, updatable());
+  }).factory('VariableGroup', function($resource) {
+    return $resource(apiPath('variables/groups'), {
+      id: '@id'
+    }, updatable());
+  }).factory('PageGroup', function($resource) {
+    return $resource(apiPath('pages/groups'), {
+      id: '@id'
+    }, updatable());
+  }).factory('Sass', function($resource) {
+    return $resource(apiPath('sass'), {
+      id: '@id'
+    }, updatable());
+  }).factory('Page', function($resource) {
+    return $resource(apiPath('pages'), {
+      id: '@id'
+    }, {
+      update: {
+        method: 'PUT'
+      },
+      checkExistance: {
+        method: 'POST',
+        url: apiPath('pages', 'checkExistance')
+      }
+    });
+  }).factory('Program', function($resource) {
+    return $resource(apiPath('programs'), {
+      id: '@id'
+    }, updatable());
+  }).factory('Photo', function($resource) {
+    return $resource(apiPath('photos'), {
+      id: '@id'
+    }, {
+      update: {
+        method: 'PUT'
+      },
+      updateAll: {
+        method: 'POST',
+        url: apiPath('photos', 'updateAll')
+      }
+    });
+  }).factory('Faq', function($resource) {
+    return $resource(apiPath('faq'), {
+      id: '@id'
+    }, updatable());
+  }).factory('FaqGroup', function($resource) {
+    return $resource(apiPath('faq/groups'), {
+      id: '@id'
+    }, updatable());
+  });
+
+  apiPath = function(entity, additional) {
+    if (additional == null) {
+      additional = '';
+    }
+    return ("api/" + entity + "/") + (additional ? additional + '/' : '') + ":id";
+  };
+
+  updatable = function() {
+    return {
+      update: {
+        method: 'PUT'
+      }
+    };
+  };
+
+  countable = function() {
+    return {
+      count: {
+        method: 'GET'
+      }
+    };
+  };
 
 }).call(this);
 
