@@ -11,7 +11,8 @@ use App\Models\PageGroup;
 use App\Models\Page;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Schema;
-use Storage;
+use Artisan;
+use App\Service\VersionControl;
 
 class Sync extends Command
 {
@@ -46,97 +47,66 @@ class Sync extends Command
      */
     public function handle()
     {
-        $this->syncGroup('variable_groups');
-        $this->syncGroup('page_groups');
-        $this->sync(Variable::class, 'name', 'html');
-        $this->sync(Page::class, 'keyphrase', 'html', 'html_mobile');
-        $this->sync(Page::class, 'keyphrase', 'html_mobile', 'html');
-    }
-
-    private function sync($class, $id, $content, $except = false)
-    {
-        $class_plural = explode("\\", $class);
-        $class_plural = end($class_plural) . 's';
-        $table = strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $class_plural)); // CamelCase to snake_case
-        $class_plural = strtolower($class_plural);
-
-        $this->line("\n\tSYNCING " . strtoupper($class_plural) . "\n");
-        $server = Api::get("sync/getData/{$table}");
-        $local = DB::table($table)->get();
-        foreach($server as $s) {
-            // пытаемся найти такую переменную на локалхосте
-            $l = $local->where($id, $s->{$id})->first();
-
-            // если переменная не найдена на локалхосте, добавляем её
-            if ($l === null) {
-                $this->info("Adding «" . $s->{$id} . "»...");
-                $class::create((array)$s);
-            } else {
-                // если переменная найдена, проверяем на различие
-                if ($this->diff($l->{$content}, $s->{$content}, $s->{$id}, $content) == 'server') {
-                    $server_var = (array)$s;
-                    if ($except) {
-                        unset($server_var[$except]);
+        foreach(VersionControl::TABLES as $table) {
+            $server_data = Api::get("sync/getData/{$table}");
+            foreach($server_data as $server) {
+                $local = DB::table($table)->whereId($server->id)->get()->first();
+                $local->previous_md5 = VersionControl::get($table, $local->id);
+                // если запись не найдена
+                if ($local === null) {
+                    $this->info("Adding $table " . $server->id);
+                    DB::table($table)->insert((array)$server);
+                } else {
+                    // если запись найдена, проверяем по каждому полю
+                    // сначала проверить целостно, и если равны – пропускать
+                    if (md5(json_encode($local)) == md5(json_encode($server))) {
+                        continue;
                     }
-                    $class::where($id, $l->{$id})->first()->update($server_var);
+                    // проверяем различия по колонкам
+                    foreach(array_diff(Schema::getColumnListing($table), VersionControl::EXCLUDE) as $column) {
+                        $local_md5 = md5($local->{$column});
+                        $server_md5 = md5($server->{$column});
+
+                        // проверяем последние синхронизированные версии
+                        if ($local->previous_md5->{$column} == $server->previous_md5->{$column}) {
+                            // если последние синхронизированные версии равны
+
+                            // изменилось на локалхосте
+                            $local_changed = $local_md5 != $local->previous_md5->{$column};
+
+                            // изменилось на сервере
+                            $server_changed = $server_md5 != $server->previous_md5->{$column};
+
+                            if ($local_changed) {
+                                if ($server_changed) {
+                                    $this->error("SKIP: $table {$local->id} $column");
+                                } else {
+                                    $this->info("$table {$local->id} $column changed locally");
+                                }
+                            } else {
+                                if ($server_changed) {
+                                    $this->info("$table {$local->id} $column changed on remotely");
+                                    DB::table($table)->whereId($local->id)->update([$column => $server->{$column}]);
+                                }
+                            }
+                        } else {
+                            // если последние синхронизированные версии не равны, то проверяем изменился ли локалхост
+                            // если локалхост не изменился, то всегда подтягиваем версию с продакшн
+                            if ($local_md5 == $local->previous_md5->{$column}) {
+                                DB::table($table)->whereId($local->id)->update([$column => $server->{$column}]);
+                                $this->info("$table {$local->id} $column changed on remotely (2)");
+                            } else {
+                                $this->error("SKIP (2): $table {$local->id} $column");
+                            }
+                        }
+                    }
                 }
             }
+            Api::post("sync/setData/{$table}", [
+               'form_params' => DB::table($table)->get()->all()
+           ]);
         }
-
-        $server = collect($server);
-        $this->info("\nPushing to server...\n");
-        Api::post("sync/setData/{$table}", [
-            'form_params' => DB::table($table)->get()->map(function ($item) use ($server, $id, $except) {
-                                                           if ($except) {
-                                                               if ($server_item = $server->where($id, $item->$id)->first()) {
-                                                                   $item->$except = $server_item->$except;
-                                                               }
-                                                           }
-                                                           return $item;
-                                                       })->all()
-        ]);
-
-        $this->info("\tOK");
-    }
-
-    private function diff($local, $server, $name, $field)
-    {
-        if (md5($local) !== md5($server)) {
-            $this->error("Server «{$name}» differs from local (field: {$field})");
-            $local_lines = explode("\n", $local);
-            $server_lines = explode("\n", $server);
-            $differences = 0;
-            foreach(range(0, count($local_lines) - 1) as $index) {
-                if (@$local_lines[$index] != @$server_lines[$index]) {
-                    $differences++;
-                    $this->error("Line " . ($index + 1));
-                    $this->error("Local: " . @$local_lines[$index]);
-                    $this->error("Server: " . @$server_lines[$index] . "\n");
-                }
-                // если много различий, не засорять консоль
-                if ($differences > 5) {
-                    $this->error("etc...");
-                    break;
-                }
-            }
-            $choice = $this->choice('Choose action', ['server', 'local', 'abort'], 1);
-            if ($choice == 'abort') {
-                exit();
-            }
-            return $choice;
-        }
-        return false;
-    }
-
-    private function syncGroup($table)
-    {
-        forceTruncate($table);
-        $this->info('Syncing «' . $table . '»...');
-        $groups = Api::get('sync/getData/' . $table);
-        if (count($groups)) {
-            foreach ($groups as $group) {
-                DB::table($table)->insert((array)$group);
-            }
-        }
+        shell_exec('envoy run generate:version_control');
+        shell_exec('php artisan generate:version_control');
     }
 }
