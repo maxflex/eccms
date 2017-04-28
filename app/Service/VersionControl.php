@@ -40,6 +40,6 @@ class VersionControl
         foreach($data as $d) {
             $return[$d->column] = $d->md5;
         }
-        return $return;
+        return (object)$return;
     }
 }

@@ -21,6 +21,7 @@ class CreateVersionControlTable extends Migration
             $table->index(['table', 'entity_id']);
             // $table->primary(['table', 'entity_id', 'column']);
         });
+        shell_exec('php artisan generate:version_control');
     }
 
     /**
