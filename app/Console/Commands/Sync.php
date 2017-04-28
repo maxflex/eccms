@@ -48,16 +48,17 @@ class Sync extends Command
     public function handle()
     {
         foreach(VersionControl::TABLES as $table) {
-            $server_data = Api::get("sync/getData/{$table}");
+            $server_data = Api::get("sync/get/{$table}");
+
+            // какие данные на продакшене ОБНОВИТЬ
+            $production_update_data = [];
+
+            // добавление отсутствующих страниц
             foreach($server_data as $server) {
                 $local = DB::table($table)->whereId($server->id)->get()->first();
 
-                // если запись не найдена
-                if ($local === null) {
-                    $this->info("Adding $table " . $server->id);
-                    unset($server->previous_md5);
-                    DB::table($table)->insert((array)$server);
-                } else {
+                // если запись найдена
+                if ($local !== null) {
                     $local->previous_md5 = VersionControl::get($table, $local->id);
 
                     // если запись найдена, проверяем по каждому полю
@@ -84,11 +85,12 @@ class Sync extends Command
                                 if ($server_changed) {
                                     $this->error("SKIP: $table {$local->id} $column");
                                 } else {
+                                    $production_update_data[$local->id][$column] = $local->{$column};
                                     $this->info("$table {$local->id} $column changed locally");
                                 }
                             } else {
                                 if ($server_changed) {
-                                    $this->info("$table {$local->id} $column changed on remotely");
+                                    $this->info("$table {$local->id} $column changed remotely");
                                     DB::table($table)->whereId($local->id)->update([$column => $server->{$column}]);
                                 }
                             }
@@ -105,9 +107,42 @@ class Sync extends Command
                     }
                 }
             }
-            Api::post("sync/setData/{$table}", [
-               'form_params' => DB::table($table)->get()->all()
-           ]);
+
+            // Обновление данных на продакшн
+            if (count($production_update_data)) {
+                Api::post("sync/update/{$table}", [
+                    'form_params' => $production_update_data
+                ]);
+            }
+
+            /**
+             * Добавление страниц
+             */
+
+            $server_data = collect($server_data);
+            $server_ids = $server_data->pluck('id')->all();
+            $local_ids = DB::table($table)->pluck('id')->all();
+
+            // добавляем на локалхост новые сущности
+            foreach(array_diff($server_ids, $local_ids) as $id) {
+                $this->info("Adding to localhost $table " . $server->id);
+                $data = $server_data->where('id', $id)->first();
+                unset($data->previous_md5);
+                DB::table($table)->insert((array)$data);
+            }
+
+            // добавляем на продакшн новые сущности
+            $production_insert_data = [];
+            foreach(array_diff($local_ids, $server_ids) as $id) {
+                $this->info("Adding to server $table " . $server->id);
+                $production_insert_data[] = DB::table($table)->whereId($id)->first();
+            }
+
+            if (count($production_insert_data)) {
+                Api::post("sync/insert/{$table}", [
+                    'form_params' => $production_insert_data
+                ]);
+            }
         }
         shell_exec('envoy run generate:version_control');
         shell_exec('php artisan generate:version_control');
