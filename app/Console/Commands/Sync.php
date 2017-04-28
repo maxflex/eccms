@@ -48,6 +48,7 @@ class Sync extends Command
     public function handle()
     {
         foreach(VersionControl::TABLES as $table) {
+            $this->line("\n************** " . strtoupper($table) . " ************** \n");
             $server_data = Api::get("sync/get/{$table}");
 
             // какие данные на продакшене ОБНОВИТЬ
@@ -144,7 +145,10 @@ class Sync extends Command
                 ]);
             }
         }
+        $this->line("\n************** RE-GENERATE PRODUCTION TABLE ************** \n");
         shell_exec('envoy run generate:version_control');
+
+        $this->line("\n************** RE-GENERATE LOCALHOST TABLE ************** \n");
         shell_exec('php artisan generate:version_control');
     }
 }
