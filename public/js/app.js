@@ -653,8 +653,8 @@
           });
         });
       },
-      onAdd: function(event) {
-        return event.preventDefault();
+      onMove: function(event) {
+        return console.log(123);
       }
     };
     $scope.sortableGroupConf = {
@@ -681,6 +681,7 @@
     };
     $scope.drop = function(group_id) {
       var variable_id;
+      console.log('handy');
       variable_id = $scope.dnd.variable_id;
       if (group_id && variable_id && (group_id !== $scope.getGroup(variable_id).id)) {
         if (group_id === -1) {
@@ -698,8 +699,7 @@
           moveToGroup(variable_id, group_id);
         }
       }
-      $scope.dnd = {};
-      return console.log('handy');
+      return $scope.dnd = {};
     };
     moveToGroup = function(variable_id, group_id) {
       var group_from, group_to, variable;
@@ -1645,6 +1645,8 @@
             beforeSave();
             return _this.model.$delete().then(function() {
               return redirect(modelName());
+            }, function(response) {
+              return notifyError(response.data.message);
             });
           }
         };
@@ -1660,7 +1662,7 @@
           return ajaxEnd();
         };
       })(this), function(response) {
-        notifyError(response.data);
+        notifyError(response.data.message);
         this.saving = false;
         return ajaxEnd();
       });
@@ -1675,6 +1677,7 @@
         };
       })(this), (function(_this) {
         return function(response) {
+          notifyError(response.data.message);
           _this.saving = false;
           ajaxEnd();
           return _this.onCreateError(response);
@@ -1706,7 +1709,7 @@
             notifySuccess('Импортировано');
           }
           if (status !== 200) {
-            return notifyError('Ошибка импорта');
+            return notifyError(response.message);
           }
         }
       }, onWhenAddingFileFailed = function(item, filter, options) {

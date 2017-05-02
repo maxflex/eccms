@@ -5,7 +5,8 @@ namespace App\Exceptions;
 use Exception;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
-
+use Illuminate\Database\QueryException;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 class Handler extends ExceptionHandler
 {
     /**
@@ -44,6 +45,14 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Exception $exception)
     {
+        if ($exception instanceof QueryException) {
+            return response()->json(['message' => $exception->getMessage()], 400);
+
+        } else if ($exception instanceof MethodNotAllowedHttpException) {
+            // has empty message :(
+            return response()->json(['message' => 'MethodNotAllowedHttpException in compiled.php'], 400);
+        }
+
         return parent::render($request, $exception);
     }
 

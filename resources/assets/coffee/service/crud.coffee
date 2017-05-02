@@ -75,6 +75,8 @@ angular.module 'Egecms'
                     beforeSave()
                     this.model.$delete().then ->
                         redirect modelName()
+                    , (response) ->
+                        notifyError response.data.message
 
         this.edit = ->
             return if not beforeSave()
@@ -82,7 +84,7 @@ angular.module 'Egecms'
                 this.saving = false
                 ajaxEnd()
             , (response) ->
-                notifyError(response.data)
+                notifyError response.data.message
                 this.saving = false
                 ajaxEnd()
 
@@ -91,6 +93,7 @@ angular.module 'Egecms'
             this.model.$save().then (response) =>
                 redirect modelName() + "/#{response.id}/edit"
             , (response) =>
+                notifyError response.data.message
                 this.saving = false
                 ajaxEnd()
                 this.onCreateError(response)
