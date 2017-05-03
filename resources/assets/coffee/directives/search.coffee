@@ -13,10 +13,7 @@ angular.module 'Egecms'
                 {title: 'отображаемый URL', value: 'url', type: 'text'},
                 {title: 'title', value: 'title', type: 'text'},
                 {title: 'публикация', value: 'published', type: 'published'},
-                {title: 'сео (стационар)', value: 'seo_desktop', type: 'seo_desktop'},
-                {title: 'сео (мобильная)', value: 'seo_mobile', type: 'seo_mobile'},
                 {title: 'h1 вверху', value: 'h1', type: 'text'},
-                {title: 'h1 внизу', value: 'h1_bottom', type: 'text'},
                 {title: 'meta keywords', value: 'keywords', type: 'text'},
                 {title: 'meta description', value: 'desc', type: 'text'},
                 {title: 'предметы', value: 'subjects', type: 'subjects'},
@@ -38,7 +35,7 @@ angular.module 'Egecms'
             $scope.selectControl = (condition) ->
                 condition.value = null
                 switch $scope.getOption(condition).type
-                    when 'published', 'seo_desktop', 'seo_mobile' then condition.value = 0
+                    when 'published' then condition.value = 0
                     when 'subjects'
                         if $scope.subjects is undefined then FactoryService.get('subjects', 'name').then (response) ->
                             $scope.subjects = response.data

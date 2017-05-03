@@ -43,6 +43,7 @@ angular
             group_from = $scope.getGroup(faq_id)
             faq = $rootScope.findById(group_from.faq, faq_id)
             group_from.faq = removeById(group_from.faq, faq_id)
+            faq.group_id = group_id
             group_to.faq.push(faq)
 
 

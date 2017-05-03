@@ -255,6 +255,7 @@
       group_from = $scope.getGroup(faq_id);
       faq = $rootScope.findById(group_from.faq, faq_id);
       group_from.faq = removeById(group_from.faq, faq_id);
+      faq.group_id = group_id;
       return group_to.faq.push(faq);
     };
     $scope.getGroup = function(faq_id) {
@@ -395,6 +396,7 @@
       page = $rootScope.findById(group_from.page, page_id);
       page.group_id = group_id;
       group_from.page = removeById(group_from.page, page_id);
+      page.group_id = group_id;
       return group_to.page.push(page);
     };
     $scope.getGroup = function(page_id) {
@@ -444,12 +446,14 @@
         if (!FormService.model.useful || !FormService.model.useful.length) {
           FormService.model.useful = [angular.copy(empty_useful)];
         }
-        AceService.initEditor(FormService, 15, 'editor');
-        return AceService.initEditor(FormService, 15, 'editor_mobile');
+        return ['html', 'html_mobile', 'seo_text'].forEach(function(field) {
+          return AceService.initEditor(FormService, 15, "editor--" + field);
+        });
       });
       return FormService.beforeSave = function() {
-        FormService.model.html = AceService.getEditor('editor').getValue();
-        return FormService.model.html_mobile = AceService.getEditor('editor_mobile').getValue();
+        return ['html', 'html_mobile', 'seo_text'].forEach(function(field) {
+          return FormService.model[field] = AceService.getEditor("editor--" + field).getValue();
+        });
       };
     });
     $scope.generateUrl = function(event) {
@@ -577,9 +581,20 @@
 (function() {
   angular.module('Egecms').controller('ProgramsIndex', function($scope, $attrs, IndexService, Program) {
     bindArguments($scope, arguments);
-    return angular.element(document).ready(function() {
+    angular.element(document).ready(function() {
       return IndexService.init(Program, $scope.current_page, $attrs);
     });
+    return $scope.childLessonSum = function(model) {
+      if (!(model && model.content)) {
+        return 0;
+      }
+      if (!model.content.length) {
+        return +model.lesson_count || 0;
+      }
+      return _.reduce(model.content, function(sum, value) {
+        return sum + parseInt($scope.childLessonSum(value));
+      }, 0);
+    };
   }).controller('ProgramsForm', function($scope, $attrs, $timeout, FormService, Program) {
     bindArguments($scope, arguments);
     return angular.element(document).ready(function() {
@@ -626,6 +641,9 @@
 (function() {
   angular.module('Egecms').controller('VariablesIndex', function($scope, $attrs, $rootScope, $timeout, IndexService, Variable, VariableGroup) {
     var moveToGroup;
+    $scope.$watchCollection('dnd', function(newVal) {
+      return console.log(newVal);
+    });
     bindArguments($scope, arguments);
     $scope.sortableVariableConf = {
       animation: 150,
@@ -636,6 +654,9 @@
             position: index
           });
         });
+      },
+      onAdd: function(event) {
+        return event.preventDefault();
       }
     };
     $scope.sortableGroupConf = {
@@ -679,7 +700,8 @@
           moveToGroup(variable_id, group_id);
         }
       }
-      return $scope.dnd = {};
+      $scope.dnd = {};
+      return console.log('handy');
     };
     moveToGroup = function(variable_id, group_id) {
       var group_from, group_to, variable;
@@ -687,6 +709,7 @@
       group_from = $scope.getGroup(variable_id);
       variable = $rootScope.findById(group_from.variable, variable_id);
       group_from.variable = removeById(group_from.variable, variable_id);
+      variable.group_id = group_id;
       return group_to.variable.push(variable);
     };
     $scope.getGroup = function(variable_id) {
@@ -742,6 +765,27 @@
 }).call(this);
 
 (function() {
+  angular.module('Egecms').value('Published', [
+    {
+      id: 0,
+      title: 'не опубликовано'
+    }, {
+      id: 1,
+      title: 'опубликовано'
+    }
+  ]).value('UpDown', [
+    {
+      id: 1,
+      title: 'вверху'
+    }, {
+      id: 2,
+      title: 'внизу'
+    }
+  ]);
+
+}).call(this);
+
+(function() {
 
 
 }).call(this);
@@ -772,6 +816,32 @@
 }).call(this);
 
 (function() {
+  angular.module('Egecms').directive('digitsOnly', function() {
+    return {
+      restricts: 'A',
+      require: 'ngModel',
+      link: function($scope, $element, $attr, $ctrl) {
+        var filter, ref;
+        filter = function(value) {
+          var new_value;
+          if (!value) {
+            return void 0;
+          }
+          new_value = value.replace(/[^0-9]/g, '');
+          if (new_value !== value) {
+            $ctrl.$setViewValue(new_value);
+            $ctrl.$render();
+          }
+          return value;
+        };
+        return (ref = $ctrl.$parsers) != null ? ref.push(filter) : void 0;
+      }
+    };
+  });
+
+}).call(this);
+
+(function() {
   angular.module('Egecms').directive('editable', function() {
     return {
       restrict: 'A',
@@ -782,7 +852,12 @@
           var ref;
           if ((ref = event.keyCode) === 13 || ref === 27) {
             event.preventDefault();
-            return $element.blur();
+            $element.blur();
+          }
+          if ($element.data('input-digits-only')) {
+            if (!(event.keyCode < 57)) {
+              return event.preventDefault();
+            }
           }
         }).on('blur', function(event) {
           $scope.onEdit($element.attr('editable'), event);
@@ -801,6 +876,23 @@
 
 (function() {
 
+
+}).call(this);
+
+(function() {
+  angular.module('Egecms').directive('jumpOnTab', function() {
+    return {
+      restrict: 'A',
+      link: function($scope, $element) {
+        return $element.on('keydown', function(event) {
+          if (event.keyCode === 9) {
+            event.preventDefault();
+            return $(event.target).parent('h2').find('.lesson_count').trigger('click').trigger('focus');
+          }
+        });
+      }
+    };
+  });
 
 }).call(this);
 
@@ -901,7 +993,8 @@
           'lesson': ['занятие', 'занятия', 'занятий'],
           'client': ['клиент', 'клиента', 'клиентов'],
           'mark': ['оценки', 'оценок', 'оценок'],
-          'request': ['заявка', 'заявки', 'заявок']
+          'request': ['заявка', 'заявки', 'заявок'],
+          'hour': ['час', 'часа', 'часов']
         };
       }
     };
@@ -915,6 +1008,10 @@
 }).call(this);
 
 (function() {
+  var TAB;
+
+  TAB = 9;
+
   angular.module('Egecms').directive('programItem', function() {
     return {
       restrict: 'E',
@@ -926,56 +1023,129 @@
         "delete": '&delete'
       },
       controller: function($timeout, $element, $scope) {
-        var resetNewItem;
+        var nextField, resetNewItem;
+        $scope.fake_id = 0;
         $scope.onEdit = function(item, event) {
-          var value;
-          value = $(event.target).text().trim();
-          if (value) {
-            return $scope.item.title = value;
+          var elem, field, value;
+          elem = $(event.target);
+          value = elem.text().trim();
+          field = elem.data('field');
+          if (value || elem.data('not-required')) {
+            $scope.item[field] = value;
           } else {
-            return $(event.target).text($scope.item.title);
+            $(event.target).text($scope.item.title);
           }
+          return $scope.hideEmptyLesson();
         };
-        $scope.addChild = function() {
+        $scope.addChild = function(event) {
           $scope.is_adding = true;
           return $timeout(function() {
-            return $element.find("input").last().focus();
+            var ref;
+            if ((ref = $scope.item.content) != null ? ref.length : void 0) {
+              return $(event.target).parents('li').first().find('input.title').last().focus();
+            } else {
+              return $(event.target).parents('li').first().find('input.title').last().focus();
+            }
           });
         };
         $scope.createChild = function(event) {
-          if ($scope.new_item.title && (event != null ? event.keyCode : void 0) === 13) {
-            if (!$scope.item.content) {
-              $scope.item.content = [];
-            }
-            if ($scope.new_item.title.length) {
-              $scope.item.content.push($scope.new_item);
-              resetNewItem();
+          if ((event != null ? event.keyCode : void 0) === 13) {
+            event.preventDefault();
+            if ($scope.new_item.title) {
+              if (!$scope.item.content) {
+                $scope.item.content = [];
+              }
+              if ($scope.new_item.title.length) {
+                $scope.item.content.push($scope.new_item);
+                resetNewItem(event);
+                if ($(event.target).is(':not(.title)')) {
+                  nextField(event);
+                }
+              }
             }
           }
           if ((event != null ? event.keyCode : void 0) === 27) {
-            return $(event.target).blur();
+            event.preventDefault();
+            $(event.target).blur();
+          }
+          if ((event != null ? event.keyCode : void 0) === TAB) {
+            event.preventDefault();
+            return nextField(event);
           }
         };
         $scope.deleteChild = function(child) {
           return $scope.item.content = _.without($scope.item.content, child);
         };
-        $scope.blur = function() {
+        $scope.blur = function(event) {
+          if ($scope.is_tabbing) {
+            $scope.is_tabbing = false;
+            return event.preventDefault();
+          }
+          if (event && event.keyCode === TAB) {
+            return event.preventDefault();
+          }
           $scope.is_adding = false;
           return $scope.is_editing = false;
+        };
+        nextField = function(event) {
+          var context, elem;
+          $scope.is_tabbing = true;
+          elem = $(event.target);
+          context = $(elem.parents('li')[0]);
+          if (elem.is('.title')) {
+            $('.lesson-count', context).focus();
+          } else {
+            $('.title', context).focus();
+          }
+          return elem.is('.lesson-count');
         };
         $scope.getChildLevelString = function(child_index) {
           var str;
           str = $scope.levelstring ? $scope.levelstring : '';
           return str + (child_index + 1) + '.';
         };
-        resetNewItem = function() {
-          return $scope.new_item = {
+        $scope.getLessonCount = function() {
+          return $scope.item.lesson_count;
+        };
+        $scope.childLessonSum = function(item) {
+          if (!(item && item.content)) {
+            return 0;
+          }
+          if (!item.content.length) {
+            return +item.lesson_count || 0;
+          }
+          return _.reduce(item.content, function(sum, value) {
+            return sum + parseInt($scope.childLessonSum(value));
+          }, 0);
+        };
+        resetNewItem = function(event) {
+          $scope.new_item = {
             title: '',
-            content: []
+            lesson_count: '',
+            child_lesson_sum: '',
+            content: [],
+            fake_id: $scope.fake_id
           };
+          return $scope.fake_id++;
+        };
+        $scope.showLesson = function() {
+          if (!$scope.show_lessons) {
+            $scope.show_lessons = [];
+          }
+          return $scope.show_lessons[$scope.item.id] = true;
+        };
+        $scope.hideEmptyLesson = function() {
+          return $scope.show_lessons && (delete $scope.show_lessons[$scope.item.id || $scope.item.fake_id]);
+        };
+        $scope.isShownLesson = function() {
+          var ref;
+          return (ref = $scope.show_lessons) != null ? ref[$scope.item.id] : void 0;
         };
         if (!$scope.level) {
           $scope.level = 1;
+        }
+        if (!$scope.lesson_count) {
+          $scope.lesson_count = 0;
         }
         return resetNewItem();
       }
@@ -1016,20 +1186,8 @@
             value: 'published',
             type: 'published'
           }, {
-            title: 'сео (стационар)',
-            value: 'seo_desktop',
-            type: 'seo_desktop'
-          }, {
-            title: 'сео (мобильная)',
-            value: 'seo_mobile',
-            type: 'seo_mobile'
-          }, {
             title: 'h1 вверху',
             value: 'h1',
-            type: 'text'
-          }, {
-            title: 'h1 внизу',
-            value: 'h1_bottom',
             type: 'text'
           }, {
             title: 'meta keywords',
@@ -1081,8 +1239,6 @@
           condition.value = null;
           switch ($scope.getOption(condition).type) {
             case 'published':
-            case 'seo_desktop':
-            case 'seo_mobile':
               return condition.value = 0;
             case 'subjects':
               if ($scope.subjects === void 0) {
@@ -1225,27 +1381,6 @@
 
 (function() {
 
-
-}).call(this);
-
-(function() {
-  angular.module('Egecms').value('Published', [
-    {
-      id: 0,
-      title: 'не опубликовано'
-    }, {
-      id: 1,
-      title: 'опубликовано'
-    }
-  ]).value('UpDown', [
-    {
-      id: 1,
-      title: 'вверху'
-    }, {
-      id: 2,
-      title: 'внизу'
-    }
-  ]);
 
 }).call(this);
 

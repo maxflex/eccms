@@ -1,3 +1,4 @@
+@charset "UTF-8";
 @import url("https://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700");
 /*!
  * Bootstrap v3.3.7 (http://getbootstrap.com)
@@ -19781,6 +19782,30 @@ select[multiple] {
 
 .editors label.active {
   color: #26A65B !important;
+}
+
+.lesson_count:empty:before {
+  content: attr(placeholder);
+  color: rgba(0, 0, 0, 0.3) !important;
+}
+
+.lesson_count.is-zero:not(:focus) {
+  color: rgba(0, 0, 0, 0.3) !important;
+}
+
+.lesson_count::after {
+  content: ' ч.';
+}
+
+.lesson_count:empty::after {
+  content: '0 ч.';
+}
+
+.new-item-hour {
+  position: relative;
+  left: -110px;
+  display: inline-block;
+  width: 50px;
 }
 
 .list-group-item .search-icon {

@@ -13,7 +13,7 @@
                 <a href='programs/@{{ model.id }}/edit'>@{{ model.title }}</a>
             </td>
             <td>
-                @{{ model.desc }}
+                <plural class="pull-right" count="childLessonSum(model)" type="hour" hide-zero></plural>
             </td>
         </tr>
     </table>

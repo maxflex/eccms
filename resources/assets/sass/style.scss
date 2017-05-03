@@ -4144,3 +4144,27 @@ select[multiple] {
         color: $green-main!important;
     }
 }
+
+.lesson_count:empty:before{
+    content: attr(placeholder);
+    color: $gray-opacity;
+}
+
+.lesson_count.is-zero:not(:focus){
+    color: $gray-opacity;
+}
+
+.lesson_count::after {
+    content: ' ч.';
+
+}
+.lesson_count:empty::after {
+    content: '0 ч.';
+
+}
+.new-item-hour {
+    position: relative;
+    left: -110px;
+    display:inline-block;
+    width:50px;
+}

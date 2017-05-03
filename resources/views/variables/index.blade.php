@@ -15,7 +15,6 @@
                 <a ng-if='group.id' class='link-like text-danger show-on-hover' ng-click='removeGroup(group)'>удалить</a>
             </div>
             <div class='droppable-table relative' ondragover="allowDrop(event)" ng-show="! group_sorting"
-                ng-dragenter="dnd.over = group.id" ng-dragleave="dnd.over = undefined" ng-drop="drop(group.id)"
                 ng-class="{'over-parent': dnd.variable_id && dnd.over === group.id && dnd.over != getVariables(dnd.variable_id).group_id}">
                 <table class="table droppable-table">
                     <tbody ng-sortable="sortableVariableConf">
@@ -32,6 +31,7 @@
                 </table>
                 <div class="droppable-table pad" ng-class="{padded: !group.variable.length}" ondragenter="setClass(event, 'over')" ondragleave="unsetClass(event, 'over')"
                      ng-show="dnd.variable_id && (group.id != getVariable(dnd.variable_id).group_id)"
+                     ng-dragenter="dnd.over = group.id" ng-dragleave="dnd.over = undefined" ng-drop="drop(group.id)"
                 ></div>
             </div>
         </div>
