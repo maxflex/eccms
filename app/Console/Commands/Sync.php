@@ -69,6 +69,10 @@ class Sync extends Command
                     }
                     // проверяем различия по колонкам
                     foreach(array_diff(Schema::getColumnListing($table), VersionControl::EXCLUDE) as $column) {
+                        // if ($column == 'seo_text') {
+                        //     continue;
+                        // }
+
                         $local_md5 = md5($local->{$column});
                         $server_md5 = md5($server->{$column});
 

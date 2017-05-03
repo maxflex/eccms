@@ -35,7 +35,7 @@ trait Exportable
         return Excel::create($table_name . '_' . date('Y-m-d_H-i-s'), function($excel) use ($request, $table_name) {
             $excel->sheet($table_name, function($sheet) use ($request, $table_name) {
                 $groups_table_name = mb_strimwidth($table_name, 0, strlen($table_name) - 1) . '_groups'; // variables => variable_groups
-                $query = static::select(self::tableField($table_name, 'id'), self::tableField($table_name, $request->field))->join($groups_table_name, $groups_table_name . '.id', '=', $table_name . '.group_id')
+                $query = static::select(self::tableField($table_name, 'id'), 'keyphrase', self::tableField($table_name, $request->field))->join($groups_table_name, $groups_table_name . '.id', '=', $table_name . '.group_id')
                     ->orderBy(\DB::raw($groups_table_name . '.position', $table_name . '.position'));
                 // если экспортируем HTML, то только длина символов
                 if(isset(static::$with_comma_on_export) && in_array($request->field, static::$with_comma_on_export)) {
