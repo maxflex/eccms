@@ -10,25 +10,30 @@ angular.module 'Egecms'
         levelstring: '='
         delete: '&delete'
     controller: ($timeout, $element, $scope) ->
+        $scope.edit = ->
+            $scope.editing = true
+
+
         $scope.fake_id = 0
-        $scope.onEdit = (item, event) ->
+        $scope.onEdit = (field, event) ->
             elem = $(event.target)
             value = elem.text().trim()
-            field = elem.data 'field'
-            if value or elem.data 'not-required'
+            $scope.$apply ->
                 $scope.item[field] = value
-            else
-                $(event.target).text $scope.item.title
 
-            $scope.hideEmptyLesson()
+        $scope.editKeydown = (event)->
+            elem = $(event.target)
+            if event?.keyCode in [13, 27]
+                event.preventDefault()
+                elem.blur()
+
+            if elem.data 'input-digits-only'
+                event.preventDefault() if not (event.keyCode < 57)
 
         $scope.addChild = (event)->
             $scope.is_adding = true
             $timeout ->
-                if $scope.item.content?.length
-                    $(event.target).parents('li').first().find('input.title').last().focus()
-                else
-                    $(event.target).parents('li').first().find('input.title').last().focus()
+                $(event.target).parents('li').first().find('input.add-item-title').last().focus()
 
         $scope.createChild = (event) ->
             if event?.keyCode is 13
@@ -38,16 +43,15 @@ angular.module 'Egecms'
                     if $scope.new_item.title.length
                         $scope.item.content.push $scope.new_item
                         resetNewItem(event)
-                        if $(event.target).is(':not(.title)')
-                            nextField(event)
 
-            if event?.keyCode is 27
+                        $scope.addChild(event)
+
+            if event.keyCode is 27
                 event.preventDefault()
                 $(event.target).blur()
 
-            if event?.keyCode is TAB
-                event.preventDefault()
-                nextField event
+            if event.keyCode is TAB
+                $scope.is_tabbing = true if $(event.target).is ':not(.add-item-lesson-count)'
 
         $scope.deleteChild = (child) ->
             $scope.item.content = _.without $scope.item.content, child
@@ -57,21 +61,11 @@ angular.module 'Egecms'
                 $scope.is_tabbing = false
                 return event.preventDefault()
 
-            return event.preventDefault() if event and event.keyCode is TAB
-
             $scope.is_adding = false
             $scope.is_editing = false
 
-        nextField = (event) ->
-            $scope.is_tabbing = true
-
-            elem = $(event.target)
-            context = $(elem.parents('li')[0])
-            if elem.is('.title')
-                $('.lesson-count', context).focus()
-            else
-                $('.title', context).focus()
-            elem.is('.lesson-count')
+        $scope.focus = ->
+            $scope.is_adding = true
 
         $scope.getChildLevelString = (child_index) ->
             str = if $scope.levelstring then $scope.levelstring else ''
@@ -93,16 +87,12 @@ angular.module 'Egecms'
             $scope.new_item = {title: '', lesson_count: '', child_lesson_sum: '', content: [], fake_id: $scope.fake_id}
             $scope.fake_id++
 
-        $scope.showLesson = ->
-            $scope.show_lessons = [] if not $scope.show_lessons
-            $scope.show_lessons[$scope.item.id] = true
-
-        $scope.hideEmptyLesson = ->
-            $scope.show_lessons and (delete $scope.show_lessons[$scope.item.id || $scope.item.fake_id])
-
-        $scope.isShownLesson = ->
-            return $scope.show_lessons?[$scope.item.id]
-
         $scope.level = 1 if not $scope.level
         $scope.lesson_count = 0 if not $scope.lesson_count
         resetNewItem()
+
+        $scope.editBlur = ->
+            $scope.editing = false
+
+        $scope.editFocus = ->
+            $scope.editing = true

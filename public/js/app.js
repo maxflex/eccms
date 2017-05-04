@@ -653,8 +653,8 @@
           });
         });
       },
-      onMove: function(event) {
-        return console.log(123);
+      onAdd: function(event) {
+        return event.preventDefault();
       }
     };
     $scope.sortableGroupConf = {
@@ -681,7 +681,6 @@
     };
     $scope.drop = function(group_id) {
       var variable_id;
-      console.log('handy');
       variable_id = $scope.dnd.variable_id;
       if (group_id && variable_id && (group_id !== $scope.getGroup(variable_id).id)) {
         if (group_id === -1) {
@@ -699,7 +698,8 @@
           moveToGroup(variable_id, group_id);
         }
       }
-      return $scope.dnd = {};
+      $scope.dnd = {};
+      return console.log('handy');
     };
     moveToGroup = function(variable_id, group_id) {
       var group_from, group_to, variable;
@@ -860,11 +860,21 @@
   angular.module('Egecms').directive('jumpOnTab', function() {
     return {
       restrict: 'A',
-      link: function($scope, $element) {
+      link: function($scope, $element, $attr) {
         return $element.on('keydown', function(event) {
+          var focused_item, next_node, range;
           if (event.keyCode === 9) {
             event.preventDefault();
-            return $(event.target).parent('h2').find('.lesson_count').trigger('click').trigger('focus');
+            next_node = $(event.target).parents('h2').first().find('.' + $attr.jumpOnTab);
+            next_node = next_node.trigger('click').trigger('focus');
+            focused_item = next_node[0];
+            if (focused_item.childNodes.length) {
+              range = document.createRange();
+              range.setStart(focused_item.childNodes[0], focused_item.innerText.length);
+              range.collapse(true);
+              window.getSelection().removeAllRanges();
+              return window.getSelection().addRange(range);
+            }
           }
         });
       }
@@ -1000,29 +1010,36 @@
         "delete": '&delete'
       },
       controller: function($timeout, $element, $scope) {
-        var nextField, resetNewItem;
+        var resetNewItem;
+        $scope.edit = function() {
+          return $scope.editing = true;
+        };
         $scope.fake_id = 0;
-        $scope.onEdit = function(item, event) {
-          var elem, field, value;
+        $scope.onEdit = function(field, event) {
+          var elem, value;
           elem = $(event.target);
           value = elem.text().trim();
-          field = elem.data('field');
-          if (value || elem.data('not-required')) {
-            $scope.item[field] = value;
-          } else {
-            $(event.target).text($scope.item.title);
+          return $scope.$apply(function() {
+            return $scope.item[field] = value;
+          });
+        };
+        $scope.editKeydown = function(event) {
+          var elem, ref;
+          elem = $(event.target);
+          if ((ref = event != null ? event.keyCode : void 0) === 13 || ref === 27) {
+            event.preventDefault();
+            elem.blur();
           }
-          return $scope.hideEmptyLesson();
+          if (elem.data('input-digits-only')) {
+            if (!(event.keyCode < 57)) {
+              return event.preventDefault();
+            }
+          }
         };
         $scope.addChild = function(event) {
           $scope.is_adding = true;
           return $timeout(function() {
-            var ref;
-            if ((ref = $scope.item.content) != null ? ref.length : void 0) {
-              return $(event.target).parents('li').first().find('input.title').last().focus();
-            } else {
-              return $(event.target).parents('li').first().find('input.title').last().focus();
-            }
+            return $(event.target).parents('li').first().find('input.add-item-title').last().focus();
           });
         };
         $scope.createChild = function(event) {
@@ -1035,19 +1052,18 @@
               if ($scope.new_item.title.length) {
                 $scope.item.content.push($scope.new_item);
                 resetNewItem(event);
-                if ($(event.target).is(':not(.title)')) {
-                  nextField(event);
-                }
+                $scope.addChild(event);
               }
             }
           }
-          if ((event != null ? event.keyCode : void 0) === 27) {
+          if (event.keyCode === 27) {
             event.preventDefault();
             $(event.target).blur();
           }
-          if ((event != null ? event.keyCode : void 0) === TAB) {
-            event.preventDefault();
-            return nextField(event);
+          if (event.keyCode === TAB) {
+            if ($(event.target).is(':not(.add-item-lesson-count)')) {
+              return $scope.is_tabbing = true;
+            }
           }
         };
         $scope.deleteChild = function(child) {
@@ -1058,23 +1074,11 @@
             $scope.is_tabbing = false;
             return event.preventDefault();
           }
-          if (event && event.keyCode === TAB) {
-            return event.preventDefault();
-          }
           $scope.is_adding = false;
           return $scope.is_editing = false;
         };
-        nextField = function(event) {
-          var context, elem;
-          $scope.is_tabbing = true;
-          elem = $(event.target);
-          context = $(elem.parents('li')[0]);
-          if (elem.is('.title')) {
-            $('.lesson-count', context).focus();
-          } else {
-            $('.title', context).focus();
-          }
-          return elem.is('.lesson-count');
+        $scope.focus = function() {
+          return $scope.is_adding = true;
         };
         $scope.getChildLevelString = function(child_index) {
           var str;
@@ -1105,26 +1109,19 @@
           };
           return $scope.fake_id++;
         };
-        $scope.showLesson = function() {
-          if (!$scope.show_lessons) {
-            $scope.show_lessons = [];
-          }
-          return $scope.show_lessons[$scope.item.id] = true;
-        };
-        $scope.hideEmptyLesson = function() {
-          return $scope.show_lessons && (delete $scope.show_lessons[$scope.item.id || $scope.item.fake_id]);
-        };
-        $scope.isShownLesson = function() {
-          var ref;
-          return (ref = $scope.show_lessons) != null ? ref[$scope.item.id] : void 0;
-        };
         if (!$scope.level) {
           $scope.level = 1;
         }
         if (!$scope.lesson_count) {
           $scope.lesson_count = 0;
         }
-        return resetNewItem();
+        resetNewItem();
+        $scope.editBlur = function() {
+          return $scope.editing = false;
+        };
+        return $scope.editFocus = function() {
+          return $scope.editing = true;
+        };
       }
     };
   });

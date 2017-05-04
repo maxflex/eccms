@@ -1,0 +1,59 @@
+.program-container {
+    & h2 {
+        &, input {
+            font-size: 14px;
+        }
+        margin: 5px 0px;
+    }
+    & .root ul {
+        padding-left: 0;
+        li {
+            margin-left: 20px;
+            list-style: none;
+        }
+        @at-root .root > ul {
+            > li {
+                margin-left: 0px!important;
+            }
+        }
+    }
+    .add-item {
+        &-title, &-lesson-count {
+            outline: none;
+            border: none;
+        }
+    }
+
+    .editing {
+        &-lesson-count {
+            // text-align: right;
+        }
+    }
+    .show-on-hover > span {
+        padding-right: 8px;
+    }
+
+    textarea {
+        resize: none;
+        vertical-align: bottom;
+        max-width: 90%;
+        display: inline-block;
+    }
+    .not-filled:empty {
+    }
+
+    input, textarea {
+        &, &:hover {
+            border: none;
+            outline: none;
+            padding: 0;
+            margin: 0
+        }
+    }
+    .nearer {
+        margin-left: -5px;
+    }
+    .no-wrap {
+        white-space: nowrap;
+    }
+}
