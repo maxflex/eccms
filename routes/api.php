@@ -47,4 +47,6 @@ Route::group(['namespace' => 'Api', 'as' => 'api.'], function () {
         Route::post('update/{table}', 'SyncController@update');
     });
 
+    # Search
+    Route::post('search', 'SearchController@search');
 });

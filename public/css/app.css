@@ -19808,7 +19808,7 @@ select[multiple] {
   width: 50px;
 }
 
-.list-group-item .search-icon {
+.search-icon {
   float: right;
   cursor: pointer;
 }

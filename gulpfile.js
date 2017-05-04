@@ -78,5 +78,7 @@ const elixir = require('laravel-elixir');
              'angucomplete-alt/dist/angucomplete-alt.min',
              'ng-image-gallery/dist/ng-image-gallery',
              'Sortable/Sortable',
+             'vue/dist/vue',
+             'vue-resource/dist/vue-resource.min',
          ]).concat(['resources/assets/js/*.js']), 'public/js/vendor.js');
  });

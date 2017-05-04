@@ -22,7 +22,6 @@
             {{ $nginit }}
         @endif
     '>
-    <search></search>
     <div class="row">
       <div style="margin-left: 10px" class="col-sm-2">
           <div class="list-group">
@@ -52,5 +51,6 @@
         </div>
       </div>
     </div>
+    @include('_search')
   </body>
 </html>

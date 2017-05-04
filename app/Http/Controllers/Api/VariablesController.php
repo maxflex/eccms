@@ -87,45 +87,4 @@ class VariablesController extends Controller
     {
         Variable::destroy($id);
     }
-
-    public function push(Request $request)
-    {
-        if (env('API_KEY') == $request->input('API_KEY')) {
-            Schema::disableForeignKeyConstraints();
-
-            DB::table('variable_groups')->truncate();
-            if (count($request->groups)) {
-                DB::table('variable_groups')->insert($request->groups);
-            }
-
-            DB::table('variables')->truncate();
-            if (count($request->variables)) {
-                DB::table('variables')->insert($request->variables);
-            }
-
-            DB::table('page_useful')->truncate();
-            if (count($request->useful)) {
-                DB::table('page_useful')->insert($request->useful);
-            }
-
-            DB::table('pages')->truncate();
-            if (count($request->pages)) {
-                DB::table('pages')->insert($request->pages);
-            }
-
-            Schema::enableForeignKeyConstraints();
-        } else {
-            return false;
-        }
-    }
-
-    public function pull()
-    {
-        return [
-            DB::table('variables')->get()->all(),
-            DB::table('variable_groups')->get()->all(),
-            DB::table('pages')->get()->all(),
-            DB::table('page_useful')->get()->all(),
-        ];
-    }
 }
