@@ -69,8 +69,22 @@ class Sync extends Command
                     }
                     // проверяем различия по колонкам
                     foreach(array_diff(Schema::getColumnListing($table), VersionControl::EXCLUDE) as $column) {
+                        // if ($column == 'seo_text') {
+                        //     continue;
+                        // }
+
                         $local_md5 = md5($local->{$column});
                         $server_md5 = md5($server->{$column});
+
+                        if (! isset($local->previous_md5->{$column})) {
+                            $this->error("Local $table {$local->id} $column not set");
+                            exit();
+                        }
+
+                        if (! isset($server->previous_md5->{$column})) {
+                            $this->error("Server $table {$server->id} $column not set");
+                            exit();
+                        }
 
                         // проверяем последние синхронизированные версии
                         if ($local->previous_md5->{$column} == $server->previous_md5->{$column}) {

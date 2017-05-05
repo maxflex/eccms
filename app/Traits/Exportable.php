@@ -33,8 +33,10 @@ trait Exportable
     public static function export($request) {
         $table_name = (new static)->getTable();
         return Excel::create($table_name . '_' . date('Y-m-d_H-i-s'), function($excel) use ($request, $table_name) {
-            $excel->sheet($table_name, function($sheet) use ($request) {
-                $query = static::query()->orderBy(\DB::raw('group_id', 'position'));
+            $excel->sheet($table_name, function($sheet) use ($request, $table_name) {
+                $groups_table_name = mb_strimwidth($table_name, 0, strlen($table_name) - 1) . '_groups'; // variables => variable_groups
+                $query = static::select(self::tableField($table_name, 'id'), 'keyphrase', self::tableField($table_name, $request->field))->join($groups_table_name, $groups_table_name . '.id', '=', $table_name . '.group_id')
+                    ->orderBy(\DB::raw($groups_table_name . '.position', $table_name . '.position'));
                 // если экспортируем HTML, то только длина символов
                 if(isset(static::$with_comma_on_export) && in_array($request->field, static::$with_comma_on_export)) {
                     $query->with(static::$with_comma_on_export);
@@ -42,7 +44,7 @@ trait Exportable
                     static::$selects_on_export[] =  $request->field;
                 }
 
-                $data = $query->select(array_unique(static::$selects_on_export))->get();
+                $data = $query->get();
                 $exportData = [];
 
                 $data->map(function ($item, $key) use ($request, &$exportData) {
@@ -106,5 +108,13 @@ trait Exportable
         } else {
             abort(400);
         }
+    }
+
+    /**
+     * Обратиться к полю таблицы
+     */
+    public static function tableField($table_name, $field)
+    {
+        return $table_name . '.' . $field;
     }
 }

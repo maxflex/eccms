@@ -23,15 +23,13 @@ class Page extends Model
         'desc',
         'published',
         'h1',
-        'h1_bottom',
         'html',
         'html_mobile',
-        'seo_desktop',
-        'seo_mobile',
         'variable_id',
         'useful',
         'group_id',
-        'position'
+        'position',
+        'seo_text'
     ];
 
     protected static $hidden_on_export = [
@@ -51,10 +49,6 @@ class Page extends Model
         'html_mobile'
     ];
 
-    protected $attributes = [
-        'seo_desktop' => 0,
-        'seo_mobile' => 0,
-    ];
 
     public function useful()
     {
@@ -85,7 +79,7 @@ class Page extends Model
         $query = static::query();
 
         // поиск по текстовым полям
-        foreach(['keyphrase', 'url', 'title', 'h1', 'h1_bottom', 'keywords', 'desc', 'hidden_filter'] as $text_field) {
+        foreach(['keyphrase', 'url', 'title', 'h1', 'keywords', 'desc', 'hidden_filter'] as $text_field) {
             if (isset($search->{$text_field}) && ! empty($search->{$text_field})) {
                 $query->where($text_field, 'like', '%' . $search->{$text_field} . '%');
             }
@@ -99,7 +93,7 @@ class Page extends Model
         }
 
         // поиск по цифровым полям
-        foreach(['seo_desktop', 'seo_mobile', 'station_id', 'sort', 'place', 'published'] as $numeric_field) {
+        foreach(['station_id', 'sort', 'place', 'published'] as $numeric_field) {
             if (isset($search->{$numeric_field})) {
                 $query->where($numeric_field, $search->{$numeric_field});
             }

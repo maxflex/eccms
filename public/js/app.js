@@ -187,6 +187,145 @@
 }).call(this);
 
 (function() {
+  Vue.config.devtools = true;
+
+  $(document).ready(function() {
+    var viewVue;
+    $('#searchModalOpen').click(function() {
+      var delayFunction;
+      $('#searchModal').modal({
+        keyboard: true
+      });
+      delayFunction = function() {
+        return $('#searchQueryInput').focus();
+      };
+      setTimeout(delayFunction, 500);
+      $($('body.modal-open .row')[0]).addClass('blur');
+      return false;
+    });
+    $('#searchModal').on('hidden.bs.modal', function() {
+      var delayFnc;
+      delayFnc = function() {
+        return $('.blur').removeClass('blur');
+      };
+      return setTimeout(delayFnc, 500);
+    });
+    return viewVue = new Vue({
+      el: '#searchModal',
+      data: {
+        lists: [],
+        links: {},
+        results: -1,
+        active: 0,
+        query: '',
+        oldquery: '',
+        all: 0,
+        loading: false
+      },
+      methods: {
+        loadData: _.debounce(function() {
+          return this.$http.post('api/search', {
+            query: this.query
+          }).then((function(_this) {
+            return function(success) {
+              var i, item, j, k, len, len1, ref, ref1, results;
+              _this.loading = false;
+              _this.active = 0;
+              _this.all = 0;
+              _this.lists = [];
+              if (success.body.results > 0) {
+                _this.results = success.body.results;
+                if (success.body.variables.length > 0) {
+                  ref = success.body.variables;
+                  for (i = j = 0, len = ref.length; j < len; i = ++j) {
+                    item = ref[i];
+                    console.log(item);
+                    item.type = 'variable';
+                    _this.all++;
+                    _this.links[_this.all] = 'variables/' + item.id + '/edit';
+                    item.link = _this.links[_this.all];
+                    _this.lists.push(item);
+                  }
+                }
+                if (success.body.pages.length > 0) {
+                  ref1 = success.body.pages;
+                  results = [];
+                  for (i = k = 0, len1 = ref1.length; k < len1; i = ++k) {
+                    item = ref1[i];
+                    item.type = 'page';
+                    _this.all++;
+                    _this.links[_this.all] = 'pages/' + item.id + '/edit';
+                    item.link = _this.links[_this.all];
+                    results.push(_this.lists.push(item));
+                  }
+                  return results;
+                }
+              } else {
+                _this.active = 0;
+                _this.all = 0;
+                _this.lists = [];
+                return _this.results = 0;
+              }
+            };
+          })(this), (function(_this) {
+            return function(error) {
+              _this.active = 0;
+              _this.all = 0;
+              _this.lists = [];
+              return _this.results = 0;
+            };
+          })(this));
+        }, 150),
+        scroll: function() {
+          return $('#searchResult').scrollTop((this.active - 4) * 30);
+        },
+        getStateClass: function(state) {
+          var obj;
+          obj = {};
+          obj["tutor-state-" + state] = true;
+          return obj;
+        },
+        keyup: function(e) {
+          var url;
+          if (e.code === 'ArrowUp') {
+            e.preventDefault();
+            if (this.active > 0) {
+              this.active--;
+            }
+            this.scroll();
+          } else if (e.code === 'ArrowDown') {
+            e.preventDefault();
+            if (this.active < this.results) {
+              this.active++;
+            }
+            if (this.active > 4) {
+              this.scroll();
+            }
+          } else if (e.code === 'Enter' && this.active > 0) {
+            url = this.links[this.active];
+            window.location = url;
+          } else {
+            if (this.query !== '') {
+              if (this.oldquery !== this.query && this.query.length > 2) {
+                this.loadData();
+              }
+              this.oldquery = this.query;
+            } else {
+              this.active = 0;
+              this.all = 0;
+              this.lists = [];
+              this.results = -1;
+            }
+          }
+          return null;
+        }
+      }
+    });
+  });
+
+}).call(this);
+
+(function() {
 
 
 }).call(this);
@@ -446,12 +585,14 @@
         if (!FormService.model.useful || !FormService.model.useful.length) {
           FormService.model.useful = [angular.copy(empty_useful)];
         }
-        AceService.initEditor(FormService, 15, 'editor');
-        return AceService.initEditor(FormService, 15, 'editor_mobile');
+        return ['html', 'html_mobile', 'seo_text'].forEach(function(field) {
+          return AceService.initEditor(FormService, 15, "editor--" + field);
+        });
       });
       return FormService.beforeSave = function() {
-        FormService.model.html = AceService.getEditor('editor').getValue();
-        return FormService.model.html_mobile = AceService.getEditor('editor_mobile').getValue();
+        return ['html', 'html_mobile', 'seo_text'].forEach(function(field) {
+          return FormService.model[field] = AceService.getEditor("editor--" + field).getValue();
+        });
       };
     });
     $scope.generateUrl = function(event) {
@@ -759,6 +900,109 @@
       };
     });
   });
+
+}).call(this);
+
+(function() {
+  angular.module('Egecms').value('Published', [
+    {
+      id: 0,
+      title: 'не опубликовано'
+    }, {
+      id: 1,
+      title: 'опубликовано'
+    }
+  ]).value('UpDown', [
+    {
+      id: 1,
+      title: 'вверху'
+    }, {
+      id: 2,
+      title: 'внизу'
+    }
+  ]);
+
+}).call(this);
+
+(function() {
+  var apiPath, countable, updatable;
+
+  angular.module('Egecms').factory('Variable', function($resource) {
+    return $resource(apiPath('variables'), {
+      id: '@id'
+    }, updatable());
+  }).factory('VariableGroup', function($resource) {
+    return $resource(apiPath('variables/groups'), {
+      id: '@id'
+    }, updatable());
+  }).factory('PageGroup', function($resource) {
+    return $resource(apiPath('pages/groups'), {
+      id: '@id'
+    }, updatable());
+  }).factory('Sass', function($resource) {
+    return $resource(apiPath('sass'), {
+      id: '@id'
+    }, updatable());
+  }).factory('Page', function($resource) {
+    return $resource(apiPath('pages'), {
+      id: '@id'
+    }, {
+      update: {
+        method: 'PUT'
+      },
+      checkExistance: {
+        method: 'POST',
+        url: apiPath('pages', 'checkExistance')
+      }
+    });
+  }).factory('Program', function($resource) {
+    return $resource(apiPath('programs'), {
+      id: '@id'
+    }, updatable());
+  }).factory('Photo', function($resource) {
+    return $resource(apiPath('photos'), {
+      id: '@id'
+    }, {
+      update: {
+        method: 'PUT'
+      },
+      updateAll: {
+        method: 'POST',
+        url: apiPath('photos', 'updateAll')
+      }
+    });
+  }).factory('Faq', function($resource) {
+    return $resource(apiPath('faq'), {
+      id: '@id'
+    }, updatable());
+  }).factory('FaqGroup', function($resource) {
+    return $resource(apiPath('faq/groups'), {
+      id: '@id'
+    }, updatable());
+  });
+
+  apiPath = function(entity, additional) {
+    if (additional == null) {
+      additional = '';
+    }
+    return ("api/" + entity + "/") + (additional ? additional + '/' : '') + ":id";
+  };
+
+  updatable = function() {
+    return {
+      update: {
+        method: 'PUT'
+      }
+    };
+  };
+
+  countable = function() {
+    return {
+      count: {
+        method: 'GET'
+      }
+    };
+  };
 
 }).call(this);
 
@@ -1160,20 +1404,8 @@
             value: 'published',
             type: 'published'
           }, {
-            title: 'сео (стационар)',
-            value: 'seo_desktop',
-            type: 'seo_desktop'
-          }, {
-            title: 'сео (мобильная)',
-            value: 'seo_mobile',
-            type: 'seo_mobile'
-          }, {
             title: 'h1 вверху',
             value: 'h1',
-            type: 'text'
-          }, {
-            title: 'h1 внизу',
-            value: 'h1_bottom',
             type: 'text'
           }, {
             title: 'meta keywords',
@@ -1225,8 +1457,6 @@
           condition.value = null;
           switch ($scope.getOption(condition).type) {
             case 'published':
-            case 'seo_desktop':
-            case 'seo_mobile':
               return condition.value = 0;
             case 'subjects':
               if ($scope.subjects === void 0) {
@@ -1369,109 +1599,6 @@
 
 (function() {
 
-
-}).call(this);
-
-(function() {
-  angular.module('Egecms').value('Published', [
-    {
-      id: 0,
-      title: 'не опубликовано'
-    }, {
-      id: 1,
-      title: 'опубликовано'
-    }
-  ]).value('UpDown', [
-    {
-      id: 1,
-      title: 'вверху'
-    }, {
-      id: 2,
-      title: 'внизу'
-    }
-  ]);
-
-}).call(this);
-
-(function() {
-  var apiPath, countable, updatable;
-
-  angular.module('Egecms').factory('Variable', function($resource) {
-    return $resource(apiPath('variables'), {
-      id: '@id'
-    }, updatable());
-  }).factory('VariableGroup', function($resource) {
-    return $resource(apiPath('variables/groups'), {
-      id: '@id'
-    }, updatable());
-  }).factory('PageGroup', function($resource) {
-    return $resource(apiPath('pages/groups'), {
-      id: '@id'
-    }, updatable());
-  }).factory('Sass', function($resource) {
-    return $resource(apiPath('sass'), {
-      id: '@id'
-    }, updatable());
-  }).factory('Page', function($resource) {
-    return $resource(apiPath('pages'), {
-      id: '@id'
-    }, {
-      update: {
-        method: 'PUT'
-      },
-      checkExistance: {
-        method: 'POST',
-        url: apiPath('pages', 'checkExistance')
-      }
-    });
-  }).factory('Program', function($resource) {
-    return $resource(apiPath('programs'), {
-      id: '@id'
-    }, updatable());
-  }).factory('Photo', function($resource) {
-    return $resource(apiPath('photos'), {
-      id: '@id'
-    }, {
-      update: {
-        method: 'PUT'
-      },
-      updateAll: {
-        method: 'POST',
-        url: apiPath('photos', 'updateAll')
-      }
-    });
-  }).factory('Faq', function($resource) {
-    return $resource(apiPath('faq'), {
-      id: '@id'
-    }, updatable());
-  }).factory('FaqGroup', function($resource) {
-    return $resource(apiPath('faq/groups'), {
-      id: '@id'
-    }, updatable());
-  });
-
-  apiPath = function(entity, additional) {
-    if (additional == null) {
-      additional = '';
-    }
-    return ("api/" + entity + "/") + (additional ? additional + '/' : '') + ":id";
-  };
-
-  updatable = function() {
-    return {
-      update: {
-        method: 'PUT'
-      }
-    };
-  };
-
-  countable = function() {
-    return {
-      count: {
-        method: 'GET'
-      }
-    };
-  };
 
 }).call(this);
 

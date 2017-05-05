@@ -33,23 +33,9 @@
 </div>
 
 <div class="row mbs">
-    <div class="col-sm-11">
+    <div class="col-sm-12">
         <label class="no-margin-bottom label-opacity">публикация</label>
         <ng-select-new model='FormService.model.published' object="Published" label="title" convert-to-number></ng-select-new>
-    </div>
-    <div class="col-sm-1">
-        <div class='burger seo-desktop'>
-            <div class='selectable' ng-class="{'selected': FormService.model.seo_desktop == 1}" ng-click='FormService.model.seo_desktop = 1'></div>
-            <div></div>
-            <div></div>
-            <div class='selectable' ng-class="{'selected': FormService.model.seo_desktop == 0}" ng-click='FormService.model.seo_desktop = 0'></div>
-        </div>
-        <div class='burger seo-mobile'>
-            <div class='selectable' ng-class="{'selected': FormService.model.seo_mobile == 1}" ng-click='FormService.model.seo_mobile = 1'></div>
-            <div></div>
-            <div></div>
-            <div class='selectable' ng-class="{'selected': FormService.model.seo_mobile == 0}" ng-click='FormService.model.seo_mobile = 0'></div>
-        </div>
     </div>
 </div>
 
@@ -58,17 +44,6 @@
         @include('modules.input', [
             'title' => 'h1 вверху',
             'model' => 'h1',
-            'attributes' => [
-                'ng-counter' => true,
-            ]
-        ])
-    </div>
-</div>
-<div class="row mbs">
-    <div class="col-sm-12">
-        @include('modules.input', [
-            'title' => 'h1 внизу',
-            'model' => 'h1_bottom',
             'attributes' => [
                 'ng-counter' => true,
             ]
@@ -93,19 +68,22 @@
     </div>
 </div>
 
+<div class="row mbb">
+    <div class="col-sm-12">
+        <label>сео текст</label>
+        <div id='editor--seo_text' style="height: 300px">@{{ FormService.model.seo_text }}</div>
+    </div>
+</div>
+
 <div class="row mbb editors">
     <div class="col-sm-12">
         <label ng-class="{'active link-like': !AceService.isShown('editor')}" ng-click="AceService.show('editor')">стационар</label>
-        <label ng-class="{'active link-like': !AceService.isShown('editor_mobile')}" ng-click="AceService.show('editor_mobile')">мобильная</label>
+        <label ng-class="{'active link-like': !AceService.isShown('editor-mobile')}" ng-click="AceService.show('editor-mobile')">мобильная</label>
         <label class="pull-right" style='top: 3px; position: relative'>
             <span class='link-like' ng-click='addLinkDialog()'>добавить ссылку</span>
         </label>
-        <div class="top-links pull-right">
-            <span ng-repeat="option in options" class="link-like ng-binding ng-scope" ng-class="{'active': $index == sort}" ng-click="setSort($index)">по алфавиту</span>
-            <span ng-repeat="option in options" class="link-like ng-binding ng-scope active" ng-class="{'active': $index == sort}" ng-click="setSort($index)">по времени сохранения</span>
-        </div>
-        <div id='editor' ng-show="AceService.isShown('editor')" style="height: 500px">@{{ FormService.model.html }}</div>
-        <div id='editor_mobile' ng-show="AceService.isShown('editor_mobile')" style="height: 500px">@{{ FormService.model.html_mobile }}</div>
+        <div id='editor--html' ng-show="AceService.isShown('editor')" style="height: 500px">@{{ FormService.model.html }}</div>
+        <div id='editor--html_mobile' ng-show="AceService.isShown('editor-mobile')" style="height: 500px">@{{ FormService.model.html_mobile }}</div>
     </div>
 </div>
 @include('pages._modals')
