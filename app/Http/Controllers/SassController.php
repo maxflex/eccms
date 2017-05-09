@@ -7,13 +7,15 @@ use Illuminate\Support\Facades\Storage;
 
 class SassController extends Controller
 {
-    public function index()
+    public function index($directory = null)
     {
-        return view('sass.index');
+        return view('sass.index')->with(ngInit([
+            'current_path' => $_SERVER['REQUEST_URI'],
+        ]));
     }
 
-    public function edit($id)
+    public function edit($file)
     {
-        return view('sass.edit')->with(ngInit(compact('id')));
+        return view('sass.edit')->with(ngInit(compact('file')));
     }
 }

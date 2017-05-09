@@ -24,7 +24,9 @@ Route::group(['namespace' => 'Api', 'as' => 'api.'], function () {
     # Translit
     Route::post('translit/to-url', 'TranslitController@toUrl');
 
-    Route::resource('sass', 'SassController');
+    Route::get('sass/{file}', 'SassController@edit')->where('file', '.*.scss$');
+    Route::post('sass/{file}', 'SassController@update')->where('file', '.*.scss$');
+    Route::get('sass/{current_path?}', 'SassController@index')->where('current_path', '.*');
     Route::resource('photos', 'PhotosController');
 
 

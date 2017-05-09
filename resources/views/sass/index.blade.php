@@ -4,9 +4,15 @@
 
 @section('content')
     <table class="table">
-        <tr ng-repeat="model in IndexService.page.data">
+        <tr ng-repeat="directory in data.directories">
             <td>
-                <a href='sass/@{{ model }}/edit'>@{{ model }}</a>
+                <i class="fa fa-folder text-success" aria-hidden="true"></i>
+                <a href='/sass/@{{ directory }}'>@{{ getName(directory) }}</a>
+            </td>
+        </tr>
+        <tr ng-repeat="file in data.files">
+            <td>
+                <a href='sass/@{{ file }}'>@{{ getName(file) }}</a>
             </td>
         </tr>
     </table>

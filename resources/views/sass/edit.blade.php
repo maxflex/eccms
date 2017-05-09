@@ -1,7 +1,7 @@
 @extends('app')
 @section('title', 'Редактирование файла')
 @section('title-center')
-    <span ng-click="FormService.edit()">сохранить</span>
+    <span ng-click="save()">сохранить</span>
 @stop
 
 @section('content')
