@@ -4,7 +4,8 @@ namespace App\Http\Controllers\Api;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use App\Http\Controllers\Controller;
-use App\Models\Tutor;
+use App\Models\Page;
+use App\Models\Variable;
 use Illuminate\Support\Facades\DB;
 use Validator;
 
@@ -39,7 +40,7 @@ class SearchController extends Controller
             $variable_fields = ['html'];
 
             # поиск по ученикам
-            $variables_query = DB::table('variables')->select('id', 'name');
+            $variables_query = Variable::select('id', 'name');
 
             foreach ($queryArray as $word) {
                 $variables_query->where(function ($query) use ($word, $variable_fields) {
@@ -63,7 +64,7 @@ class SearchController extends Controller
             ];
 
             # поиск по по предователям
-            $pages_query = DB::table('pages')->select('id', 'keyphrase');
+            $pages_query = Page::select('id', 'keyphrase');
             foreach ($queryArray as $word) {
                 $pages_query->where(function ($query) use ($word, $page_fields) {
                     foreach ($page_fields as $field) {

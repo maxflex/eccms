@@ -14,13 +14,15 @@ class SassController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index($current_path = null)
     {
-        $files = Collect(Storage::disk('web_sass')->files())->filter(function ($file) {
+        $files = Collect(Storage::disk('web_sass')->files($current_path))->filter(function ($file) {
             return preg_match('/[\w]\.scss/', $file);
         });
 
-        return ['data' => $files];
+        $directories = Storage::disk('web_sass')->directories($current_path);
+
+        return compact('directories', 'files');
     }
 
     /**
@@ -29,12 +31,9 @@ class SassController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function edit($file)
     {
-        return [
-            'id'      => $id,
-            'text' => Storage::disk('web_sass')->get($id)
-        ];
+        return Storage::disk('web_sass')->get($file);
     }
 
     /**
@@ -47,7 +46,7 @@ class SassController extends Controller
     public function update(Request $request, $id)
     {
         Storage::disk('web_sass')->put($id, $request->text);
-        $output = shell_exec("/home/egerep-web/compile-web-sass.sh 2>&1");
+        $output = shell_exec("/home/ecweb/compile-web-sass.sh 2>&1");
         Storage::disk('web_sass')->put('log.txt', $output);
     }
 }

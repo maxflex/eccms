@@ -19,7 +19,8 @@ Route::group(['middleware' => ['login']], function () {
 
     Route::resource('programs', 'ProgramsController');
 
-    Route::resource('sass', 'SassController');
+    Route::get('sass/{file}', 'SassController@edit')->where('file', '.*.scss$');
+    Route::get('sass/{directory?}', 'SassController@index')->where('directory', '.*');
 
     Route::resource('photos', 'PhotosController');
 
