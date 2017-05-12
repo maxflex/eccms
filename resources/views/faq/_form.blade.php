@@ -14,12 +14,19 @@
     </div>
 </div>
 
-<div class="row mbs">
+<div class="row mbs faq-answer">
     <div class="col-sm-12">
         @include('modules.input', [
             'title' => 'ответ',
+            'rows' => '15',
             'model' => 'answer',
             'textarea' => true
         ])
     </div>
 </div>
+
+<style>
+    .faq-answer textarea {
+        height: 400px;
+    }
+</style>
