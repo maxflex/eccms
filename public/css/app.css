@@ -19708,8 +19708,21 @@ select[multiple] {
   position: relative;
 }
 
-.droppable-table.over {
+.droppable-table .pad {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin-bottom: 0;
+}
+
+.droppable-table .pad.over {
   border-color: #26A65B;
+}
+
+.droppable-table .pad.padded {
+  padding: 10px;
 }
 
 .disable-events {

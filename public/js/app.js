@@ -1,7 +1,7 @@
 (function() {
   var indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
-  angular.module("Egecms", ['dndLists', 'ngSanitize', 'ngResource', 'ngAnimate', 'ui.bootstrap', 'angular-ladda', 'angularFileUpload', 'angucomplete-alt', 'ngDrag', 'ngAnimate', 'thatisuday.ng-image-gallery', 'ng-sortable']).config([
+  angular.module("Egecms", ['ngSanitize', 'ngResource', 'ngAnimate', 'ui.bootstrap', 'angular-ladda', 'angularFileUpload', 'angucomplete-alt', 'ngDrag', 'ngAnimate', 'thatisuday.ng-image-gallery', 'ng-sortable']).config([
     '$compileProvider', function($compileProvider) {
       return $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|chrome-extension|sip):/);
     }
@@ -805,9 +805,7 @@
     });
     bindArguments($scope, arguments);
     $scope.sortableVariableConf = {
-      group: 'variables',
       animation: 150,
-      dragoverBubble: true,
       onUpdate: function(event) {
         return angular.forEach(event.models, function(obj, index) {
           return Variable.update({
@@ -816,34 +814,8 @@
           });
         });
       },
-      onRemove: function(event) {
-        return console.log('remove');
-      },
-      onMove: function(event) {
-        debugger;
-        return $scope.dnd.group_id = event.related.id;
-      },
       onAdd: function(event) {
-        debugger;
-        var variable_id;
-        variable_id = $scope.dnd.variable_id;
-        if (group_id && variable_id && (group_id !== $scope.getGroup(variable_id).id)) {
-          if (group_id === -1) {
-            VariableGroup.save({
-              variable_id: variable_id
-            }, function(response) {
-              $scope.groups.push(response);
-              return moveToGroup(variable_id, response.id);
-            });
-          } else if (group_id) {
-            Variable.update({
-              id: $scope.dnd.variable_id,
-              group_id: group_id
-            });
-            moveToGroup(variable_id, group_id);
-          }
-        }
-        return $scope.dnd = {};
+        return event.preventDefault();
       }
     };
     $scope.sortableGroupConf = {
@@ -869,7 +841,25 @@
       });
     };
     $scope.drop = function(group_id) {
-      $scope.dropped_group_id = group_id;
+      var variable_id;
+      variable_id = $scope.dnd.variable_id;
+      if (group_id && variable_id && (group_id !== $scope.getGroup(variable_id).id)) {
+        if (group_id === -1) {
+          VariableGroup.save({
+            variable_id: variable_id
+          }, function(response) {
+            $scope.groups.push(response);
+            return moveToGroup(variable_id, response.id);
+          });
+        } else if (group_id) {
+          Variable.update({
+            id: $scope.dnd.variable_id,
+            group_id: group_id
+          });
+          moveToGroup(variable_id, group_id);
+        }
+      }
+      $scope.dnd = {};
       return console.log('handy');
     };
     moveToGroup = function(variable_id, group_id) {
@@ -930,6 +920,27 @@
       };
     });
   });
+
+}).call(this);
+
+(function() {
+  angular.module('Egecms').value('Published', [
+    {
+      id: 0,
+      title: 'не опубликовано'
+    }, {
+      id: 1,
+      title: 'опубликовано'
+    }
+  ]).value('UpDown', [
+    {
+      id: 1,
+      title: 'вверху'
+    }, {
+      id: 2,
+      title: 'внизу'
+    }
+  ]);
 
 }).call(this);
 
@@ -1526,27 +1537,6 @@
 
 (function() {
 
-
-}).call(this);
-
-(function() {
-  angular.module('Egecms').value('Published', [
-    {
-      id: 0,
-      title: 'не опубликовано'
-    }, {
-      id: 1,
-      title: 'опубликовано'
-    }
-  ]).value('UpDown', [
-    {
-      id: 1,
-      title: 'вверху'
-    }, {
-      id: 2,
-      title: 'внизу'
-    }
-  ]);
 
 }).call(this);
 
