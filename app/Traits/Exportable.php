@@ -36,7 +36,7 @@ trait Exportable
             $excel->sheet($table_name, function($sheet) use ($request, $table_name) {
                 $groups_table_name = mb_strimwidth($table_name, 0, strlen($table_name) - 1) . '_groups'; // variables => variable_groups
                 $query = static::select(self::tableField($table_name, 'id'), 'keyphrase', self::tableField($table_name, $request->field))->join($groups_table_name, $groups_table_name . '.id', '=', $table_name . '.group_id')
-                    ->orderBy(\DB::raw($groups_table_name . '.position', $table_name . '.position'));
+                    ->orderBy(\DB::raw($groups_table_name . '.position, ' . $table_name . '.position'));
                 // если экспортируем HTML, то только длина символов
                 if(isset(static::$with_comma_on_export) && in_array($request->field, static::$with_comma_on_export)) {
                     $query->with(static::$with_comma_on_export);
