@@ -19760,6 +19760,11 @@ select[multiple] {
   max-width: 60%;
 }
 
+.photo-id {
+  width: 5%;
+  vertical-align: middle !important;
+}
+
 .program-container h2 {
   margin: 5px 0px;
 }
