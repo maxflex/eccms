@@ -568,7 +568,7 @@
             "source": {
                 "type": "git",
                 "url": "https://mkolyadin@bitbucket.org/mkolyadin/ege-shared.git",
-                "reference": "637b6e94eabb48c1a0cad12057f939f7bc31ae42"
+                "reference": "206437f16bb99b315be95aa14b5c8636f84a1c5b"
             },
             "type": "library",
             "autoload": {
@@ -576,7 +576,7 @@
                     "Shared\\": "src/"
                 }
             },
-            "time": "2016-12-09 07:22:04"
+            "time": "2017-05-16 08:28:35"
         },
         {
             "name": "guzzlehttp/guzzle",
@@ -2927,12 +2927,12 @@
             "version": "0.9.5",
             "source": {
                 "type": "git",
-                "url": "https://github.com/padraic/mockery.git",
+                "url": "https://github.com/mockery/mockery.git",
                 "reference": "4db079511a283e5aba1b3c2fb19037c645e70fc2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/padraic/mockery/zipball/4db079511a283e5aba1b3c2fb19037c645e70fc2",
+                "url": "https://api.github.com/repos/mockery/mockery/zipball/4db079511a283e5aba1b3c2fb19037c645e70fc2",
                 "reference": "4db079511a283e5aba1b3c2fb19037c645e70fc2",
                 "shasum": ""
             },

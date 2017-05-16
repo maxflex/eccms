@@ -39,7 +39,7 @@ class User extends Model
      */
     public function getColorAttribute()
     {
-        if ($this->allowed(\Shared\Rights::ERC_BANNED)) {
+        if ($this->allowed(\Shared\Rights::ECC_BANNED)) {
             return static::DEFAULT_COLOR;
         } else {
             return $this->attributes['color'];
@@ -144,13 +144,13 @@ class User extends Model
      */
     public static function scopeActive($query)
     {
-        return $query->real()->whereRaw('NOT FIND_IN_SET(' . \Shared\Rights::ERC_BANNED . ', rights)');
+        return $query->real()->whereRaw('NOT FIND_IN_SET(' . \Shared\Rights::ECC_BANNED . ', rights)');
     }
 
     public static function isBlocked()
     {
         return User::whereId(User::fromSession()->id)
-                ->whereRaw('FIND_IN_SET(' . \Shared\Rights::ERC_BANNED . ', rights)')
+                ->whereRaw('FIND_IN_SET(' . \Shared\Rights::ECC_BANNED . ', rights)')
                 ->exists();
     }
 
