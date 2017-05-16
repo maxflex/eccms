@@ -10,8 +10,11 @@
     <table class="table reverse-borders">
         <tbody ng-sortable='sortablePhotosConf'>
         <tr ng-repeat="model in IndexService.page.data">
+            <td class="photo-id">
+                <a ng-href="photos/@{{ model.id }}/edit">@{{ model.id }}</a>
+            </td>
             <td>
-                <a ng-href="photos/@{{ model.id }}/edit">@{{ model.title ? model.title : 'не указано' }}</a>
+                <img width="100px" ng-src="@{{ model.thumbUrl }}">
             </td>
         </tr>
         </tbody>

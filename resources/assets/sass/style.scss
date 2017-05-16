@@ -4058,39 +4058,6 @@ select[multiple] {
     height: 34px;
 }
 
-.program-container {
-    & h2 {
-        &, input {
-            font-size: 14px;
-        }
-        margin: 5px 0px;
-    }
-    & .root ul {
-        padding-left: 0;
-        li {
-            margin-left: 20px;
-            list-style: none;
-        }
-        @at-root .root > ul {
-            > li {
-                margin-left: 0px!important;
-            }
-        }
-    }
-    .add-item {
-        outline: none;
-        border: none;
-    }
-    .show-on-hover > span {
-        padding-right: 8px;
-    }
-    .item-title {
-        &:before {
-            content: ''
-        }
-    }
-}
-
 
  .droppable-table {
      border: 3px dashed transparent;
@@ -4145,26 +4112,18 @@ select[multiple] {
     }
 }
 
-.lesson_count:empty:before{
-    content: attr(placeholder);
-    color: $gray-opacity;
-}
-
-.lesson_count.is-zero:not(:focus){
-    color: $gray-opacity;
-}
-
-.lesson_count::after {
-    content: ' ч.';
-
-}
-.lesson_count:empty::after {
-    content: '0 ч.';
-
-}
 .new-item-hour {
     position: relative;
     left: -110px;
     display:inline-block;
     width:50px;
+}
+
+.alert-danger {
+    max-width: 60%;
+}
+
+.photo-id {
+    width: 5%;
+    vertical-align: middle!important;
 }

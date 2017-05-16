@@ -9,7 +9,7 @@ angular.module('Egecms').directive 'editable', ->
                 $element.blur()
 
             if $element.data 'input-digits-only'
-                event.preventDefault() if not (event.keyCode <57)
+                event.preventDefault() if not (event.keyCode < 57)
 
         .on 'blur', (event) ->
             $scope.onEdit($element.attr('editable'), event)

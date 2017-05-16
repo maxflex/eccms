@@ -1,4 +1,3 @@
-@charset "UTF-8";
 @import url("https://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,700");
 /*!
  * Bootstrap v3.3.7 (http://getbootstrap.com)
@@ -19691,40 +19690,6 @@ select[multiple] {
   height: 34px;
 }
 
-.program-container h2 {
-  margin: 5px 0px;
-}
-
-.program-container h2, .program-container h2 input {
-  font-size: 14px;
-}
-
-.program-container .root ul {
-  padding-left: 0;
-}
-
-.program-container .root ul li {
-  margin-left: 20px;
-  list-style: none;
-}
-
-.root > ul > li {
-  margin-left: 0px !important;
-}
-
-.program-container .add-item {
-  outline: none;
-  border: none;
-}
-
-.program-container .show-on-hover > span {
-  padding-right: 8px;
-}
-
-.program-container .item-title:before {
-  content: '';
-}
-
 .droppable-table {
   border: 3px dashed transparent;
   border-radius: 5px;
@@ -19784,28 +19749,72 @@ select[multiple] {
   color: #26A65B !important;
 }
 
-.lesson_count:empty:before {
-  content: attr(placeholder);
-  color: rgba(0, 0, 0, 0.3) !important;
-}
-
-.lesson_count.is-zero:not(:focus) {
-  color: rgba(0, 0, 0, 0.3) !important;
-}
-
-.lesson_count::after {
-  content: ' ч.';
-}
-
-.lesson_count:empty::after {
-  content: '0 ч.';
-}
-
 .new-item-hour {
   position: relative;
   left: -110px;
   display: inline-block;
   width: 50px;
+}
+
+.alert-danger {
+  max-width: 60%;
+}
+
+.photo-id {
+  width: 5%;
+  vertical-align: middle !important;
+}
+
+.program-container h2 {
+  margin: 5px 0px;
+}
+
+.program-container h2, .program-container h2 input {
+  font-size: 14px;
+}
+
+.program-container .root ul {
+  padding-left: 0;
+}
+
+.program-container .root ul li {
+  margin-left: 20px;
+  list-style: none;
+}
+
+.root > ul > li {
+  margin-left: 0px !important;
+}
+
+.program-container .add-item-title, .program-container .add-item-lesson-count {
+  outline: none;
+  border: none;
+}
+
+.program-container .show-on-hover > span {
+  padding-right: 8px;
+}
+
+.program-container textarea {
+  resize: none;
+  vertical-align: bottom;
+  max-width: 90%;
+  display: inline-block;
+}
+
+.program-container input, .program-container input:hover, .program-container textarea, .program-container textarea:hover {
+  border: none;
+  outline: none;
+  padding: 0;
+  margin: 0;
+}
+
+.program-container .nearer {
+  margin-left: -5px;
+}
+
+.program-container .no-wrap {
+  white-space: nowrap;
 }
 
 .search-icon {

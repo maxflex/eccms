@@ -14,7 +14,7 @@ angular.module 'Egecms'
 				removeAfterUpload: true
 				onCompleteItem: (i, response, status) ->
 					notifySuccess 'Импортировано' if status is 200
-					notifyError 'Ошибка импорта' if status isnt 200
+					notifyError response.message if status isnt 200
 				onWhenAddingFileFailed  = (item, filter, options) ->
 					if filter.name is "queueLimit"
 						this.clearQueue()
