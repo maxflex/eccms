@@ -1,45 +1,66 @@
 angular
     .module 'Egecms'
     .controller 'VariablesIndex', ($scope, $attrs, $rootScope, $timeout, IndexService, Variable, VariableGroup) ->
-        $scope.$watchCollection 'dnd', (newVal) ->
-            console.log newVal
+        l = (e) -> console.log e
+#        $scope.$watchCollection 'dnd', (newVal) ->
+#            console.log newVal
         bindArguments($scope, arguments)
+
         $scope.sortableVariableConf =
-            animation: 150
+            animation:  150
+            group:
+                name:   'variable'
+                put:    'variable'
+
             onUpdate: (event) ->
                 angular.forEach event.models, (obj, index) ->
                     Variable.update({id: obj.id, position: index})
             onAdd: (event) ->
-                event.preventDefault()
+                l 'add', event
+
+            onRemove: (event) ->
+                l 'rem', event
+
+            onMove: (event) ->
+                l 'move'
 
         $scope.sortableGroupConf =
             animation: 150
-            onStart: (event) ->
-                $scope.group_sorting = true
+            handle: '.group-title'
             onUpdate: (event) ->
-                $scope.group_sorting = false
-                angular.forEach event.models, (obj, index) ->
-                    VariableGroup.update({id: obj.id, position: index})
+                l 'g upd'
+
+            onStart: (event) ->
+                l 'g start'
+
+            onAdd: (event) ->
+                l 'g add'
+
+            onRemove: (event) ->
+                l 'g rem'
+
+            onMove: (event) ->
+                l 'g move'
 
         $scope.dnd = {}
 
         $scope.dragStart = (variable_id) ->
-            $timeout ->
-                console.log('drag start', variable_id)
-                $scope.dnd.variable_id = variable_id
+#            $timeout ->
+#                console.log('drag start', variable_id)
+#                $scope.dnd.variable_id = variable_id
 
         $scope.drop = (group_id) ->
-            variable_id = $scope.dnd.variable_id
-            if group_id and variable_id and (group_id isnt $scope.getGroup(variable_id).id)
-                if group_id is -1
-                    VariableGroup.save {variable_id: variable_id}, (response) ->
-                        $scope.groups.push(response)
-                        moveToGroup(variable_id, response.id)
-                else if group_id
-                    Variable.update({id: $scope.dnd.variable_id, group_id: group_id})
-                    moveToGroup(variable_id, group_id)
-            $scope.dnd = {}
-            console.log 'handy'
+#            variable_id = $scope.dnd.variable_id
+#            if group_id and variable_id and (group_id isnt $scope.getGroup(variable_id).id)
+#                if group_id is -1
+#                    VariableGroup.save {variable_id: variable_id}, (response) ->
+#                        $scope.groups.push(response)
+#                        moveToGroup(variable_id, response.id)
+#                else if group_id
+#                    Variable.update({id: $scope.dnd.variable_id, group_id: group_id})
+#                    moveToGroup(variable_id, group_id)
+#            $scope.dnd = {}
+#            console.log 'handy'
 
         # переместить в группу
         moveToGroup = (variable_id, group_id) ->

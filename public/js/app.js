@@ -799,13 +799,17 @@
 
 (function() {
   angular.module('Egecms').controller('VariablesIndex', function($scope, $attrs, $rootScope, $timeout, IndexService, Variable, VariableGroup) {
-    var moveToGroup;
-    $scope.$watchCollection('dnd', function(newVal) {
-      return console.log(newVal);
-    });
+    var l, moveToGroup;
+    l = function(e) {
+      return console.log(e);
+    };
     bindArguments($scope, arguments);
     $scope.sortableVariableConf = {
       animation: 150,
+      group: {
+        name: 'variable',
+        put: 'variable'
+      },
       onUpdate: function(event) {
         return angular.forEach(event.models, function(obj, index) {
           return Variable.update({
@@ -815,53 +819,37 @@
         });
       },
       onAdd: function(event) {
-        return event.preventDefault();
+        return l('add', event);
+      },
+      onRemove: function(event) {
+        return l('rem', event);
+      },
+      onMove: function(event) {
+        return l('move');
       }
     };
     $scope.sortableGroupConf = {
       animation: 150,
-      onStart: function(event) {
-        return $scope.group_sorting = true;
-      },
+      handle: '.group-title',
       onUpdate: function(event) {
-        $scope.group_sorting = false;
-        return angular.forEach(event.models, function(obj, index) {
-          return VariableGroup.update({
-            id: obj.id,
-            position: index
-          });
-        });
+        return l('g upd');
+      },
+      onStart: function(event) {
+        return l('g start');
+      },
+      onAdd: function(event) {
+        return l('g add');
+      },
+      onRemove: function(event) {
+        return l('g rem');
+      },
+      onMove: function(event) {
+        return l('g move');
       }
     };
     $scope.dnd = {};
-    $scope.dragStart = function(variable_id) {
-      return $timeout(function() {
-        console.log('drag start', variable_id);
-        return $scope.dnd.variable_id = variable_id;
-      });
-    };
-    $scope.drop = function(group_id) {
-      var variable_id;
-      variable_id = $scope.dnd.variable_id;
-      if (group_id && variable_id && (group_id !== $scope.getGroup(variable_id).id)) {
-        if (group_id === -1) {
-          VariableGroup.save({
-            variable_id: variable_id
-          }, function(response) {
-            $scope.groups.push(response);
-            return moveToGroup(variable_id, response.id);
-          });
-        } else if (group_id) {
-          Variable.update({
-            id: $scope.dnd.variable_id,
-            group_id: group_id
-          });
-          moveToGroup(variable_id, group_id);
-        }
-      }
-      $scope.dnd = {};
-      return console.log('handy');
-    };
+    $scope.dragStart = function(variable_id) {};
+    $scope.drop = function(group_id) {};
     moveToGroup = function(variable_id, group_id) {
       var group_from, group_to, variable;
       group_to = $rootScope.findById($scope.groups, group_id);
@@ -920,6 +908,27 @@
       };
     });
   });
+
+}).call(this);
+
+(function() {
+  angular.module('Egecms').value('Published', [
+    {
+      id: 0,
+      title: 'не опубликовано'
+    }, {
+      id: 1,
+      title: 'опубликовано'
+    }
+  ]).value('UpDown', [
+    {
+      id: 1,
+      title: 'вверху'
+    }, {
+      id: 2,
+      title: 'внизу'
+    }
+  ]);
 
 }).call(this);
 
@@ -1516,27 +1525,6 @@
 
 (function() {
 
-
-}).call(this);
-
-(function() {
-  angular.module('Egecms').value('Published', [
-    {
-      id: 0,
-      title: 'не опубликовано'
-    }, {
-      id: 1,
-      title: 'опубликовано'
-    }
-  ]).value('UpDown', [
-    {
-      id: 1,
-      title: 'вверху'
-    }, {
-      id: 2,
-      title: 'внизу'
-    }
-  ]);
 
 }).call(this);
 
