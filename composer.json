@@ -17,7 +17,9 @@
         "ege-shared":"dev-master",
         "maatwebsite/excel": "^2.1",
         "doctrine/dbal": "^2.5",
-        "guzzlehttp/guzzle": "^6.2"
+        "guzzlehttp/guzzle": "^6.2",
+        "intervention/image": "^2.3",
+        "intervention/imagecache": "^2.3"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",

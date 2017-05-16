@@ -9,7 +9,10 @@ use Illuminate\Database\Eloquent\Model;
 class Photo extends Model
 {
     const UPLOAD_DIR = 'images/';
-    const THUMB_PREFIX = 'thumb_';
+
+    const THUMB_WIDTH = 300;
+    const THUMB_ROUTE = 'resize';
+    const THUMB_FILTER = 'small';
 
     public $timestamps = false;
 
@@ -38,7 +41,7 @@ class Photo extends Model
 
     public function getThumbUrlAttribute()
     {
-        return \Storage::url(static::UPLOAD_DIR . $this->filename);
+        return static::THUMB_ROUTE . '/' . static::THUMB_FILTER . '/' . $this->filename;
     }
 
     protected static function boot()
