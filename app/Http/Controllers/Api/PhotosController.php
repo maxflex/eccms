@@ -16,7 +16,7 @@ class PhotosController extends Controller
      */
     public function index()
     {
-        return Photo::orderBy('position')->paginate(100);
+        return Photo::orderBy('position')->paginate(3);
     }
 
     public function show($id)
@@ -27,17 +27,6 @@ class PhotosController extends Controller
     public function update(Request $request, $id)
     {
         Photo::find($id)->update($request->input());
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        return Photo::create($request->all());
     }
 
     /**
@@ -59,9 +48,13 @@ class PhotosController extends Controller
             $filename = uniqid() . '.' . $extension;
             $request->file('file')->storeAs(Photo::UPLOAD_DIR, $filename, 'public');
 
-            $this->deleteFile($request->old_file);
+            $old_filename = $request->old_file;
+            $this->deleteFile($old_filename);
 
-            return $filename;
+            return Photo::updateOrCreate(
+                ['filename' => $old_filename],
+                ['filename' => $filename]
+            );
         }
 
         return false;

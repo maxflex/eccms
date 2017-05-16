@@ -7,7 +7,7 @@ angular
             imgBubbles: false
             bgClose   : true
             imgAnim   : 'fadeup'
-    .controller 'PhotosIndex', ($scope, $attrs, IndexService, Photo, PhotoService) ->
+    .controller 'PhotosIndex', ($scope, $attrs, IndexService, Photo, PhotoService, FormService) ->
         bindArguments($scope, arguments)
         angular.element(document).ready ->
             IndexService.init(Photo, $scope.current_page, $attrs)
@@ -21,12 +21,15 @@ angular
                 Photo.updateAll
                     positions: positions
 
+        $scope.delete = (event, model) ->
+            FormService.model = new Photo model
+            FormService.delete event, =>
+                IndexService.page.total--
+                IndexService.page.data = _.without IndexService.page.data, model
 
-
-    .controller 'PhotosForm', ($scope, $attrs, FormService, Photo, PhotoService) ->
-        bindArguments($scope, arguments)
-        angular.element(document).ready ->
-            FormService.init(Photo, $scope.id, $scope.model)
+        $scope.upload = (model) ->
+            PhotoService.editing_model = model
+            window.upload()
 
         $scope.$watchCollection 'FormService.model.photos', (newVal, oldVal) ->
             $scope.images = PhotoService.getImages() if newVal isnt undefined

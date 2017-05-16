@@ -685,12 +685,12 @@
       bgClose: true,
       imgAnim: 'fadeup'
     });
-  }).controller('PhotosIndex', function($scope, $attrs, IndexService, Photo, PhotoService) {
+  }).controller('PhotosIndex', function($scope, $attrs, IndexService, Photo, PhotoService, FormService) {
     bindArguments($scope, arguments);
     angular.element(document).ready(function() {
       return IndexService.init(Photo, $scope.current_page, $attrs);
     });
-    return $scope.sortablePhotosConf = {
+    $scope.sortablePhotosConf = {
       animation: 150,
       onUpdate: function(event) {
         var positions;
@@ -703,11 +703,19 @@
         });
       }
     };
-  }).controller('PhotosForm', function($scope, $attrs, FormService, Photo, PhotoService) {
-    bindArguments($scope, arguments);
-    angular.element(document).ready(function() {
-      return FormService.init(Photo, $scope.id, $scope.model);
-    });
+    $scope["delete"] = function(event, model) {
+      FormService.model = new Photo(model);
+      return FormService["delete"](event, (function(_this) {
+        return function() {
+          IndexService.page.total--;
+          return IndexService.page.data = _.without(IndexService.page.data, model);
+        };
+      })(this));
+    };
+    $scope.upload = function(model) {
+      PhotoService.editing_model = model;
+      return window.upload();
+    };
     return $scope.$watchCollection('FormService.model.photos', function(newVal, oldVal) {
       if (newVal !== void 0) {
         return $scope.images = PhotoService.getImages();
@@ -920,6 +928,27 @@
       };
     });
   });
+
+}).call(this);
+
+(function() {
+  angular.module('Egecms').value('Published', [
+    {
+      id: 0,
+      title: 'не опубликовано'
+    }, {
+      id: 1,
+      title: 'опубликовано'
+    }
+  ]).value('UpDown', [
+    {
+      id: 1,
+      title: 'вверху'
+    }, {
+      id: 2,
+      title: 'внизу'
+    }
+  ]);
 
 }).call(this);
 
@@ -1142,7 +1171,8 @@
           'client': ['клиент', 'клиента', 'клиентов'],
           'mark': ['оценки', 'оценок', 'оценок'],
           'request': ['заявка', 'заявки', 'заявок'],
-          'hour': ['час', 'часа', 'часов']
+          'hour': ['час', 'часа', 'часов'],
+          'photo': ['фотография', 'фотографии', 'фотографий']
         };
       }
     };
@@ -1520,27 +1550,6 @@
 }).call(this);
 
 (function() {
-  angular.module('Egecms').value('Published', [
-    {
-      id: 0,
-      title: 'не опубликовано'
-    }, {
-      id: 1,
-      title: 'опубликовано'
-    }
-  ]).value('UpDown', [
-    {
-      id: 1,
-      title: 'вверху'
-    }, {
-      id: 2,
-      title: 'внизу'
-    }
-  ]);
-
-}).call(this);
-
-(function() {
   var apiPath, countable, updatable;
 
   angular.module('Egecms').factory('Variable', function($resource) {
@@ -1782,13 +1791,22 @@
       }
       return model_name;
     };
-    this["delete"] = function(event) {
+    this["delete"] = function(event, callback) {
+      if (callback == null) {
+        callback = false;
+      }
       return bootbox.confirm("Вы уверены, что хотите " + ($(event.target).text()) + " #" + this.model.id + "?", (function(_this) {
         return function(result) {
           if (result === true) {
             beforeSave();
             return _this.model.$delete().then(function() {
-              return redirect(modelName());
+              if (callback) {
+                callback();
+                _this.saving = false;
+                return ajaxEnd();
+              } else {
+                return redirect(modelName());
+              }
             }, function(response) {
               return notifyError(response.data.message);
             });
@@ -1902,13 +1920,7 @@
 }).call(this);
 
 (function() {
-  angular.module('Egecms').service('PhotoService', function($http, Photo, FileUploader, FormService, PhotosUploadDir) {
-    this.getUrl = function(model) {
-      if (!model || !model.filename) {
-        return '';
-      }
-      return PhotosUploadDir + model.filename;
-    };
+  angular.module('Egecms').service('PhotoService', function($http, Photo, FileUploader, IndexService) {
     this.Uploader = new FileUploader({
       url: 'api/photos/upload',
       alias: 'file',
@@ -1927,32 +1939,44 @@
     });
     this.Uploader.onSuccessItem = (function(_this) {
       return function(item, response) {
-        FormService.model.filename = response;
+        var index;
+        if (_this.editing_model) {
+          index = _.findIndex(IndexService.page.data, {
+            filename: _this.editing_model.filename
+          });
+          _.extend(IndexService.page.data[index], response);
+        } else {
+          IndexService.page.data.push(response);
+          IndexService.page.total++;
+        }
+        _this.editing_model = null;
         if (typeof _this.onSuccessItemCallback === 'function') {
           return _this.onSuccessItemCallback();
         }
       };
     })(this);
-    this.Uploader.onBeforeUploadItem = function(item) {
-      return item.formData.push({
-        old_file: FormService.model.filename
-      });
-    };
-    this.getImages = function() {
-      var images;
-      images = [];
-      IndexService.page.datas.forEach(function(image) {
-        return images.push({
-          url: image.url
+    this.Uploader.onBeforeUploadItem = (function(_this) {
+      return function(item) {
+        var ref;
+        return item.formData.push({
+          old_file: (ref = _this.editing_model) != null ? ref.filename : void 0
         });
+      };
+    })(this);
+    this["delete"] = function(model) {
+      return Photo["delete"]({
+        id: model.id
       });
-      return images;
     };
-    this["delete"] = function() {
-      Photo["delete"]({
-        id: scope.id
-      });
-      return redirect('/photos');
+    this.filesize = function(size) {
+      var unit, units;
+      units = ['B', 'Kb', 'Mb', 'Gb'];
+      unit = 0;
+      while (size > 1024) {
+        size = size / 1024;
+        unit++;
+      }
+      return size.toFixed(1) + units[unit];
     };
     return this;
   });

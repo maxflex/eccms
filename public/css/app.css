@@ -14260,7 +14260,7 @@ button.close {
  * http://lab.hakim.se/ladda
  * MIT licensed
  *
- * Copyright (C) 2016 Hakim El Hattab, http://hakim.se
+ * Copyright (C) 2015 Hakim El Hattab, http://hakim.se
  */
 .ladda-button {
   position: relative;
@@ -15789,7 +15789,7 @@ a:hover {
   margin-right: 10px;
 }
 
-.options-list span.link-like, .options-list .panel-heading-main .col-sm-4 span, .panel-heading-main .col-sm-4 .options-list span {
+.options-list span.link-like, .options-list .panel-heading-main .col-sm-4 span, .panel-heading-main .col-sm-4 .options-list span, .options-list .photos-table span.link-like-text, .photos-table .options-list span.link-like-text {
   font-weight: normal;
 }
 
@@ -16250,11 +16250,11 @@ span {
   margin-right: 20px;
 }
 
-.controls-line span.link-like, .controls-line .panel-heading-main .col-sm-4 span, .panel-heading-main .col-sm-4 .controls-line span {
+.controls-line span.link-like, .controls-line .panel-heading-main .col-sm-4 span, .panel-heading-main .col-sm-4 .controls-line span, .controls-line .photos-table span.link-like-text, .photos-table .controls-line span.link-like-text {
   font-weight: normal;
 }
 
-.controls-line span.link-like span, .controls-line .panel-heading-main .col-sm-4 span span, .panel-heading-main .col-sm-4 .controls-line span span {
+.controls-line span.link-like span, .controls-line .panel-heading-main .col-sm-4 span span, .panel-heading-main .col-sm-4 .controls-line span span, .controls-line .photos-table span.link-like-text span, .photos-table .controls-line span.link-like-text span {
   font-weight: normal;
 }
 
@@ -17326,7 +17326,7 @@ tr.ui-sortable-helper td {
   margin-bottom: 20px;
 }
 
-.top-links a, .top-links span.link-like, .top-links .panel-heading-main .col-sm-4 span, .panel-heading-main .col-sm-4 .top-links span {
+.top-links a, .top-links span.link-like, .top-links .panel-heading-main .col-sm-4 span, .panel-heading-main .col-sm-4 .top-links span, .top-links .photos-table span.link-like-text, .photos-table .top-links span.link-like-text {
   margin-right: 15px;
   display: inline-block;
 }
@@ -18385,18 +18385,18 @@ md-input-container textarea {
   margin: 0;
 }
 
-.link-like, .panel-heading-main .col-sm-4 span {
+.link-like, .panel-heading-main .col-sm-4 span, .photos-table .link-like-text {
   color: #26A65B;
   text-decoration: none;
   cursor: pointer;
 }
 
-.link-like:hover, .panel-heading-main .col-sm-4 span:hover {
+.link-like:hover, .panel-heading-main .col-sm-4 span:hover, .photos-table .link-like-text:hover {
   color: #1d7d44;
   text-decoration: underline;
 }
 
-.link-like.red, .panel-heading-main .col-sm-4 span.red {
+.link-like.red, .panel-heading-main .col-sm-4 span.red, .photos-table .red.link-like-text {
   color: #a94442;
 }
 
@@ -18494,7 +18494,7 @@ md-input-container textarea {
   color: #FF809C;
 }
 
-.link-like.text-danger, .panel-heading-main .col-sm-4 span.text-danger {
+.link-like.text-danger, .panel-heading-main .col-sm-4 span.text-danger, .photos-table .text-danger.link-like-text {
   color: #A94442;
 }
 
@@ -19283,7 +19283,7 @@ table.summary-table.left-align tr td {
   cursor: default !important;
 }
 
-.list-group, .panel-heading, .controls-line a, .controls-line span.link-like, .controls-line .panel-heading-main .col-sm-4 span, .panel-heading-main .col-sm-4 .controls-line span, .top-links, .options-list, .nav-tabs-links {
+.list-group, .panel-heading, .controls-line a, .controls-line span.link-like, .controls-line .panel-heading-main .col-sm-4 span, .panel-heading-main .col-sm-4 .controls-line span, .controls-line .photos-table span.link-like-text, .photos-table .controls-line span.link-like-text, .top-links, .options-list, .nav-tabs-links {
   -webkit-font-smoothing: auto !important;
 }
 
@@ -19760,9 +19760,21 @@ select[multiple] {
   max-width: 60%;
 }
 
-.photo-id {
-  width: 5%;
+.photos-table td {
   vertical-align: middle !important;
+}
+
+.photos-table .link-like-text {
+  cursor: auto;
+}
+
+.photos-table .link-like-text:hover {
+  text-decoration: none;
+}
+
+.gallery-count span {
+  margin: 0 !important;
+  text-decoration: none !important;
 }
 
 .program-container h2 {

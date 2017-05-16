@@ -23,7 +23,8 @@ class Photo extends Model
 
     protected $appends = [
         'url',
-        'thumbUrl'
+        'thumbUrl',
+        'info'
     ];
 
     public function scopeGallery($query, $args)
@@ -42,6 +43,20 @@ class Photo extends Model
     public function getThumbUrlAttribute()
     {
         return static::THUMB_ROUTE . '/' . static::THUMB_FILTER . '/' . $this->filename;
+    }
+
+    public function getInfoAttribute()
+    {
+        $sizes = [];
+        if ($this->id) {
+            $dimensions = getimagesize(public_path() . '/storage/' . static::UPLOAD_DIR . $this->filename);
+            $sizes = [
+                'width'     => $dimensions[0],
+                'height'    => $dimensions[1],
+                'size'      => \Storage::disk('public')->size(static::UPLOAD_DIR . $this->filename),
+            ];
+        }
+        return $sizes;
     }
 
     protected static function boot()

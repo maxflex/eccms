@@ -69,12 +69,17 @@ angular.module 'Egecms'
             model_name = l[l.length - 3] if $.isNumeric(model_name)
             model_name
 
-        this.delete = (event) ->
+        this.delete = (event, callback = false) ->
             bootbox.confirm "Вы уверены, что хотите #{$(event.target).text()} ##{this.model.id}?", (result) =>
                 if result is true
                     beforeSave()
-                    this.model.$delete().then ->
-                        redirect modelName()
+                    this.model.$delete().then =>
+                        if callback #static deletion
+                            callback()
+                            this.saving = false
+                            ajaxEnd()
+                        else
+                            redirect modelName()
                     , (response) ->
                         notifyError response.data.message
 

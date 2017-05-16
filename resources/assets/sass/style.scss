@@ -4123,7 +4123,22 @@ select[multiple] {
     max-width: 60%;
 }
 
-.photo-id {
-    width: 5%;
-    vertical-align: middle!important;
+.photos-table {
+    td {
+        vertical-align: middle!important;
+    }
+    .link-like-text {
+        @extend .link-like;
+        cursor: auto;
+        &:hover {
+            text-decoration: none;
+        }
+    }
+}
+
+.gallery-count {
+    span {
+        margin: 0!important;
+        text-decoration: none!important;
+    }
 }

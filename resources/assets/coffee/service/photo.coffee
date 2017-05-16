@@ -1,9 +1,5 @@
 angular.module 'Egecms'
-    .service 'PhotoService', ($http, Photo, FileUploader, FormService, PhotosUploadDir) ->
-        this.getUrl = (model) ->
-            return '' if !model || !model.filename
-            PhotosUploadDir + model.filename
-
+    .service 'PhotoService', ($http, Photo, FileUploader, IndexService) ->
         this.Uploader = new FileUploader
             url: 'api/photos/upload'
             alias: 'file'
@@ -17,25 +13,31 @@ angular.module 'Egecms'
             removeAfterUpload: true
 
         this.Uploader.onSuccessItem = (item, response) =>
-            FormService.model.filename = response
+            if this.editing_model
+                index = _.findIndex IndexService.page.data, filename: this.editing_model.filename
+                _.extend IndexService.page.data[index], response
+            else
+                IndexService.page.data.push response
+                IndexService.page.total++
 
+            this.editing_model = null
             if typeof this.onSuccessItemCallback is 'function'
                 this.onSuccessItemCallback()
 
-        this.Uploader.onBeforeUploadItem = (item) ->
+        this.Uploader.onBeforeUploadItem = (item) =>
             item.formData.push
-                old_file: FormService.model.filename
+                old_file: this.editing_model?.filename
 
-        this.getImages = ->
-            images = []
-            IndexService.page.datas.forEach (image) ->
-                images.push url: image.url
-            images
-
-        this.delete = ->
+        this.delete = (model) ->
             Photo.delete
-                id: scope.id
+                id: model.id
 
-            redirect '/photos'
+        this.filesize = (size) ->
+            units = ['B', 'Kb', 'Mb', 'Gb']
+            unit = 0
+            while size > 1024
+                size = size / 1024
+                unit++
+            size.toFixed(1) + units[unit]
 
         this
