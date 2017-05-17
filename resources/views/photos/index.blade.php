@@ -1,5 +1,5 @@
 @extends('app')
-@section('title', 'Галлерея <span ng-show="IndexService.page.total">(<plural class="gallery-count" type="photo" count="IndexService.page.total"></plural>)</spanq>')
+@section('title', 'Галерея <span ng-show="IndexService.page.total">(<plural class="gallery-count" type="photo" count="IndexService.page.total"></plural>)</spanq>')
 @section('controller', 'PhotosIndex')
 
 @section('title-right')
