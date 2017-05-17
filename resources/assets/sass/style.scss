@@ -4095,7 +4095,7 @@ select[multiple] {
 
  .fake-info {
      height: 8px;
-     width: 150px;
+     width: 150px!important;
      background-color: $hr_gray;
      display: inline-block;
  }
@@ -4140,5 +4140,58 @@ select[multiple] {
     span {
         margin: 0!important;
         text-decoration: none!important;
+    }
+}
+
+.photo-id {
+    width: 5%;
+    vertical-align: middle!important;
+}
+
+
+.nested-dnd {
+    .group-title {
+    }
+
+    .group-list {
+        padding:0;
+        margin-bottom: 20px;
+        border-radius: 5px;
+        border: 3px solid white;
+        &.hovered {
+            border: 3px dashed $green-main;
+        }
+    }
+    .group-item {
+        span, a {
+            display: inline-block;
+        }
+
+        &-title {
+            width: 35%;
+            &-faq {
+                width: 100%;
+            }
+        }
+        &-desc {
+            width: 60%;
+        }
+        list-style: none;
+        border-bottom: 1px solid #ddd;
+        padding: 8px;
+        line-height: 1.4;
+        &:last-of-type {
+            border-bottom: none;
+        }
+    }
+
+	.sortable-drag {
+        border-bottom: none;
+    }
+
+    .dragging-group {
+        ul {
+            display: none;
+        }
     }
 }

@@ -1,73 +1,104 @@
 angular
     .module 'Egecms'
     .controller 'PagesIndex', ($scope, $attrs, $rootScope, $timeout, IndexService, Page, Published, ExportService, PageGroup) ->
+        l = (e) -> console.log e
+
+        angular.element(document).ready ->
+            $(document).scroll (event) ->
+                if $(document).scrollTop() + $(window).height() is $(document).height()
+                    $(document).scrollTop($(document).height() - 50)
+                    l 'scrolled back'
+
+        $scope.$watchCollection 'dnd', (newVal) ->
+            l $scope.dnd
+
         bindArguments($scope, arguments)
         ExportService.init({controller: 'pages'})
 
+        updatePositions = (group_ids) ->
+            group_ids = [group_ids] if not _.isArray group_ids
+            angular.forEach group_ids, (group_id) ->
+                group = $rootScope.findById $scope.groups, group_id
+                angular.forEach group.page, (page, index) ->
+                    Page.update({id: page.id, position: index})
+
+        dragEnd = ->
+            $scope.dnd = {}
+
         $scope.sortablePageConf =
             animation: 150
+            group:
+                name:   'variable'
+                put:    'variable'
+            fallbackTolerance: 5
+
             onUpdate: (event) ->
-                angular.forEach event.models, (obj, index) ->
-                    Page.update({id: obj.id, position: index})
+                updatePositions $scope.dnd.group_id
+
+            onAdd: (event) ->
+                page_id = $scope.dnd.page_id
+                if $scope.dnd.group_id and $scope.dnd.page_id and ($scope.dnd.group_id isnt $scope.dnd.old_group_id)
+                   if $scope.dnd.group_id is -1
+                       PageGroup.save {page_id: $scope.dnd.page_id}, (response) ->
+                           $scope.groups.push(response)
+                           moveToGroup $scope.dnd.page_id, response.id, $scope.dnd.old_group_id, true
+                           dragEnd()
+                   else if $scope.dnd.group_id
+                       moveToGroup $scope.dnd.page_id, $scope.dnd.group_id, $scope.dnd.old_group_id
+                       updatePositions [$scope.dnd.group_id, $scope.dnd.old_group_id]
+
+            onEnd: (event) ->
+                dragEnd() if $scope.dnd.group_id isnt -1
+
+        $scope.dragOver = (group) ->
+            $scope.dnd.group_id = group.id if $scope.dnd.type isnt 'group'
 
         $scope.sortableGroupConf =
             animation: 150
-            onStart: (event) ->
-                $scope.group_sorting = true
+            handle: '.group-title'
+            dragClass: 'dragging-group'
             onUpdate: (event) ->
-                $scope.group_sorting = false
-                angular.forEach event.models, (obj, index) ->
-                    PageGroup.update({id: obj.id, position: index})
+                angular.forEach $scope.groups, (group, index) ->
+                    group.position = index
+                    PageGroup.update({id: group.id, position: index})
+
+            onStart: (event) ->
+                $scope.dnd.type = 'group'
+
+            onEnd: (event) ->
+                $scope.dnd = {}
 
         $scope.dnd = {}
 
-        $scope.dragStart = (page_id) ->
-            $timeout ->
-                console.log('drag start', page_id)
-                $scope.dnd.page_id = page_id
-
-        $scope.drop = (group_id) ->
-            page_id = $scope.dnd.page_id
-            if page_id and group_id and (group_id isnt $scope.getGroup(page_id).id)
-                if group_id is -1
-                    PageGroup.save {page_id: page_id}, (response) ->
-                        $scope.groups.push(response)
-                        moveToGroup(page_id, response.id)
-                else if group_id
-                    Page.update({id: $scope.dnd.page_id, group_id: group_id})
-                    moveToGroup(page_id, group_id)
-            $scope.dnd = {}
-
         # переместить в группу
-        moveToGroup = (page_id, group_id) ->
-            group_to = $rootScope.findById($scope.groups, group_id)
-            group_from = $scope.getGroup(page_id)
-            page = $rootScope.findById(group_from.page, page_id)
+        moveToGroup = (page_id, group_id, old_group_id, copy_item = false) ->
+            Page.update id: page_id, group_id: group_id
+
+            group_from = _.find $scope.groups, id: old_group_id
+            page = _.clone findById(group_from.page, page_id)
             page.group_id = group_id
+
             group_from.page = removeById(group_from.page, page_id)
-            page.group_id = group_id
-            group_to.page.push(page)
+            group_to = _.find $scope.groups, id: group_id
 
-
-
-        $scope.getGroup = (page_id) ->
-            group_found = null
-            $scope.groups.forEach (group) ->
-                return if group_found isnt null
-                group.page.forEach (page) ->
-                    if page.id is parseInt(page_id)
-                        group_found = group
-                        return
-            group_found
-
-        $scope.getPage = (page_id) ->
-            $rootScope.findById($scope.getGroup(page_id).page, page_id)
+            if copy_item
+                group_to.page.push page
+            else
+                page = $rootScope.findById(group_to.page, page_id)
+                page.group_id = group_id
 
         $scope.removeGroup = (group) ->
             bootbox.confirm "Вы уверены, что хотите удалить группу «#{group.title}»", (response) ->
                 if response is true
                     PageGroup.remove {id: group.id}
-                    $scope.groups = removeById($scope.groups, group.id)
+                    new_group_id = (_.max _.without($scope.groups, group), (group) -> group.position).id
+
+                    if group.page
+                        angular.forEach group.page, (page) ->
+                            moveToGroup page.id, new_group_id, page.group_id, true
+                        updatePositions new_group_id
+
+                    $scope.groups = removeById $scope.groups, group.id
 
         $scope.onEdit = (id, event) ->
             PageGroup.update {id: id, title: $(event.target).text()}

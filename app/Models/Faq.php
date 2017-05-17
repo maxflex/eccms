@@ -17,6 +17,8 @@ class Faq extends Model
 
     protected static function boot()
     {
+        parent::boot();
+
         // @todo: присвоение группы перенести в интерфейс
         static::creating(function($model) {
             if (! isset($model->group_id)) {
