@@ -19783,8 +19783,11 @@ select[multiple] {
   line-height: 1.4;
 }
 
-.nested-dnd .group-item-title {
+.nested-dnd .group-item span, .nested-dnd .group-item a {
   display: inline-block;
+}
+
+.nested-dnd .group-item-title {
   width: 35%;
 }
 
@@ -19793,7 +19796,6 @@ select[multiple] {
 }
 
 .nested-dnd .group-item-desc {
-  display: inline-block;
   width: 60%;
 }
 

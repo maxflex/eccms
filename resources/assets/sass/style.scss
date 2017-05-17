@@ -4143,15 +4143,17 @@ select[multiple] {
         }
     }
     .group-item {
-        &-title {
+        span, a {
             display: inline-block;
+        }
+
+        &-title {
             width: 35%;
             &-faq {
                 width: 100%;
             }
         }
         &-desc {
-            display: inline-block;
             width: 60%;
         }
         list-style: none;
