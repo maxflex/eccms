@@ -39,7 +39,8 @@ class PageGroupsController extends Controller
      */
     public function store(Request $request)
     {
-        ($page_group = PageGroup::create())->load('page');
+        $page_group = PageGroup::create();
+        $page_group->load('page');
         Page::whereId($request->page_id)->update([
             'group_id' => $page_group->id,
         ]);
