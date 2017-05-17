@@ -1044,6 +1044,18 @@
       link: function($scope, $element, $attrs) {
         return $element.on('click', function(event) {
           return $element.attr('contenteditable', 'true').focus();
+        }).on('dblclick', function(event) {
+          var elem, rng, sel, text;
+          $element.attr('contenteditable', 'true').focus();
+          if ($attrs.hasOwnProperty('withDblclick')) {
+            elem = $(event.target);
+            text = elem.text();
+            rng = document.createRange();
+            rng.selectNode(elem[0]);
+            sel = window.getSelection();
+            sel.removeAllRanges();
+            return sel.addRange(rng);
+          }
         }).on('keydown', function(event) {
           var ref;
           if ((ref = event.keyCode) === 13 || ref === 27) {

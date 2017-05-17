@@ -11,7 +11,7 @@
     <div ng-sortable="sortableGroupConf" class="nested-dnd">
         <div class="layer group" ng-repeat="group in groups">
             <div class="group-title">
-                <h4 class='inline-block' editable='@{{ group.id }}' ng-class="{'disable-events': !group.id}">@{{ group.title }}</h4>
+                <h4 class='inline-block' editable='@{{ group.id }}' with-dblclick ng-class="{'disable-events': !group.id}">@{{ group.title }}</h4>
                 <a ng-if='group.id' class='link-like text-danger show-on-hover' ng-click='removeGroup(group)'>удалить</a>
             </div>
             <ul ng-sortable="sortableVariableConf" class="group-list" ng-class="{'ng-hide': dnd.type == 'group', 'hovered': dnd.old_group_id != group.id && dnd.group_id == group.id }" ng-dragover="dragOver(group)">
