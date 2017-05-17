@@ -26,6 +26,7 @@ class VariableGroup extends Model
     {
         static::creating(function($model) {
             $model->title = self::DEFAULT_TITLE;
+            $model->position = static::max('position') + 1;
         });
     }
 }

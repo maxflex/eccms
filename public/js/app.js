@@ -331,613 +331,6 @@
 }).call(this);
 
 (function() {
-  angular.module('Egecms').controller('FaqIndex', function($scope, $rootScope, $attrs, $timeout, Faq, FaqGroup) {
-    var moveToGroup;
-    bindArguments($scope, arguments);
-    $scope.sortableFaqConf = {
-      animation: 150,
-      onUpdate: function(event) {
-        return angular.forEach(event.models, function(obj, index) {
-          return Faq.update({
-            id: obj.id,
-            position: index
-          });
-        });
-      }
-    };
-    $scope.sortableGroupConf = {
-      animation: 150,
-      onStart: function(event) {
-        return $scope.group_sorting = true;
-      },
-      onUpdate: function(event) {
-        $scope.group_sorting = false;
-        return angular.forEach(event.models, function(obj, index) {
-          return FaqGroup.update({
-            id: obj.id,
-            position: index
-          });
-        });
-      }
-    };
-    $scope.dnd = {};
-    $scope.dragStart = function(faq_id) {
-      return $timeout(function() {
-        console.log('drag start', faq_id);
-        return $scope.dnd.faq_id = faq_id;
-      });
-    };
-    $scope.drop = function(group_id) {
-      var faq_id;
-      faq_id = $scope.dnd.faq_id;
-      if (group_id && faq_id && (group_id !== $scope.getGroup(faq_id).id)) {
-        if (group_id === -1) {
-          FaqGroup.save({
-            faq_id: faq_id
-          }, function(response) {
-            $scope.groups.push(response);
-            return moveToGroup(faq_id, response.id);
-          });
-        } else if (group_id) {
-          Faq.update({
-            id: faq_id,
-            group_id: group_id
-          });
-          moveToGroup(faq_id, group_id);
-        }
-      }
-      return $scope.dnd = {};
-    };
-    moveToGroup = function(faq_id, group_id) {
-      var faq, group_from, group_to;
-      group_to = $rootScope.findById($scope.groups, group_id);
-      group_from = $scope.getGroup(faq_id);
-      faq = $rootScope.findById(group_from.faq, faq_id);
-      group_from.faq = removeById(group_from.faq, faq_id);
-      faq.group_id = group_id;
-      return group_to.faq.push(faq);
-    };
-    $scope.getGroup = function(faq_id) {
-      var group_found;
-      group_found = null;
-      $scope.groups.forEach(function(group) {
-        if (group_found !== null) {
-          return;
-        }
-        return group.faq.forEach(function(faq) {
-          if (faq.id === parseInt(faq_id)) {
-            group_found = group;
-          }
-        });
-      });
-      return group_found;
-    };
-    $scope.getFaq = function(faq_id) {
-      return $rootScope.findById($scope.getGroup(faq_id).faq, faq_id);
-    };
-    $scope.removeGroup = function(group) {
-      return bootbox.confirm("Вы уверены, что хотите удалить группу «" + group.title + "»", function(response) {
-        if (response === true) {
-          FaqGroup.remove({
-            id: group.id
-          });
-          return $scope.groups = removeById($scope.groups, group.id);
-        }
-      });
-    };
-    return $scope.onEdit = function(id, event) {
-      return FaqGroup.update({
-        id: id,
-        title: $(event.target).text()
-      });
-    };
-  }).controller('FaqForm', function($scope, $attrs, $timeout, FormService, AceService, Faq) {
-    bindArguments($scope, arguments);
-    return angular.element(document).ready(function() {
-      return FormService.init(Faq, $scope.id, $scope.model);
-    });
-  });
-
-}).call(this);
-
-(function() {
-  angular.module('Egecms').controller('LoginCtrl', function($scope, $http) {
-    angular.element(document).ready(function() {
-      return $scope.l = Ladda.create(document.querySelector('#login-submit'));
-    });
-    return $scope.checkFields = function() {
-      $scope.l.start();
-      ajaxStart();
-      $scope.in_process = true;
-      return $http.post('login', {
-        login: $scope.login,
-        password: $scope.password
-      }).then(function(response) {
-        if (response.data === true) {
-          return location.reload();
-        } else {
-          $scope.in_process = false;
-          ajaxEnd();
-          $scope.l.stop();
-          return notifyError("Неправильная пара логин-пароль");
-        }
-      });
-    };
-  });
-
-}).call(this);
-
-(function() {
-  angular.module('Egecms').controller('PagesIndex', function($scope, $attrs, $rootScope, $timeout, IndexService, Page, Published, ExportService, PageGroup) {
-    var moveToGroup;
-    bindArguments($scope, arguments);
-    ExportService.init({
-      controller: 'pages'
-    });
-    $scope.sortablePageConf = {
-      animation: 150,
-      onUpdate: function(event) {
-        return angular.forEach(event.models, function(obj, index) {
-          return Page.update({
-            id: obj.id,
-            position: index
-          });
-        });
-      }
-    };
-    $scope.sortableGroupConf = {
-      animation: 150,
-      onStart: function(event) {
-        return $scope.group_sorting = true;
-      },
-      onUpdate: function(event) {
-        $scope.group_sorting = false;
-        return angular.forEach(event.models, function(obj, index) {
-          return PageGroup.update({
-            id: obj.id,
-            position: index
-          });
-        });
-      }
-    };
-    $scope.dnd = {};
-    $scope.dragStart = function(page_id) {
-      return $timeout(function() {
-        console.log('drag start', page_id);
-        return $scope.dnd.page_id = page_id;
-      });
-    };
-    $scope.drop = function(group_id) {
-      var page_id;
-      page_id = $scope.dnd.page_id;
-      if (page_id && group_id && (group_id !== $scope.getGroup(page_id).id)) {
-        if (group_id === -1) {
-          PageGroup.save({
-            page_id: page_id
-          }, function(response) {
-            $scope.groups.push(response);
-            return moveToGroup(page_id, response.id);
-          });
-        } else if (group_id) {
-          Page.update({
-            id: $scope.dnd.page_id,
-            group_id: group_id
-          });
-          moveToGroup(page_id, group_id);
-        }
-      }
-      return $scope.dnd = {};
-    };
-    moveToGroup = function(page_id, group_id) {
-      var group_from, group_to, page;
-      group_to = $rootScope.findById($scope.groups, group_id);
-      group_from = $scope.getGroup(page_id);
-      page = $rootScope.findById(group_from.page, page_id);
-      page.group_id = group_id;
-      group_from.page = removeById(group_from.page, page_id);
-      page.group_id = group_id;
-      return group_to.page.push(page);
-    };
-    $scope.getGroup = function(page_id) {
-      var group_found;
-      group_found = null;
-      $scope.groups.forEach(function(group) {
-        if (group_found !== null) {
-          return;
-        }
-        return group.page.forEach(function(page) {
-          if (page.id === parseInt(page_id)) {
-            group_found = group;
-          }
-        });
-      });
-      return group_found;
-    };
-    $scope.getPage = function(page_id) {
-      return $rootScope.findById($scope.getGroup(page_id).page, page_id);
-    };
-    $scope.removeGroup = function(group) {
-      return bootbox.confirm("Вы уверены, что хотите удалить группу «" + group.title + "»", function(response) {
-        if (response === true) {
-          PageGroup.remove({
-            id: group.id
-          });
-          return $scope.groups = removeById($scope.groups, group.id);
-        }
-      });
-    };
-    return $scope.onEdit = function(id, event) {
-      return PageGroup.update({
-        id: id,
-        title: $(event.target).text()
-      });
-    };
-  }).controller('PagesForm', function($scope, $http, $attrs, $timeout, FormService, AceService, Page, Published, UpDown) {
-    var empty_useful;
-    bindArguments($scope, arguments);
-    empty_useful = {
-      text: null,
-      page_id_field: null
-    };
-    angular.element(document).ready(function() {
-      FormService.init(Page, $scope.id, $scope.model);
-      FormService.dataLoaded.promise.then(function() {
-        if (!FormService.model.useful || !FormService.model.useful.length) {
-          FormService.model.useful = [angular.copy(empty_useful)];
-        }
-        return ['html', 'html_mobile', 'seo_text'].forEach(function(field) {
-          return AceService.initEditor(FormService, 15, "editor--" + field);
-        });
-      });
-      return FormService.beforeSave = function() {
-        return ['html', 'html_mobile', 'seo_text'].forEach(function(field) {
-          return FormService.model[field] = AceService.getEditor("editor--" + field).getValue();
-        });
-      };
-    });
-    $scope.generateUrl = function(event) {
-      return $http.post('/api/translit/to-url', {
-        text: FormService.model.keyphrase
-      }).then(function(response) {
-        FormService.model.url = response.data;
-        return $scope.checkExistance('url', {
-          target: $(event.target).closest('div').find('input')
-        });
-      });
-    };
-    $scope.checkExistance = function(field, event) {
-      return Page.checkExistance({
-        id: FormService.model.id,
-        field: field,
-        value: FormService.model[field]
-      }, function(response) {
-        var element;
-        element = $(event.target);
-        if (response.exists) {
-          FormService.error_element = element;
-          return element.addClass('has-error').focus();
-        } else {
-          FormService.error_element = void 0;
-          return element.removeClass('has-error');
-        }
-      });
-    };
-    $scope.checkUsefulExistance = function(field, event, value) {
-      return Page.checkExistance({
-        id: FormService.model.id,
-        field: field,
-        value: value
-      }, function(response) {
-        var element;
-        element = $(event.target);
-        if (!value || response.exists) {
-          FormService.error_element = void 0;
-          return element.removeClass('has-error');
-        } else {
-          FormService.error_element = element;
-          return element.addClass('has-error').focus();
-        }
-      });
-    };
-    $scope.addUseful = function() {
-      return FormService.model.useful.push(angular.copy(empty_useful));
-    };
-    $scope.addLinkDialog = function() {
-      $scope.link_text = AceService.editor.getSelectedText();
-      return $('#link-manager').modal('show');
-    };
-    $scope.search = function(input, promise) {
-      return $http.post('api/pages/search', {
-        q: input
-      }, {
-        timeout: promise
-      }).then(function(response) {
-        return response;
-      });
-    };
-    $scope.searchSelected = function(selectedObject) {
-      $scope.link_page_id = selectedObject.originalObject.id;
-      return $scope.$broadcast('angucomplete-alt:changeInput', 'page-search', $scope.link_page_id.toString());
-    };
-    $scope.addLink = function() {
-      var link;
-      link = "<a href='[link|" + $scope.link_page_id + "]'>" + $scope.link_text + "</a>";
-      $scope.link_page_id = void 0;
-      $scope.$broadcast('angucomplete-alt:clearInput');
-      AceService.editor.session.replace(AceService.editor.selection.getRange(), link);
-      return $('#link-manager').modal('hide');
-    };
-    return $scope.$watch('FormService.model.station_id', function(newVal, oldVal) {
-      return $timeout(function() {
-        return $('#sort').selectpicker('refresh');
-      });
-    });
-  });
-
-}).call(this);
-
-(function() {
-  angular.module('Egecms').config(function(ngImageGalleryOptsProvider) {
-    return ngImageGalleryOptsProvider.setOpts({
-      thumbnails: true,
-      inline: false,
-      imgBubbles: false,
-      bgClose: true,
-      imgAnim: 'fadeup'
-    });
-  }).controller('PhotosIndex', function($scope, $attrs, IndexService, Photo, PhotoService) {
-    bindArguments($scope, arguments);
-    angular.element(document).ready(function() {
-      return IndexService.init(Photo, $scope.current_page, $attrs);
-    });
-    return $scope.sortablePhotosConf = {
-      animation: 150,
-      onUpdate: function(event) {
-        var positions;
-        positions = {};
-        angular.forEach(event.models, function(obj, index) {
-          return positions[obj.id] = index;
-        });
-        return Photo.updateAll({
-          positions: positions
-        });
-      }
-    };
-  }).controller('PhotosForm', function($scope, $attrs, FormService, Photo, PhotoService) {
-    bindArguments($scope, arguments);
-    angular.element(document).ready(function() {
-      return FormService.init(Photo, $scope.id, $scope.model);
-    });
-    return $scope.$watchCollection('FormService.model.photos', function(newVal, oldVal) {
-      if (newVal !== void 0) {
-        return $scope.images = PhotoService.getImages();
-      }
-    });
-  });
-
-}).call(this);
-
-(function() {
-  angular.module('Egecms').controller('ProgramsIndex', function($scope, $attrs, IndexService, Program) {
-    bindArguments($scope, arguments);
-    angular.element(document).ready(function() {
-      return IndexService.init(Program, $scope.current_page, $attrs);
-    });
-    return $scope.childLessonSum = function(model) {
-      if (!(model && model.content)) {
-        return 0;
-      }
-      if (!model.content.length) {
-        return +model.lesson_count || 0;
-      }
-      return _.reduce(model.content, function(sum, value) {
-        return sum + parseInt($scope.childLessonSum(value));
-      }, 0);
-    };
-  }).controller('ProgramsForm', function($scope, $attrs, $timeout, FormService, Program) {
-    bindArguments($scope, arguments);
-    return angular.element(document).ready(function() {
-      return FormService.init(Program, $scope.id, $scope.model);
-    });
-  });
-
-}).call(this);
-
-(function() {
-  angular.module('Egecms').controller('SassIndex', function($scope, $attrs, $http, IndexService, Sass) {
-    bindArguments($scope, arguments);
-    $scope.getName = function(path) {
-      return path.split('/').slice(-1)[0];
-    };
-    return angular.element(document).ready(function() {
-      return $http.get("api" + $scope.current_path, {}).then(function(response) {
-        return $scope.data = response.data;
-      });
-    });
-  }).controller('SassForm', function($scope, $rootScope, $http, $timeout, FormService, AceService, Sass) {
-    bindArguments($scope, arguments);
-    $rootScope.frontend_loading = true;
-    angular.element(document).ready(function() {
-      return $http.get('api/sass/' + $scope.file).then(function(response) {
-        $scope.text = response.data;
-        return $timeout(function() {
-          $rootScope.frontend_loading = false;
-          $scope.editor = ace.edit('editor');
-          $scope.editor.getSession().setMode('ace/mode/css');
-          $scope.editor.getSession().setUseWrapMode(true);
-          return $scope.editor.setOptions({
-            minLines: 20,
-            maxLines: 2e308
-          });
-        });
-      });
-    });
-    return $scope.save = function() {
-      ajaxStart();
-      return $http.post('api/sass/' + $scope.file, {
-        text: $scope.editor.getValue()
-      }).then(function() {
-        return ajaxEnd();
-      });
-    };
-  });
-
-}).call(this);
-
-(function() {
-  angular.module('Egecms').controller('SearchIndex', function($scope, $attrs, $timeout, IndexService, Page, Published, ExportService) {
-    bindArguments($scope, arguments);
-    ExportService.init({
-      controller: 'pages'
-    });
-    return angular.element(document).ready(function() {
-      return IndexService.init(Page, $scope.current_page, $attrs, false);
-    });
-  });
-
-}).call(this);
-
-(function() {
-  angular.module('Egecms').controller('VariablesIndex', function($scope, $attrs, $rootScope, $timeout, IndexService, Variable, VariableGroup) {
-    var l, moveToGroup;
-    l = function(e) {
-      return console.log(e);
-    };
-    bindArguments($scope, arguments);
-    $scope.sortableVariableConf = {
-      animation: 150,
-      group: {
-        name: 'variable',
-        put: 'variable'
-      },
-      onUpdate: function(event) {
-        return angular.forEach(event.models, function(obj, index) {
-          return Variable.update({
-            id: obj.id,
-            position: index
-          });
-        });
-      },
-      onAdd: function(event) {
-        return l('add', event);
-      },
-      onRemove: function(event) {
-        return l('rem', event);
-      },
-      onMove: function(event) {
-        return l('move');
-      }
-    };
-    $scope.sortableGroupConf = {
-      animation: 150,
-      handle: '.group-title',
-      onUpdate: function(event) {
-        return l('g upd');
-      },
-      onStart: function(event) {
-        return l('g start');
-      },
-      onAdd: function(event) {
-        return l('g add');
-      },
-      onRemove: function(event) {
-        return l('g rem');
-      },
-      onMove: function(event) {
-        return l('g move');
-      }
-    };
-    $scope.dnd = {};
-    $scope.dragStart = function(variable_id) {};
-    $scope.drop = function(group_id) {};
-    moveToGroup = function(variable_id, group_id) {
-      var group_from, group_to, variable;
-      group_to = $rootScope.findById($scope.groups, group_id);
-      group_from = $scope.getGroup(variable_id);
-      variable = $rootScope.findById(group_from.variable, variable_id);
-      group_from.variable = removeById(group_from.variable, variable_id);
-      variable.group_id = group_id;
-      return group_to.variable.push(variable);
-    };
-    $scope.getGroup = function(variable_id) {
-      var group_found;
-      group_found = null;
-      $scope.groups.forEach(function(group) {
-        if (group_found !== null) {
-          return;
-        }
-        return group.variable.forEach(function(variable) {
-          if (variable.id === parseInt(variable_id)) {
-            group_found = group;
-          }
-        });
-      });
-      return group_found;
-    };
-    $scope.getVariable = function(variable_id) {
-      return $rootScope.findById($scope.getGroup(variable_id).variable, variable_id);
-    };
-    $scope.removeGroup = function(group) {
-      return bootbox.confirm("Вы уверены, что хотите удалить группу «" + group.title + "»", function(response) {
-        if (response === true) {
-          VariableGroup.remove({
-            id: group.id
-          });
-          return $scope.groups = removeById($scope.groups, group.id);
-        }
-      });
-    };
-    return $scope.onEdit = function(id, event) {
-      return VariableGroup.update({
-        id: id,
-        title: $(event.target).text()
-      });
-    };
-  }).controller('VariablesForm', function($scope, $attrs, $timeout, FormService, AceService, Variable) {
-    bindArguments($scope, arguments);
-    return angular.element(document).ready(function() {
-      FormService.init(Variable, $scope.id, $scope.model);
-      FormService.dataLoaded.promise.then(function() {
-        AceService.initEditor(FormService, 30);
-        if (FormService.model.html[0] === '{') {
-          return AceService.editor.getSession().setMode('ace/mode/json');
-        }
-      });
-      return FormService.beforeSave = function() {
-        return FormService.model.html = AceService.editor.getValue();
-      };
-    });
-  });
-
-}).call(this);
-
-(function() {
-  angular.module('Egecms').value('Published', [
-    {
-      id: 0,
-      title: 'не опубликовано'
-    }, {
-      id: 1,
-      title: 'опубликовано'
-    }
-  ]).value('UpDown', [
-    {
-      id: 1,
-      title: 'вверху'
-    }, {
-      id: 2,
-      title: 'внизу'
-    }
-  ]);
-
-}).call(this);
-
-(function() {
-
-
-}).call(this);
-
-(function() {
 
 
 }).call(this);
@@ -1525,6 +918,680 @@
 
 (function() {
 
+
+}).call(this);
+
+(function() {
+
+
+}).call(this);
+
+(function() {
+  angular.module('Egecms').controller('FaqIndex', function($scope, $rootScope, $attrs, $timeout, Faq, FaqGroup) {
+    var moveToGroup;
+    bindArguments($scope, arguments);
+    $scope.sortableFaqConf = {
+      animation: 150,
+      onUpdate: function(event) {
+        return angular.forEach(event.models, function(obj, index) {
+          return Faq.update({
+            id: obj.id,
+            position: index
+          });
+        });
+      }
+    };
+    $scope.sortableGroupConf = {
+      animation: 150,
+      onStart: function(event) {
+        return $scope.group_sorting = true;
+      },
+      onUpdate: function(event) {
+        $scope.group_sorting = false;
+        return angular.forEach(event.models, function(obj, index) {
+          return FaqGroup.update({
+            id: obj.id,
+            position: index
+          });
+        });
+      }
+    };
+    $scope.dnd = {};
+    $scope.dragStart = function(faq_id) {
+      return $timeout(function() {
+        console.log('drag start', faq_id);
+        return $scope.dnd.faq_id = faq_id;
+      });
+    };
+    $scope.drop = function(group_id) {
+      var faq_id;
+      faq_id = $scope.dnd.faq_id;
+      if (group_id && faq_id && (group_id !== $scope.getGroup(faq_id).id)) {
+        if (group_id === -1) {
+          FaqGroup.save({
+            faq_id: faq_id
+          }, function(response) {
+            $scope.groups.push(response);
+            return moveToGroup(faq_id, response.id);
+          });
+        } else if (group_id) {
+          Faq.update({
+            id: faq_id,
+            group_id: group_id
+          });
+          moveToGroup(faq_id, group_id);
+        }
+      }
+      return $scope.dnd = {};
+    };
+    moveToGroup = function(faq_id, group_id) {
+      var faq, group_from, group_to;
+      group_to = $rootScope.findById($scope.groups, group_id);
+      group_from = $scope.getGroup(faq_id);
+      faq = $rootScope.findById(group_from.faq, faq_id);
+      group_from.faq = removeById(group_from.faq, faq_id);
+      faq.group_id = group_id;
+      return group_to.faq.push(faq);
+    };
+    $scope.getGroup = function(faq_id) {
+      var group_found;
+      group_found = null;
+      $scope.groups.forEach(function(group) {
+        if (group_found !== null) {
+          return;
+        }
+        return group.faq.forEach(function(faq) {
+          if (faq.id === parseInt(faq_id)) {
+            group_found = group;
+          }
+        });
+      });
+      return group_found;
+    };
+    $scope.getFaq = function(faq_id) {
+      return $rootScope.findById($scope.getGroup(faq_id).faq, faq_id);
+    };
+    $scope.removeGroup = function(group) {
+      return bootbox.confirm("Вы уверены, что хотите удалить группу «" + group.title + "»", function(response) {
+        if (response === true) {
+          FaqGroup.remove({
+            id: group.id
+          });
+          return $scope.groups = removeById($scope.groups, group.id);
+        }
+      });
+    };
+    return $scope.onEdit = function(id, event) {
+      return FaqGroup.update({
+        id: id,
+        title: $(event.target).text()
+      });
+    };
+  }).controller('FaqForm', function($scope, $attrs, $timeout, FormService, AceService, Faq) {
+    bindArguments($scope, arguments);
+    return angular.element(document).ready(function() {
+      return FormService.init(Faq, $scope.id, $scope.model);
+    });
+  });
+
+}).call(this);
+
+(function() {
+  angular.module('Egecms').controller('LoginCtrl', function($scope, $http) {
+    angular.element(document).ready(function() {
+      return $scope.l = Ladda.create(document.querySelector('#login-submit'));
+    });
+    return $scope.checkFields = function() {
+      $scope.l.start();
+      ajaxStart();
+      $scope.in_process = true;
+      return $http.post('login', {
+        login: $scope.login,
+        password: $scope.password
+      }).then(function(response) {
+        if (response.data === true) {
+          return location.reload();
+        } else {
+          $scope.in_process = false;
+          ajaxEnd();
+          $scope.l.stop();
+          return notifyError("Неправильная пара логин-пароль");
+        }
+      });
+    };
+  });
+
+}).call(this);
+
+(function() {
+  angular.module('Egecms').controller('PagesIndex', function($scope, $attrs, $rootScope, $timeout, IndexService, Page, Published, ExportService, PageGroup) {
+    var moveToGroup;
+    bindArguments($scope, arguments);
+    ExportService.init({
+      controller: 'pages'
+    });
+    $scope.sortablePageConf = {
+      animation: 150,
+      onUpdate: function(event) {
+        return angular.forEach(event.models, function(obj, index) {
+          return Page.update({
+            id: obj.id,
+            position: index
+          });
+        });
+      }
+    };
+    $scope.sortableGroupConf = {
+      animation: 150,
+      onStart: function(event) {
+        return $scope.group_sorting = true;
+      },
+      onUpdate: function(event) {
+        $scope.group_sorting = false;
+        return angular.forEach(event.models, function(obj, index) {
+          return PageGroup.update({
+            id: obj.id,
+            position: index
+          });
+        });
+      }
+    };
+    $scope.dnd = {};
+    $scope.dragStart = function(page_id) {
+      return $timeout(function() {
+        console.log('drag start', page_id);
+        return $scope.dnd.page_id = page_id;
+      });
+    };
+    $scope.drop = function(group_id) {
+      var page_id;
+      page_id = $scope.dnd.page_id;
+      if (page_id && group_id && (group_id !== $scope.getGroup(page_id).id)) {
+        if (group_id === -1) {
+          PageGroup.save({
+            page_id: page_id
+          }, function(response) {
+            $scope.groups.push(response);
+            return moveToGroup(page_id, response.id);
+          });
+        } else if (group_id) {
+          Page.update({
+            id: $scope.dnd.page_id,
+            group_id: group_id
+          });
+          moveToGroup(page_id, group_id);
+        }
+      }
+      return $scope.dnd = {};
+    };
+    moveToGroup = function(page_id, group_id) {
+      var group_from, group_to, page;
+      group_to = $rootScope.findById($scope.groups, group_id);
+      group_from = $scope.getGroup(page_id);
+      page = $rootScope.findById(group_from.page, page_id);
+      page.group_id = group_id;
+      group_from.page = removeById(group_from.page, page_id);
+      page.group_id = group_id;
+      return group_to.page.push(page);
+    };
+    $scope.getGroup = function(page_id) {
+      var group_found;
+      group_found = null;
+      $scope.groups.forEach(function(group) {
+        if (group_found !== null) {
+          return;
+        }
+        return group.page.forEach(function(page) {
+          if (page.id === parseInt(page_id)) {
+            group_found = group;
+          }
+        });
+      });
+      return group_found;
+    };
+    $scope.getPage = function(page_id) {
+      return $rootScope.findById($scope.getGroup(page_id).page, page_id);
+    };
+    $scope.removeGroup = function(group) {
+      return bootbox.confirm("Вы уверены, что хотите удалить группу «" + group.title + "»", function(response) {
+        if (response === true) {
+          PageGroup.remove({
+            id: group.id
+          });
+          return $scope.groups = removeById($scope.groups, group.id);
+        }
+      });
+    };
+    return $scope.onEdit = function(id, event) {
+      return PageGroup.update({
+        id: id,
+        title: $(event.target).text()
+      });
+    };
+  }).controller('PagesForm', function($scope, $http, $attrs, $timeout, FormService, AceService, Page, Published, UpDown) {
+    var empty_useful;
+    bindArguments($scope, arguments);
+    empty_useful = {
+      text: null,
+      page_id_field: null
+    };
+    angular.element(document).ready(function() {
+      FormService.init(Page, $scope.id, $scope.model);
+      FormService.dataLoaded.promise.then(function() {
+        if (!FormService.model.useful || !FormService.model.useful.length) {
+          FormService.model.useful = [angular.copy(empty_useful)];
+        }
+        return ['html', 'html_mobile', 'seo_text'].forEach(function(field) {
+          return AceService.initEditor(FormService, 15, "editor--" + field);
+        });
+      });
+      return FormService.beforeSave = function() {
+        return ['html', 'html_mobile', 'seo_text'].forEach(function(field) {
+          return FormService.model[field] = AceService.getEditor("editor--" + field).getValue();
+        });
+      };
+    });
+    $scope.generateUrl = function(event) {
+      return $http.post('/api/translit/to-url', {
+        text: FormService.model.keyphrase
+      }).then(function(response) {
+        FormService.model.url = response.data;
+        return $scope.checkExistance('url', {
+          target: $(event.target).closest('div').find('input')
+        });
+      });
+    };
+    $scope.checkExistance = function(field, event) {
+      return Page.checkExistance({
+        id: FormService.model.id,
+        field: field,
+        value: FormService.model[field]
+      }, function(response) {
+        var element;
+        element = $(event.target);
+        if (response.exists) {
+          FormService.error_element = element;
+          return element.addClass('has-error').focus();
+        } else {
+          FormService.error_element = void 0;
+          return element.removeClass('has-error');
+        }
+      });
+    };
+    $scope.checkUsefulExistance = function(field, event, value) {
+      return Page.checkExistance({
+        id: FormService.model.id,
+        field: field,
+        value: value
+      }, function(response) {
+        var element;
+        element = $(event.target);
+        if (!value || response.exists) {
+          FormService.error_element = void 0;
+          return element.removeClass('has-error');
+        } else {
+          FormService.error_element = element;
+          return element.addClass('has-error').focus();
+        }
+      });
+    };
+    $scope.addUseful = function() {
+      return FormService.model.useful.push(angular.copy(empty_useful));
+    };
+    $scope.addLinkDialog = function() {
+      $scope.link_text = AceService.editor.getSelectedText();
+      return $('#link-manager').modal('show');
+    };
+    $scope.search = function(input, promise) {
+      return $http.post('api/pages/search', {
+        q: input
+      }, {
+        timeout: promise
+      }).then(function(response) {
+        return response;
+      });
+    };
+    $scope.searchSelected = function(selectedObject) {
+      $scope.link_page_id = selectedObject.originalObject.id;
+      return $scope.$broadcast('angucomplete-alt:changeInput', 'page-search', $scope.link_page_id.toString());
+    };
+    $scope.addLink = function() {
+      var link;
+      link = "<a href='[link|" + $scope.link_page_id + "]'>" + $scope.link_text + "</a>";
+      $scope.link_page_id = void 0;
+      $scope.$broadcast('angucomplete-alt:clearInput');
+      AceService.editor.session.replace(AceService.editor.selection.getRange(), link);
+      return $('#link-manager').modal('hide');
+    };
+    return $scope.$watch('FormService.model.station_id', function(newVal, oldVal) {
+      return $timeout(function() {
+        return $('#sort').selectpicker('refresh');
+      });
+    });
+  });
+
+}).call(this);
+
+(function() {
+  angular.module('Egecms').config(function(ngImageGalleryOptsProvider) {
+    return ngImageGalleryOptsProvider.setOpts({
+      thumbnails: true,
+      inline: false,
+      imgBubbles: false,
+      bgClose: true,
+      imgAnim: 'fadeup'
+    });
+  }).controller('PhotosIndex', function($scope, $attrs, IndexService, Photo, PhotoService) {
+    bindArguments($scope, arguments);
+    angular.element(document).ready(function() {
+      return IndexService.init(Photo, $scope.current_page, $attrs);
+    });
+    return $scope.sortablePhotosConf = {
+      animation: 150,
+      onUpdate: function(event) {
+        var positions;
+        positions = {};
+        angular.forEach(event.models, function(obj, index) {
+          return positions[obj.id] = index;
+        });
+        return Photo.updateAll({
+          positions: positions
+        });
+      }
+    };
+  }).controller('PhotosForm', function($scope, $attrs, FormService, Photo, PhotoService) {
+    bindArguments($scope, arguments);
+    angular.element(document).ready(function() {
+      return FormService.init(Photo, $scope.id, $scope.model);
+    });
+    return $scope.$watchCollection('FormService.model.photos', function(newVal, oldVal) {
+      if (newVal !== void 0) {
+        return $scope.images = PhotoService.getImages();
+      }
+    });
+  });
+
+}).call(this);
+
+(function() {
+  angular.module('Egecms').controller('ProgramsIndex', function($scope, $attrs, IndexService, Program) {
+    bindArguments($scope, arguments);
+    angular.element(document).ready(function() {
+      return IndexService.init(Program, $scope.current_page, $attrs);
+    });
+    return $scope.childLessonSum = function(model) {
+      if (!(model && model.content)) {
+        return 0;
+      }
+      if (!model.content.length) {
+        return +model.lesson_count || 0;
+      }
+      return _.reduce(model.content, function(sum, value) {
+        return sum + parseInt($scope.childLessonSum(value));
+      }, 0);
+    };
+  }).controller('ProgramsForm', function($scope, $attrs, $timeout, FormService, Program) {
+    bindArguments($scope, arguments);
+    return angular.element(document).ready(function() {
+      return FormService.init(Program, $scope.id, $scope.model);
+    });
+  });
+
+}).call(this);
+
+(function() {
+  angular.module('Egecms').controller('SassIndex', function($scope, $attrs, $http, IndexService, Sass) {
+    bindArguments($scope, arguments);
+    $scope.getName = function(path) {
+      return path.split('/').slice(-1)[0];
+    };
+    return angular.element(document).ready(function() {
+      return $http.get("api" + $scope.current_path, {}).then(function(response) {
+        return $scope.data = response.data;
+      });
+    });
+  }).controller('SassForm', function($scope, $rootScope, $http, $timeout, FormService, AceService, Sass) {
+    bindArguments($scope, arguments);
+    $rootScope.frontend_loading = true;
+    angular.element(document).ready(function() {
+      return $http.get('api/sass/' + $scope.file).then(function(response) {
+        $scope.text = response.data;
+        return $timeout(function() {
+          $rootScope.frontend_loading = false;
+          $scope.editor = ace.edit('editor');
+          $scope.editor.getSession().setMode('ace/mode/css');
+          $scope.editor.getSession().setUseWrapMode(true);
+          return $scope.editor.setOptions({
+            minLines: 20,
+            maxLines: 2e308
+          });
+        });
+      });
+    });
+    return $scope.save = function() {
+      ajaxStart();
+      return $http.post('api/sass/' + $scope.file, {
+        text: $scope.editor.getValue()
+      }).then(function() {
+        return ajaxEnd();
+      });
+    };
+  });
+
+}).call(this);
+
+(function() {
+  angular.module('Egecms').controller('SearchIndex', function($scope, $attrs, $timeout, IndexService, Page, Published, ExportService) {
+    bindArguments($scope, arguments);
+    ExportService.init({
+      controller: 'pages'
+    });
+    return angular.element(document).ready(function() {
+      return IndexService.init(Page, $scope.current_page, $attrs, false);
+    });
+  });
+
+}).call(this);
+
+(function() {
+  angular.module('Egecms').controller('VariablesIndex', function($scope, $attrs, $rootScope, $timeout, IndexService, Variable, VariableGroup) {
+    var dragEnd, l, moveToGroup, updatePositions;
+    l = function(e) {
+      return console.log(e);
+    };
+    $scope.$watchCollection('dnd', function(newVal) {
+      return l($scope.dnd);
+    });
+    bindArguments($scope, arguments);
+    updatePositions = function(group_ids) {
+      return angular.forEach(group_ids, function(group_id) {
+        var group;
+        group = $rootScope.findById($scope.groups, group_id);
+        return angular.forEach(group.variable, function(variable, index) {
+          return Variable.update({
+            id: variable.id,
+            position: index
+          });
+        });
+      });
+    };
+    dragEnd = function() {
+      return $scope.dnd = {};
+    };
+    $scope.sortableVariableConf = {
+      animation: 150,
+      group: {
+        name: 'variable',
+        put: 'variable'
+      },
+      onUpdate: function(event) {
+        console.log('upd');
+        return updatePositions([$scope.dnd.group_id]);
+      },
+      onAdd: function(event) {
+        var variable_id;
+        l('add');
+        variable_id = $scope.dnd.variable_id;
+        if ($scope.dnd.group_id && $scope.dnd.variable_id && ($scope.dnd.group_id !== $scope.dnd.old_group_id)) {
+          if ($scope.dnd.group_id === -1) {
+            return VariableGroup.save({
+              variable_id: $scope.dnd.variable_id
+            }, function(response) {
+              $scope.groups.push(response);
+              moveToGroup($scope.dnd.variable_id, response.id, $scope.dnd.old_group_id, true);
+              return dragEnd();
+            });
+          } else if ($scope.dnd.group_id) {
+            Variable.update({
+              id: $scope.dnd.variable_id,
+              group_id: $scope.dnd.group_id
+            });
+            moveToGroup($scope.dnd.variable_id, $scope.dnd.group_id, $scope.dnd.old_group_id);
+            return updatePositions([$scope.dnd.group_id, $scope.dnd.old_group_id]);
+          }
+        }
+      },
+      onRemove: function(event) {
+        return l('rem', event);
+      },
+      onEnd: function(event) {
+        if ($scope.dnd.group_id !== -1) {
+          return dragEnd();
+        }
+      }
+    };
+    $scope.dragOver = function(group) {
+      if ($scope.dnd.type !== 'group') {
+        return $scope.dnd.group_id = group.id;
+      }
+    };
+    $scope.sortableGroupConf = {
+      animation: 150,
+      handle: '.group-title',
+      dragClass: 'dragging-group',
+      ghostClass: 'dragging-group-g',
+      onUpdate: function(event) {
+        l('g upd');
+        return angular.forEach($scope.groups, function(group, index) {
+          return VariableGroup.update({
+            id: group.id,
+            position: index
+          });
+        });
+      },
+      onStart: function(event) {
+        l('g strt');
+        return $scope.dnd.type = 'group';
+      },
+      onEnd: function(event) {
+        l('g end');
+        return $scope.dnd = {};
+      },
+      onRemove: function(event) {
+        return l('g rem');
+      },
+      onMove: function(event) {
+        return l('g move');
+      }
+    };
+    $scope.dnd = {};
+    moveToGroup = function(variable_id, group_id, old_group_id, copy_item) {
+      var group_from, group_to, variable;
+      if (copy_item == null) {
+        copy_item = false;
+      }
+      group_from = _.find($scope.groups, {
+        id: old_group_id
+      });
+      variable = _.clone(findById(group_from.variable, variable_id));
+      group_from.variable = removeById(group_from.variable, variable_id);
+      group_to = _.find($scope.groups, {
+        id: group_id
+      });
+      if (copy_item) {
+        return group_to.variable.push(variable);
+      } else {
+        variable = $rootScope.findById(group_to.variable, variable_id);
+        return variable.group_id = group_id;
+      }
+    };
+    $scope.getGroup = function(variable_id) {
+      var group_found;
+      group_found = null;
+      $scope.groups.forEach(function(group) {
+        if (group_found !== null) {
+          return;
+        }
+        return group.variable.forEach(function(variable) {
+          if (variable.id === parseInt(variable_id)) {
+            group_found = group;
+          }
+        });
+      });
+      return group_found;
+    };
+    $scope.getVariable = function(variable_id) {
+      return $rootScope.findById($scope.getGroup(variable_id).variable, variable_id);
+    };
+    $scope.removeGroup = function(group) {
+      return bootbox.confirm("Вы уверены, что хотите удалить группу «" + group.title + "»", function(response) {
+        var new_group_id;
+        if (response === true) {
+          VariableGroup.remove({
+            id: group.id
+          });
+          new_group_id = (_.max(_.without($scope.groups, group, function(group) {
+            return group.position;
+          }))).id;
+          angular.forEach(group.variable, function(variable) {
+            return moveToGroup(variable.id, new_group_id, variable.group_id, true);
+          });
+          return $scope.groups = removeById($scope.groups, group.id);
+        }
+      });
+    };
+    return $scope.onEdit = function(id, event) {
+      return VariableGroup.update({
+        id: id,
+        title: $(event.target).text()
+      });
+    };
+  }).controller('VariablesForm', function($scope, $attrs, $timeout, FormService, AceService, Variable) {
+    bindArguments($scope, arguments);
+    return angular.element(document).ready(function() {
+      FormService.init(Variable, $scope.id, $scope.model);
+      FormService.dataLoaded.promise.then(function() {
+        AceService.initEditor(FormService, 30);
+        if (FormService.model.html[0] === '{') {
+          return AceService.editor.getSession().setMode('ace/mode/json');
+        }
+      });
+      return FormService.beforeSave = function() {
+        return FormService.model.html = AceService.editor.getValue();
+      };
+    });
+  });
+
+}).call(this);
+
+(function() {
+  angular.module('Egecms').value('Published', [
+    {
+      id: 0,
+      title: 'не опубликовано'
+    }, {
+      id: 1,
+      title: 'опубликовано'
+    }
+  ]).value('UpDown', [
+    {
+      id: 1,
+      title: 'вверху'
+    }, {
+      id: 2,
+      title: 'внизу'
+    }
+  ]);
 
 }).call(this);
 

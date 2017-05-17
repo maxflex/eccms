@@ -14260,7 +14260,7 @@ button.close {
  * http://lab.hakim.se/ladda
  * MIT licensed
  *
- * Copyright (C) 2016 Hakim El Hattab, http://hakim.se
+ * Copyright (C) 2015 Hakim El Hattab, http://hakim.se
  */
 .ladda-button {
   position: relative;
@@ -19732,7 +19732,7 @@ select[multiple] {
 
 .fake-info {
   height: 8px;
-  width: 150px;
+  width: 150px !important;
   background-color: #eee;
   display: inline-block;
 }
@@ -19763,6 +19763,46 @@ select[multiple] {
 .photo-id {
   width: 5%;
   vertical-align: middle !important;
+}
+
+.nested-dnd .group-list {
+  padding: 0;
+  margin-bottom: 20px;
+  border-radius: 5px;
+  border: 3px solid white;
+}
+
+.nested-dnd .group-list.hovered {
+  border: 3px dashed #26A65B;
+}
+
+.nested-dnd .group-item {
+  list-style: none;
+  border-bottom: 1px solid #ddd;
+  padding: 8px;
+  line-height: 1.4;
+}
+
+.nested-dnd .group-item-title {
+  display: inline-block;
+  width: 35%;
+}
+
+.nested-dnd .group-item-desc {
+  display: inline-block;
+  width: 60%;
+}
+
+.nested-dnd .group-item:last-of-type {
+  border-bottom: none;
+}
+
+.nested-dnd .sortable-drag {
+  border-bottom: 5px solid blue;
+}
+
+.nested-dnd .dragging-group ul {
+  display: none;
 }
 
 .program-container h2 {
