@@ -21,3 +21,15 @@ Artisan::command('inspire', function () {
 Artisan::command('generate:version_control', function () {
     \App\Service\VersionControl::generate();
 })->describe('Generate version control table');
+
+Artisan::command('vars:not_used', function () {
+    $variable_names = \App\Models\Variable::pluck('name');
+    foreach($variable_names as $variable_name) {
+        $vars = \DB::table('variables')->whereRaw("html LIKE '%[{$variable_name}%'")->exists();
+        $pages = \DB::table('pages')->whereRaw("html LIKE '%[{$variable_name}%' OR html_mobile LIKE '%[{$variable_name}%'")->exists();
+        $faqs = \DB::table('faqs')->whereRaw("answer LIKE '%[{$variable_name}%'")->exists();
+        if (!$vars && !$pages && !$faqs) {
+            $this->error($variable_name);
+        }
+    }
+})->describe('Generate version control table');
