@@ -31,7 +31,7 @@
             </div>
             <ul ng-hide="dnd.type == 'group'" ng-sortable="sortableVariableConf" class="group-list" ng-class="{'hovered': dnd.group_id == -1 }" ng-dragover="dnd.group_id = -1">
                 <li class="group-item"
-                    ng-repeat="i in [1, 2, 3, 4]"
+                    ng-repeat="i in [1, 2, 3]"
                 >
                     <a class="group-item-title">
                         <div class="fake-info"></div>

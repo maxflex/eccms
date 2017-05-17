@@ -3,12 +3,20 @@ angular
     .controller 'VariablesIndex', ($scope, $attrs, $rootScope, $timeout, IndexService, Variable, VariableGroup) ->
         l = (e) -> console.log e
 
+        angular.element(document).ready ->
+            $(document).scroll (event) ->
+                if $(document).scrollTop() + $(window).height() is $(document).height()
+                    $(document).scrollTop($(document).height() - 50)
+                    l 'scrolled back'
+
+
         $scope.$watchCollection 'dnd', (newVal) ->
             l $scope.dnd
 
         bindArguments($scope, arguments)
 
         updatePositions = (group_ids) ->
+            group_ids = [group_ids] if not _.isArray group_ids
             angular.forEach group_ids, (group_id) ->
                 group = $rootScope.findById $scope.groups, group_id
                 angular.forEach group.variable, (variable, index) ->
@@ -22,13 +30,12 @@ angular
             group:
                 name:   'variable'
                 put:    'variable'
+            fallbackTolerance: 5
 
             onUpdate: (event) ->
-                console.log 'upd'
-                updatePositions [$scope.dnd.group_id]
+                updatePositions $scope.dnd.group_id
 
             onAdd: (event) ->
-                l 'add'
                 variable_id = $scope.dnd.variable_id
                 if $scope.dnd.group_id and $scope.dnd.variable_id and ($scope.dnd.group_id isnt $scope.dnd.old_group_id)
                    if $scope.dnd.group_id is -1
@@ -37,12 +44,8 @@ angular
                            moveToGroup $scope.dnd.variable_id, response.id, $scope.dnd.old_group_id, true
                            dragEnd()
                    else if $scope.dnd.group_id
-                       Variable.update({id: $scope.dnd.variable_id, group_id: $scope.dnd.group_id})
                        moveToGroup $scope.dnd.variable_id, $scope.dnd.group_id, $scope.dnd.old_group_id
                        updatePositions [$scope.dnd.group_id, $scope.dnd.old_group_id]
-
-            onRemove: (event) ->
-                l 'rem', event
 
             onEnd: (event) ->
                 dragEnd() if $scope.dnd.group_id isnt -1
@@ -56,30 +59,25 @@ angular
             dragClass: 'dragging-group'
             ghostClass: 'dragging-group-g'
             onUpdate: (event) ->
-                l 'g upd'
                 angular.forEach $scope.groups, (group, index) ->
+                    group.position = index
                     VariableGroup.update({id: group.id, position: index})
 
             onStart: (event) ->
-                l 'g strt'
                 $scope.dnd.type = 'group'
 
             onEnd: (event) ->
-                l 'g end'
                 $scope.dnd = {}
-
-            onRemove: (event) ->
-                l 'g rem'
-
-            onMove: (event) ->
-                l 'g move'
 
         $scope.dnd = {}
 
         # переместить в группу
         moveToGroup = (variable_id, group_id, old_group_id, copy_item = false) ->
+            Variable.update id: variable_id, group_id: group_id
+
             group_from = _.find $scope.groups, id: old_group_id
             variable = _.clone findById(group_from.variable, variable_id)
+            variable.group_id = group_id
 
             group_from.variable = removeById(group_from.variable, variable_id)
             group_to = _.find $scope.groups, id: group_id
@@ -107,9 +105,12 @@ angular
             bootbox.confirm "Вы уверены, что хотите удалить группу «#{group.title}»", (response) ->
                 if response is true
                     VariableGroup.remove {id: group.id}
-                    new_group_id = (_.max _.without $scope.groups, group, (group) -> group.position).id
-                    angular.forEach group.variable, (variable) ->
-                        moveToGroup variable.id, new_group_id, variable.group_id, true
+                    new_group_id = (_.max _.without($scope.groups, group), (group) -> group.position).id
+
+                    if group.variable
+                        angular.forEach group.variable, (variable) ->
+                            moveToGroup variable.id, new_group_id, variable.group_id, true
+                        updatePositions new_group_id
 
                     $scope.groups = removeById $scope.groups, group.id
 

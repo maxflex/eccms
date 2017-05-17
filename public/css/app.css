@@ -19798,7 +19798,7 @@ select[multiple] {
 }
 
 .nested-dnd .sortable-drag {
-  border-bottom: 5px solid blue;
+  border-bottom: none;
 }
 
 .nested-dnd .dragging-group ul {
