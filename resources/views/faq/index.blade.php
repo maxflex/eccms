@@ -8,49 +8,42 @@
 
 @section('content')
     <span ng-init='groups = {{ json_encode(\App\Models\FaqGroup::get()) }}'></span>
-    <div ng-sortable='sortableGroupConf'>
+    <div ng-sortable="sortableGroupConf" class="nested-dnd">
         <div ng-repeat="group in groups">
-            <div>
+            <div class="group-title">
                 <h4 class='inline-block' editable='@{{ group.id }}' ng-class="{'disable-events': !group.id}">@{{ group.title }}</h4>
                 <a ng-if='group.id' class='link-like text-danger show-on-hover' ng-click='removeGroup(group)'>удалить</a>
             </div>
-            <div class='droppable-table relative' ondragover="allowDrop(event)" ng-show="! group_sorting"
-                 ng-dragenter="dnd.over = group.id" ng-dragleave="dnd.over = undefined" ng-drop="drop(group.id)"
-                 ng-class="{'over-parent': dnd.faq_id && dnd.over === group.id && dnd.over != getFaqs(dnd.faq_id).group_id}">
-                <table class="table droppable-table">
-                    <tbody ng-sortable='sortableFaqConf'>
-                        <tr ng-repeat="faq in group.faq" draggable="true"
-                            ng-dragstart="dragStart(faq.id)" ng-dragend='dnd.faq_id = null'>
-                            <td>
-                                <a href='faq/@{{ faq.id }}/edit'>@{{ faq.question }}</a>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                <div class="droppable-table pad" ng-class="{padded: !group.faq.length}" ondragenter="setClass(event, 'over')" ondragleave="unsetClass(event, 'over')"
-                     ng-show="dnd.faq_id && (group.id != getFaq(dnd.faq_id).group_id)"
-                ></div>
-            </div>
+            <ul ng-sortable="sortableFaqConf"
+                ng-class="{'ng-hide': dnd.type == 'group', 'hovered': dnd.old_group_id != group.id && dnd.group_id == group.id }"
+                ng-dragover="dragOver(group)"
+                class="group-list"
+            >
+                <li class="group-item"
+                    ng-repeat="faq in group.faq"
+                    ng-dragstart="dnd.faq_id = faq.id; dnd.old_group_id = group.id;"
+                >
+                    <a class="group-item-title-faq" href='faq/@{{ faq.id }}/edit'>@{{ faq.question }}</a>
+                </li>
+            </ul>
         </div>
-    </div>
-    <div>
-        <div ng-show='1 || dnd.faq_id > 0'>
-            <h4>{{ \App\Models\FaqGroup::DEFAULT_TITLE }}</h4>
-            <div class='droppable-table relative' ondragover="allowDrop(event)"
-                 ng-dragenter="dnd.over = -1" ng-dragleave="dnd.over = undefined" ng-drop="drop(-1)"
-                 ng-class="{'over-parent': dnd.over == -1}">
-                <table class="table">
-                    <tr ng-repeat="i in [1, 2, 3, 4]">
-                        <td>
-                            <div class='fake-info'></div>
-                        </td>
-                        <td>
-                            <div class='fake-info' style='width: 50px'></div>
-                        </td>
-                    </tr>
-                </table>
-                <div class="droppable-table pad" ondragenter="setClass('over')" ondragleave="unsetClass('over')"></div>
+
+        <div class="layer group" ng-show="dnd.faq_id > 0">
+            <div class="group-title">
+                <h4 class="inline-block">{{ \App\Models\FaqGroup::DEFAULT_TITLE }}</h4>
             </div>
+            <ul ng-hide="dnd.type == 'group'" ng-sortable="sortableFaqConf" class="group-list" ng-class="{'hovered': dnd.group_id == -1 }" ng-dragover="dnd.group_id = -1">
+                <li class="group-item"
+                    ng-repeat="i in [1, 2, 3]"
+                >
+                    <a class="group-item-title">
+                        <div class="fake-info"></div>
+                    </a>
+                    <span class="group-item-desc">
+                        <div class="fake-info"></div>
+                    </span>
+                </li>
+            </ul>
         </div>
     </div>
 @stop

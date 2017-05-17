@@ -9,7 +9,6 @@ angular
                     $(document).scrollTop($(document).height() - 50)
                     l 'scrolled back'
 
-
         $scope.$watchCollection 'dnd', (newVal) ->
             l $scope.dnd
 
@@ -57,7 +56,6 @@ angular
             animation: 150
             handle: '.group-title'
             dragClass: 'dragging-group'
-            ghostClass: 'dragging-group-g'
             onUpdate: (event) ->
                 angular.forEach $scope.groups, (group, index) ->
                     group.position = index
@@ -87,19 +85,6 @@ angular
             else
                 variable = $rootScope.findById(group_to.variable, variable_id)
                 variable.group_id = group_id
-
-        $scope.getGroup = (variable_id) ->
-            group_found = null
-            $scope.groups.forEach (group) ->
-                return if group_found isnt null
-                group.variable.forEach (variable) ->
-                    if variable.id is parseInt(variable_id)
-                        group_found = group
-                        return
-            group_found
-
-        $scope.getVariable = (variable_id) ->
-            $rootScope.findById($scope.getGroup(variable_id).variable, variable_id)
 
         $scope.removeGroup = (group) ->
             bootbox.confirm "Вы уверены, что хотите удалить группу «#{group.title}»", (response) ->

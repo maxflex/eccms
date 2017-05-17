@@ -4146,6 +4146,9 @@ select[multiple] {
         &-title {
             display: inline-block;
             width: 35%;
+            &-faq {
+                width: 100%;
+            }
         }
         &-desc {
             display: inline-block;

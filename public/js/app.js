@@ -332,95 +332,141 @@
 
 (function() {
   angular.module('Egecms').controller('FaqIndex', function($scope, $rootScope, $attrs, $timeout, Faq, FaqGroup) {
-    var moveToGroup;
+    var dragEnd, l, moveToGroup, updatePositions;
+    l = function(e) {
+      return console.log(e);
+    };
+    angular.element(document).ready(function() {
+      return $(document).scroll(function(event) {
+        if ($(document).scrollTop() + $(window).height() === $(document).height()) {
+          $(document).scrollTop($(document).height() - 50);
+          return l('scrolled back');
+        }
+      });
+    });
+    $scope.$watchCollection('dnd', function(newVal) {
+      return l($scope.dnd);
+    });
     bindArguments($scope, arguments);
-    $scope.sortableFaqConf = {
-      animation: 150,
-      onUpdate: function(event) {
-        return angular.forEach(event.models, function(obj, index) {
+    updatePositions = function(group_ids) {
+      if (!_.isArray(group_ids)) {
+        group_ids = [group_ids];
+      }
+      return angular.forEach(group_ids, function(group_id) {
+        var group;
+        group = $rootScope.findById($scope.groups, group_id);
+        return angular.forEach(group.faq, function(faq, index) {
           return Faq.update({
-            id: obj.id,
+            id: faq.id,
             position: index
           });
         });
+      });
+    };
+    dragEnd = function() {
+      return $scope.dnd = {};
+    };
+    $scope.sortableFaqConf = {
+      animation: 150,
+      group: {
+        name: 'variable',
+        put: 'variable'
+      },
+      fallbackTolerance: 5,
+      onUpdate: function(event) {
+        return updatePositions($scope.dnd.group_id);
+      },
+      onAdd: function(event) {
+        var faq_id;
+        faq_id = $scope.dnd.faq_id;
+        if ($scope.dnd.group_id && $scope.dnd.faq_id && ($scope.dnd.group_id !== $scope.dnd.old_group_id)) {
+          if ($scope.dnd.group_id === -1) {
+            return FaqGroup.save({
+              faq_id: $scope.dnd.faq_id
+            }, function(response) {
+              $scope.groups.push(response);
+              moveToGroup($scope.dnd.faq_id, response.id, $scope.dnd.old_group_id, true);
+              return dragEnd();
+            });
+          } else if ($scope.dnd.group_id) {
+            moveToGroup($scope.dnd.faq_id, $scope.dnd.group_id, $scope.dnd.old_group_id);
+            return updatePositions([$scope.dnd.group_id, $scope.dnd.old_group_id]);
+          }
+        }
+      },
+      onEnd: function(event) {
+        if ($scope.dnd.group_id !== -1) {
+          return dragEnd();
+        }
+      }
+    };
+    $scope.dragOver = function(group) {
+      if ($scope.dnd.type !== 'group') {
+        return $scope.dnd.group_id = group.id;
       }
     };
     $scope.sortableGroupConf = {
       animation: 150,
-      onStart: function(event) {
-        return $scope.group_sorting = true;
-      },
+      handle: '.group-title',
+      dragClass: 'dragging-group',
       onUpdate: function(event) {
-        $scope.group_sorting = false;
-        return angular.forEach(event.models, function(obj, index) {
+        return angular.forEach($scope.groups, function(group, index) {
+          group.position = index;
           return FaqGroup.update({
-            id: obj.id,
+            id: group.id,
             position: index
           });
         });
+      },
+      onStart: function(event) {
+        return $scope.dnd.type = 'group';
+      },
+      onEnd: function(event) {
+        return $scope.dnd = {};
       }
     };
     $scope.dnd = {};
-    $scope.dragStart = function(faq_id) {
-      return $timeout(function() {
-        console.log('drag start', faq_id);
-        return $scope.dnd.faq_id = faq_id;
-      });
-    };
-    $scope.drop = function(group_id) {
-      var faq_id;
-      faq_id = $scope.dnd.faq_id;
-      if (group_id && faq_id && (group_id !== $scope.getGroup(faq_id).id)) {
-        if (group_id === -1) {
-          FaqGroup.save({
-            faq_id: faq_id
-          }, function(response) {
-            $scope.groups.push(response);
-            return moveToGroup(faq_id, response.id);
-          });
-        } else if (group_id) {
-          Faq.update({
-            id: faq_id,
-            group_id: group_id
-          });
-          moveToGroup(faq_id, group_id);
-        }
-      }
-      return $scope.dnd = {};
-    };
-    moveToGroup = function(faq_id, group_id) {
+    moveToGroup = function(faq_id, group_id, old_group_id, copy_item) {
       var faq, group_from, group_to;
-      group_to = $rootScope.findById($scope.groups, group_id);
-      group_from = $scope.getGroup(faq_id);
-      faq = $rootScope.findById(group_from.faq, faq_id);
-      group_from.faq = removeById(group_from.faq, faq_id);
-      faq.group_id = group_id;
-      return group_to.faq.push(faq);
-    };
-    $scope.getGroup = function(faq_id) {
-      var group_found;
-      group_found = null;
-      $scope.groups.forEach(function(group) {
-        if (group_found !== null) {
-          return;
-        }
-        return group.faq.forEach(function(faq) {
-          if (faq.id === parseInt(faq_id)) {
-            group_found = group;
-          }
-        });
+      if (copy_item == null) {
+        copy_item = false;
+      }
+      Faq.update({
+        id: faq_id,
+        group_id: group_id
       });
-      return group_found;
-    };
-    $scope.getFaq = function(faq_id) {
-      return $rootScope.findById($scope.getGroup(faq_id).faq, faq_id);
+      group_from = _.find($scope.groups, {
+        id: old_group_id
+      });
+      faq = _.clone(findById(group_from.faq, faq_id));
+      faq.group_id = group_id;
+      group_from.faq = removeById(group_from.faq, faq_id);
+      group_to = _.find($scope.groups, {
+        id: group_id
+      });
+      if (copy_item) {
+        return group_to.faq.push(faq);
+      } else {
+        faq = $rootScope.findById(group_to.faq, faq_id);
+        return faq.group_id = group_id;
+      }
     };
     $scope.removeGroup = function(group) {
       return bootbox.confirm("Вы уверены, что хотите удалить группу «" + group.title + "»", function(response) {
+        var new_group_id;
         if (response === true) {
           FaqGroup.remove({
             id: group.id
           });
+          new_group_id = (_.max(_.without($scope.groups, group), function(group) {
+            return group.position;
+          })).id;
+          if (group.faq) {
+            angular.forEach(group.faq, function(faq) {
+              return moveToGroup(faq.id, new_group_id, faq.group_id, true);
+            });
+            updatePositions(new_group_id);
+          }
           return $scope.groups = removeById($scope.groups, group.id);
         }
       });
@@ -876,7 +922,6 @@
       animation: 150,
       handle: '.group-title',
       dragClass: 'dragging-group',
-      ghostClass: 'dragging-group-g',
       onUpdate: function(event) {
         return angular.forEach($scope.groups, function(group, index) {
           group.position = index;
@@ -918,24 +963,6 @@
         variable = $rootScope.findById(group_to.variable, variable_id);
         return variable.group_id = group_id;
       }
-    };
-    $scope.getGroup = function(variable_id) {
-      var group_found;
-      group_found = null;
-      $scope.groups.forEach(function(group) {
-        if (group_found !== null) {
-          return;
-        }
-        return group.variable.forEach(function(variable) {
-          if (variable.id === parseInt(variable_id)) {
-            group_found = group;
-          }
-        });
-      });
-      return group_found;
-    };
-    $scope.getVariable = function(variable_id) {
-      return $rootScope.findById($scope.getGroup(variable_id).variable, variable_id);
     };
     $scope.removeGroup = function(group) {
       return bootbox.confirm("Вы уверены, что хотите удалить группу «" + group.title + "»", function(response) {
@@ -1044,18 +1071,6 @@
       link: function($scope, $element, $attrs) {
         return $element.on('click', function(event) {
           return $element.attr('contenteditable', 'true').focus();
-        }).on('dblclick', function(event) {
-          var elem, rng, sel, text;
-          $element.attr('contenteditable', 'true').focus();
-          if ($attrs.hasOwnProperty('withDblclick')) {
-            elem = $(event.target);
-            text = elem.text();
-            rng = document.createRange();
-            rng.selectNode(elem[0]);
-            sel = window.getSelection();
-            sel.removeAllRanges();
-            return sel.addRange(rng);
-          }
         }).on('keydown', function(event) {
           var ref;
           if ((ref = event.keyCode) === 13 || ref === 27) {
@@ -1898,6 +1913,28 @@
         };
       })(this));
     };
+    return this;
+  });
+
+}).call(this);
+
+(function() {
+  angular.module('Egecms').service('DndService', function($rootScope) {
+    var l;
+    l = function(e) {
+      return console.log(e);
+    };
+    angular.element(document).ready(function() {
+      return $(document).scroll(function(event) {
+        if ($(document).scrollTop() + $(window).height() === $(document).height()) {
+          $(document).scrollTop($(document).height() - 50);
+          return l('scrolled back');
+        }
+      });
+    });
+    $scope.$watchCollection('dnd', function(newVal) {
+      return l($scope.dnd);
+    });
     return this;
   });
 

@@ -19788,6 +19788,10 @@ select[multiple] {
   width: 35%;
 }
 
+.nested-dnd .group-item-title-faq {
+  width: 100%;
+}
+
 .nested-dnd .group-item-desc {
   display: inline-block;
   width: 60%;
