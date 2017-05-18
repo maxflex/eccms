@@ -18,7 +18,7 @@
             </div>
             <ul ng-sortable="sortablePageConf"
                 ng-class="{'ng-hide': dnd.type == 'group', 'hovered': dnd.old_group_id != group.id && dnd.group_id == group.id }"
-                ng-dragover="dragOver(group)"
+                ng-dragenter="dragOver(group, $event)"
                 class="group-list"
             >
                 <li class="group-item"
