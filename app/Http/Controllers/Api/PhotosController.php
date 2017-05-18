@@ -16,7 +16,7 @@ class PhotosController extends Controller
      */
     public function index()
     {
-        return Photo::orderBy('position')->paginate(100);
+        return Photo::orderBy('position')->paginate(1000);
     }
 
     public function show($id)

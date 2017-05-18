@@ -1852,6 +1852,28 @@
 }).call(this);
 
 (function() {
+  angular.module('Egecms').service('DndService', function($rootScope) {
+    var l;
+    l = function(e) {
+      return console.log(e);
+    };
+    angular.element(document).ready(function() {
+      return $(document).scroll(function(event) {
+        if ($(document).scrollTop() + $(window).height() === $(document).height()) {
+          $(document).scrollTop($(document).height() - 50);
+          return l('scrolled back');
+        }
+      });
+    });
+    $scope.$watchCollection('dnd', function(newVal) {
+      return l($scope.dnd);
+    });
+    return this;
+  });
+
+}).call(this);
+
+(function() {
   angular.module('Egecms').service('ExportService', function($rootScope, FileUploader) {
     bindArguments(this, arguments);
     this.init = function(options) {
