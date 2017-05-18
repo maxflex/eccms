@@ -27,7 +27,11 @@ Route::group(['namespace' => 'Api', 'as' => 'api.'], function () {
     Route::get('sass/{file}', 'SassController@edit')->where('file', '.*.scss$');
     Route::post('sass/{file}', 'SassController@update')->where('file', '.*.scss$');
     Route::get('sass/{current_path?}', 'SassController@index')->where('current_path', '.*');
+
     Route::resource('photos', 'PhotosController');
+    Route::group(['prefix' => 'photos'], function() {
+        Route::resource('groups', 'PhotoGroupsController');
+    });
 
 
     Route::resource('photos/upload', 'PhotosController@upload');

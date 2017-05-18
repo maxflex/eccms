@@ -18,6 +18,7 @@ class Photo extends Model
 
     protected $fillable = [
         'filename',
+        'group_id',
         'position'
     ];
 

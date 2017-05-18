@@ -776,30 +776,160 @@
       bgClose: true,
       imgAnim: 'fadeup'
     });
-  }).controller('PhotosIndex', function($scope, $attrs, IndexService, Photo, PhotoService, FormService) {
-    bindArguments($scope, arguments);
+  }).controller('PhotosIndex', function($scope, $rootScope, $attrs, Photo, PhotoGroup, PhotoService, FormService) {
+    var dragEnd, l, moveToGroup, updatePositions;
+    l = function(e) {
+      return console.log(e);
+    };
     angular.element(document).ready(function() {
-      return IndexService.init(Photo, $scope.current_page, $attrs);
+      PhotoService.init($scope.groups);
+      return $(document).scroll(function(event) {
+        if ($(document).scrollTop() + $(window).height() === $(document).height()) {
+          $(document).scrollTop($(document).height() - 50);
+          return l('scrolled back');
+        }
+      });
     });
+    $scope.$watchCollection('dnd', function(newVal) {
+      return l($scope.dnd);
+    });
+    bindArguments($scope, arguments);
+    updatePositions = function(group_ids) {
+      if (!_.isArray(group_ids)) {
+        group_ids = [group_ids];
+      }
+      return angular.forEach(group_ids, function(group_id) {
+        var group;
+        group = $rootScope.findById($scope.groups, group_id);
+        return angular.forEach(group.photo, function(photo, index) {
+          return Photo.update({
+            id: photo.id,
+            position: index
+          });
+        });
+      });
+    };
+    dragEnd = function() {
+      return $scope.dnd = {};
+    };
     $scope.sortablePhotosConf = {
       animation: 150,
+      group: {
+        name: 'variable',
+        put: 'variable'
+      },
+      fallbackTolerance: 5,
       onUpdate: function(event) {
-        var positions;
-        positions = {};
-        angular.forEach(event.models, function(obj, index) {
-          return positions[obj.id] = index;
-        });
-        return Photo.updateAll({
-          positions: positions
-        });
+        return updatePositions($scope.dnd.group_id);
+      },
+      onAdd: function(event) {
+        var photo_id;
+        photo_id = $scope.dnd.photo_id;
+        if ($scope.dnd.group_id && $scope.dnd.photo_id && ($scope.dnd.group_id !== $scope.dnd.old_group_id)) {
+          if ($scope.dnd.group_id === -1) {
+            return PhotoGroup.save({
+              photo_id: $scope.dnd.photo_id
+            }, function(response) {
+              $scope.groups.push(response);
+              moveToGroup($scope.dnd.photo_id, response.id, $scope.dnd.old_group_id, true);
+              return dragEnd();
+            });
+          } else if ($scope.dnd.group_id) {
+            moveToGroup($scope.dnd.photo_id, $scope.dnd.group_id, $scope.dnd.old_group_id);
+            return updatePositions([$scope.dnd.group_id, $scope.dnd.old_group_id]);
+          }
+        }
+      },
+      onEnd: function(event) {
+        if ($scope.dnd.group_id !== -1) {
+          return dragEnd();
+        }
       }
+    };
+    $scope.dragOver = function(group) {
+      if ($scope.dnd.type !== 'group') {
+        return $scope.dnd.group_id = group.id;
+      }
+    };
+    $scope.sortableGroupConf = {
+      animation: 150,
+      handle: '.group-title',
+      dragClass: 'dragging-group',
+      onUpdate: function(event) {
+        return angular.forEach($scope.groups, function(group, index) {
+          group.position = index;
+          return PhotoGroup.update({
+            id: group.id,
+            position: index
+          });
+        });
+      },
+      onStart: function(event) {
+        return $scope.dnd.type = 'group';
+      },
+      onEnd: function(event) {
+        return $scope.dnd = {};
+      }
+    };
+    $scope.dnd = {};
+    moveToGroup = function(photo_id, group_id, old_group_id, copy_item) {
+      var group_from, group_to, photo;
+      if (copy_item == null) {
+        copy_item = false;
+      }
+      Photo.update({
+        id: photo_id,
+        group_id: group_id
+      });
+      group_from = _.find($scope.groups, {
+        id: old_group_id
+      });
+      photo = _.clone(findById(group_from.photo, photo_id));
+      photo.group_id = group_id;
+      group_from.photo = removeById(group_from.photo, photo_id);
+      group_to = _.find($scope.groups, {
+        id: group_id
+      });
+      if (copy_item) {
+        return group_to.photo.push(photo);
+      } else {
+        photo = $rootScope.findById(group_to.photo, photo_id);
+        return photo.group_id = group_id;
+      }
+    };
+    $scope.removeGroup = function(group) {
+      return bootbox.confirm("Вы уверены, что хотите удалить группу «" + group.title + "»", function(response) {
+        var new_group_id;
+        if (response === true) {
+          PhotoGroup.remove({
+            id: group.id
+          });
+          new_group_id = (_.max(_.without($scope.groups, group), function(group) {
+            return group.position;
+          })).id;
+          if (group.photo) {
+            angular.forEach(group.photo, function(photo) {
+              return moveToGroup(photo.id, new_group_id, photo.group_id, true);
+            });
+            updatePositions(new_group_id);
+          }
+          return $scope.groups = removeById($scope.groups, group.id);
+        }
+      });
+    };
+    $scope.onEdit = function(id, event) {
+      return PhotoGroup.update({
+        id: id,
+        title: $(event.target).text()
+      });
     };
     $scope["delete"] = function(event, model) {
       FormService.model = new Photo(model);
       return FormService["delete"](event, (function(_this) {
         return function() {
-          IndexService.page.total--;
-          return IndexService.page.data = _.without(IndexService.page.data, model);
+          return _.each($scope.groups, function(group) {
+            return group.photo = _.without(group.photo, model);
+          });
         };
       })(this));
     };
@@ -807,11 +937,15 @@
       PhotoService.editing_model = model;
       return window.upload();
     };
-    return $scope.$watchCollection('FormService.model.photos', function(newVal, oldVal) {
-      if (newVal !== void 0) {
-        return $scope.images = PhotoService.getImages();
+    $scope.totalPhotos = function() {
+      if (!$scope.groups) {
+        return;
       }
-    });
+      return _.reduce($scope.groups, function(sum, group) {
+        return sum += group.photo.length;
+      }, 0);
+    };
+    return PhotoService.init($scope.groups);
   });
 
 }).call(this);
@@ -1726,6 +1860,10 @@
         url: apiPath('photos', 'updateAll')
       }
     });
+  }).factory('PhotoGroup', function($resource) {
+    return $resource(apiPath('photos/groups'), {
+      id: '@id'
+    }, updatable());
   }).factory('Faq', function($resource) {
     return $resource(apiPath('faq'), {
       id: '@id'
@@ -1983,7 +2121,12 @@
 
 (function() {
   angular.module('Egecms').service('DndService', function($rootScope) {
-    var l;
+    var init, l, updatePositions;
+    this.dnd = {};
+    init = function(Resource, items) {
+      this.Resource = Resource;
+      return this.items = items;
+    };
     l = function(e) {
       return console.log(e);
     };
@@ -1998,6 +2141,21 @@
     $scope.$watchCollection('dnd', function(newVal) {
       return l($scope.dnd);
     });
+    updatePositions = function(group_ids) {
+      if (!_.isArray(group_ids)) {
+        group_ids = [group_ids];
+      }
+      return angular.forEach(group_ids, function(group_id) {
+        var group;
+        group = $rootScope.findById($scope.groups, group_id);
+        return angular.forEach(group[this.items], function(variable, index) {
+          return this.Resource.update({
+            id: variable.id,
+            position: index
+          });
+        });
+      });
+    };
     return this;
   });
 
@@ -2072,7 +2230,10 @@
 }).call(this);
 
 (function() {
-  angular.module('Egecms').service('PhotoService', function($http, Photo, FileUploader, IndexService) {
+  angular.module('Egecms').service('PhotoService', function($http, Photo, FileUploader) {
+    this.init = function(groups) {
+      return this.groups = groups;
+    };
     this.Uploader = new FileUploader({
       url: 'api/photos/upload',
       alias: 'file',
@@ -2091,15 +2252,20 @@
     });
     this.Uploader.onSuccessItem = (function(_this) {
       return function(item, response) {
-        var index;
+        var group, photo;
         if (_this.editing_model) {
-          index = _.findIndex(IndexService.page.data, {
-            filename: _this.editing_model.filename
+          group = _.find(scope.groups, {
+            id: response.group_id
           });
-          _.extend(IndexService.page.data[index], response);
+          photo = _.find(group.photo, {
+            id: response.id
+          });
+          _.extend(photo, response);
         } else {
-          IndexService.page.data.push(response);
-          IndexService.page.total++;
+          group = _.find(scope.groups, {
+            id: response.group_id
+          });
+          group.push(response);
         }
         _this.editing_model = null;
         if (typeof _this.onSuccessItemCallback === 'function') {

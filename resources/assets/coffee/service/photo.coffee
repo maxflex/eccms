@@ -1,5 +1,8 @@
 angular.module 'Egecms'
-    .service 'PhotoService', ($http, Photo, FileUploader, IndexService) ->
+    .service 'PhotoService', ($http, Photo, FileUploader) ->
+        this.init = (groups) ->
+            this.groups = groups
+
         this.Uploader = new FileUploader
             url: 'api/photos/upload'
             alias: 'file'
@@ -14,11 +17,12 @@ angular.module 'Egecms'
 
         this.Uploader.onSuccessItem = (item, response) =>
             if this.editing_model
-                index = _.findIndex IndexService.page.data, filename: this.editing_model.filename
-                _.extend IndexService.page.data[index], response
+                group = _.find scope.groups, id: response.group_id
+                photo = _.find group.photo, id: response.id
+                _.extend photo, response
             else
-                IndexService.page.data.push response
-                IndexService.page.total++
+                group = _.find scope.groups, id: response.group_id
+                group.push response
 
             this.editing_model = null
             if typeof this.onSuccessItemCallback is 'function'

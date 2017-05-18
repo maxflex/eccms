@@ -30,6 +30,9 @@ angular.module('Egecms')
                 method: 'POST'
                 url: apiPath('photos', 'updateAll')
 
+    .factory 'PhotoGroup', ($resource) ->
+        $resource apiPath('photos/groups'), {id: '@id'}, updatable()
+
     .factory 'Faq', ($resource) ->
         $resource apiPath('faq'), {id: '@id'}, updatable()
 
