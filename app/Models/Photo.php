@@ -63,7 +63,11 @@ class Photo extends Model
     protected static function boot()
     {
         static::creating(function($model) {
-            $model->position = static::max('position') + 1;
+            if (! isset($model->group_id)) {
+                $model->group_id = PhotoGroup::orderBy('position', 'desc')->value('id');
+            }
+
+            $model->position = static::where('group_id', $model->group_id)->max('position') + 1;
         });
     }
 }
