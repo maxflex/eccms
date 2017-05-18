@@ -1793,6 +1793,27 @@
 }).call(this);
 
 (function() {
+  angular.module('Egecms').value('Published', [
+    {
+      id: 0,
+      title: 'не опубликовано'
+    }, {
+      id: 1,
+      title: 'опубликовано'
+    }
+  ]).value('UpDown', [
+    {
+      id: 1,
+      title: 'вверху'
+    }, {
+      id: 2,
+      title: 'внизу'
+    }
+  ]);
+
+}).call(this);
+
+(function() {
   var apiPath, countable, updatable;
 
   angular.module('Egecms').factory('Variable', function($resource) {
@@ -1875,27 +1896,6 @@
       }
     };
   };
-
-}).call(this);
-
-(function() {
-  angular.module('Egecms').value('Published', [
-    {
-      id: 0,
-      title: 'не опубликовано'
-    }, {
-      id: 1,
-      title: 'опубликовано'
-    }
-  ]).value('UpDown', [
-    {
-      id: 1,
-      title: 'вверху'
-    }, {
-      id: 2,
-      title: 'внизу'
-    }
-  ]);
 
 }).call(this);
 
@@ -2113,48 +2113,6 @@
           return _this.onCreateError(response);
         };
       })(this));
-    };
-    return this;
-  });
-
-}).call(this);
-
-(function() {
-  angular.module('Egecms').service('DndService', function($rootScope) {
-    var init, l, updatePositions;
-    this.dnd = {};
-    init = function(Resource, items) {
-      this.Resource = Resource;
-      return this.items = items;
-    };
-    l = function(e) {
-      return console.log(e);
-    };
-    angular.element(document).ready(function() {
-      return $(document).scroll(function(event) {
-        if ($(document).scrollTop() + $(window).height() === $(document).height()) {
-          $(document).scrollTop($(document).height() - 50);
-          return l('scrolled back');
-        }
-      });
-    });
-    $scope.$watchCollection('dnd', function(newVal) {
-      return l($scope.dnd);
-    });
-    updatePositions = function(group_ids) {
-      if (!_.isArray(group_ids)) {
-        group_ids = [group_ids];
-      }
-      return angular.forEach(group_ids, function(group_id) {
-        var group;
-        group = $rootScope.findById($scope.groups, group_id);
-        return angular.forEach(group[this.items], function(variable, index) {
-          return this.Resource.update({
-            id: variable.id,
-            position: index
-          });
-        });
-      });
     };
     return this;
   });
