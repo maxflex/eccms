@@ -19732,7 +19732,7 @@ select[multiple] {
 
 .fake-info {
   height: 8px;
-  width: 150px;
+  width: 150px !important;
   background-color: #eee;
   display: inline-block;
 }
@@ -19775,6 +19775,57 @@ select[multiple] {
 .gallery-count span {
   margin: 0 !important;
   text-decoration: none !important;
+}
+
+.photo-id {
+  width: 5%;
+  vertical-align: middle !important;
+}
+
+.nested-dnd .group-list {
+  padding: 0;
+  margin-bottom: 20px;
+  border-radius: 5px;
+  border: 3px solid white;
+}
+
+.nested-dnd .group-list.hovered {
+  border: 3px dashed #26A65B;
+}
+
+.nested-dnd .group-item {
+  list-style: none;
+  border-bottom: 1px solid #ddd;
+  padding: 8px;
+  line-height: 1.4;
+}
+
+.nested-dnd .group-item span, .nested-dnd .group-item a {
+  display: inline-block;
+}
+
+.nested-dnd .group-item-title {
+  width: 35%;
+}
+
+.nested-dnd .group-item-title-faq {
+  width: 100%;
+}
+
+.nested-dnd .group-item-desc {
+  width: 60%;
+}
+
+.nested-dnd .group-item:last-of-type {
+  border-bottom: none;
+}
+
+.nested-dnd .sortable-drag {
+  border-bottom: none;
+}
+
+.nested-dnd .dragging-group ul {
+  display: none;
 }
 
 .program-container h2 {

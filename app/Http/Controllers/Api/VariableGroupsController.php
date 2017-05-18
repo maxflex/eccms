@@ -39,7 +39,8 @@ class VariableGroupsController extends Controller
      */
     public function store(Request $request)
     {
-        ($variable_group = VariableGroup::create())->load('variable');
+        $variable_group = VariableGroup::create();
+        $variable->load('variable');
         Variable::whereId($request->variable_id)->update([
             'group_id' => $variable_group->id,
         ]);

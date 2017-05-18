@@ -13,6 +13,7 @@ class FaqGroupsController extends Controller
     public function store(Request $request)
     {
         $faq_group = FaqGroup::create();
+        $faq_group->load('faq');
         Faq::whereId($request->faq_id)->update([
             'group_id' => $faq_group->id,
         ]);

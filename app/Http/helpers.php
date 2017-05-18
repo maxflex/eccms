@@ -212,6 +212,14 @@
         return \DB::connection('factory')->table($table);
     }
 
+   /**
+     * Factory connection helper
+     */
+    function dbEgecrm($table)
+    {
+        return \DB::connection('egecrm')->table($table);
+    }
+
     function mb_ucfirst($text) {
         return mb_strtoupper(mb_substr($text, 0, 1)) . mb_substr($text, 1);
     }
