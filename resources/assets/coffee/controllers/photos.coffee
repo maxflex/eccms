@@ -8,7 +8,6 @@ angular
             bgClose   : true
             imgAnim   : 'fadeup'
     .controller 'PhotosIndex', ($scope, $rootScope, $attrs, Photo, PhotoGroup, PhotoService, FormService) ->
-    .controller 'PhotosIndex', ($scope, $rootScope, $attrs, Photo, PhotoGroup, PhotoService, FormService) ->
         l = (e) -> console.log e
 
         angular.element(document).ready ->

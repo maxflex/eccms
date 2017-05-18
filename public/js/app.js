@@ -1793,27 +1793,6 @@
 }).call(this);
 
 (function() {
-  angular.module('Egecms').value('Published', [
-    {
-      id: 0,
-      title: 'не опубликовано'
-    }, {
-      id: 1,
-      title: 'опубликовано'
-    }
-  ]).value('UpDown', [
-    {
-      id: 1,
-      title: 'вверху'
-    }, {
-      id: 2,
-      title: 'внизу'
-    }
-  ]);
-
-}).call(this);
-
-(function() {
   var apiPath, countable, updatable;
 
   angular.module('Egecms').factory('Variable', function($resource) {
@@ -1896,6 +1875,27 @@
       }
     };
   };
+
+}).call(this);
+
+(function() {
+  angular.module('Egecms').value('Published', [
+    {
+      id: 0,
+      title: 'не опубликовано'
+    }, {
+      id: 1,
+      title: 'опубликовано'
+    }
+  ]).value('UpDown', [
+    {
+      id: 1,
+      title: 'вверху'
+    }, {
+      id: 2,
+      title: 'внизу'
+    }
+  ]);
 
 }).call(this);
 
