@@ -3,18 +3,18 @@
 @section('controller', 'PhotosIndex')
 
 @section('title-right')
-    <span onclick='upload()' ng-disabled='PhotoService.Uploader.isUploading' id="upload-photo">добавить фото</span>
+    <span onclick='upload()' ng-disabled='Uploader.isUploading' id="upload-photo">добавить фото</span>
 @endsection
 
 @section('content')
-    <input class="ng-hide" type='file' multiple name='photos' nv-file-select='' uploader='PhotoService.Uploader'>
+    <input class="ng-hide" type='file' multiple name='photos' nv-file-select='' uploader='Uploader'>
     <span ng-init='groups = {{ json_encode(\App\Models\PhotoGroup::get()) }}'></span>
 
     <div ng-sortable="sortableGroupConf" class="nested-dnd">
         <div ng-repeat="group in groups">
             <div class="group-title">
                 <h4 class='inline-block' editable='@{{ group.id }}' ng-class="{'disable-events': !group.id}">@{{ group.title }}</h4>
-                <a ng-if='group.id' class='link-like text-danger show-on-hover' ng-click='removeGroup(group)'>удалить</a>
+                <a ng-if='group.id && groups.length > 1' class='link-like text-danger show-on-hover' ng-click='removeGroup(group)'>удалить</a>
             </div>
             <ul ng-sortable="sortablePhotosConf"
                 ng-class="{'ng-hide': dnd.type == 'group', 'hovered': dnd.old_group_id != group.id && dnd.group_id == group.id }"
@@ -30,7 +30,7 @@
                         <img width="100px" async ng-src="@{{ photo.thumbUrl }}">
                     </span>
                     <span style="width:15%;">@{{ photo.info.width + 'x' + photo.info.height }}</span>
-                    <span style="width:calc(60% - 85px)">@{{ PhotoService.filesize(photo.info.size) }}</span>
+                    <span style="width:calc(60% - 85px)">@{{ filesize(photo.info.size) }}</span>
                     <a style="width:10%;" class="link link-like" ng-click="upload(photo)">редактировать</a>
                     <a style="width:5%;" class="link link-like" ng-click="delete($event, photo)">удалить</a>
                 </li>
