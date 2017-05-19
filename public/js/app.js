@@ -331,6 +331,603 @@
 }).call(this);
 
 (function() {
+
+
+}).call(this);
+
+(function() {
+  angular.module('Egecms').directive('ngCounter', function($timeout) {
+    return {
+      restrict: 'A',
+      link: function($scope, $element, $attrs) {
+        var counter;
+        $($element).parent().append("<span class='input-counter'></span>");
+        counter = $($element).parent().find('.input-counter');
+        $($element).on('keyup', function() {
+          return counter.text($(this).val().length || '');
+        });
+        return $timeout(function() {
+          return $($element).keyup();
+        }, 500);
+      }
+    };
+  });
+
+}).call(this);
+
+(function() {
+  angular.module('Egecms').directive('digitsOnly', function() {
+    return {
+      restricts: 'A',
+      require: 'ngModel',
+      link: function($scope, $element, $attr, $ctrl) {
+        var filter, ref;
+        filter = function(value) {
+          var new_value;
+          if (!value) {
+            return void 0;
+          }
+          new_value = value.replace(/[^0-9]/g, '');
+          if (new_value !== value) {
+            $ctrl.$setViewValue(new_value);
+            $ctrl.$render();
+          }
+          return value;
+        };
+        return (ref = $ctrl.$parsers) != null ? ref.push(filter) : void 0;
+      }
+    };
+  });
+
+}).call(this);
+
+(function() {
+  angular.module('Egecms').directive('editable', function() {
+    return {
+      restrict: 'A',
+      link: function($scope, $element, $attrs) {
+        return $element.on('click', function(event) {
+          return $element.attr('contenteditable', 'true').focus();
+        }).on('keydown', function(event) {
+          var ref;
+          if ((ref = event.keyCode) === 13 || ref === 27) {
+            event.preventDefault();
+            $element.blur();
+          }
+          if ($element.data('input-digits-only')) {
+            if (!(event.keyCode < 57)) {
+              return event.preventDefault();
+            }
+          }
+        }).on('blur', function(event) {
+          $scope.onEdit($element.attr('editable'), event);
+          return $element.removeAttr('contenteditable');
+        });
+      }
+    };
+  });
+
+}).call(this);
+
+(function() {
+
+
+}).call(this);
+
+(function() {
+
+
+}).call(this);
+
+(function() {
+  angular.module('Egecms').directive('jumpOnTab', function() {
+    return {
+      restrict: 'A',
+      link: function($scope, $element, $attr) {
+        return $element.on('keydown', function(event) {
+          var focused_item, next_node, range;
+          if (event.keyCode === 9) {
+            event.preventDefault();
+            next_node = $(event.target).parents('h2').first().find('.' + $attr.jumpOnTab);
+            next_node = next_node.trigger('click').trigger('focus');
+            focused_item = next_node[0];
+            if (focused_item.childNodes.length) {
+              range = document.createRange();
+              range.setStart(focused_item.childNodes[0], focused_item.innerText.length);
+              range.collapse(true);
+              window.getSelection().removeAllRanges();
+              return window.getSelection().addRange(range);
+            }
+          }
+        });
+      }
+    };
+  });
+
+}).call(this);
+
+(function() {
+  angular.module('Egecms').directive('ngMulti', function() {
+    return {
+      restrict: 'E',
+      replace: true,
+      scope: {
+        object: '=',
+        model: '=',
+        label: '@',
+        noneText: '@'
+      },
+      templateUrl: 'directives/ngmulti',
+      controller: function($scope, $element, $attrs, $timeout) {
+        $element.selectpicker({
+          noneSelectedText: $scope.noneText
+        });
+        return $scope.$watchGroup(['model', 'object'], function(newVal) {
+          if (newVal) {
+            return $element.selectpicker('refresh');
+          }
+        });
+      }
+    };
+  });
+
+}).call(this);
+
+(function() {
+  angular.module('Egecms').directive('orderBy', function() {
+    return {
+      restrict: 'E',
+      replace: true,
+      scope: {
+        options: '='
+      },
+      templateUrl: 'directives/order-by',
+      link: function($scope, $element, $attrs) {
+        var IndexService, local_storage_key, syncIndexService;
+        IndexService = $scope.$parent.IndexService;
+        local_storage_key = 'sort-' + IndexService.controller;
+        syncIndexService = function(sort) {
+          IndexService.sort = sort;
+          IndexService.current_page = 1;
+          return IndexService.loadPage();
+        };
+        $scope.setSort = function(sort) {
+          $scope.sort = sort;
+          localStorage.setItem(local_storage_key, sort);
+          return syncIndexService(sort);
+        };
+        $scope.sort = localStorage.getItem(local_storage_key);
+        if ($scope.sort === null) {
+          return $scope.setSort(0);
+        } else {
+          return syncIndexService($scope.sort);
+        }
+      }
+    };
+  });
+
+}).call(this);
+
+(function() {
+
+
+}).call(this);
+
+(function() {
+
+
+}).call(this);
+
+(function() {
+  angular.module('Egecms').directive('plural', function() {
+    return {
+      restrict: 'E',
+      scope: {
+        count: '=',
+        type: '@',
+        noneText: '@'
+      },
+      templateUrl: 'directives/plural',
+      controller: function($scope, $element, $attrs, $timeout) {
+        $scope.textOnly = $attrs.hasOwnProperty('textOnly');
+        $scope.hideZero = $attrs.hasOwnProperty('hideZero');
+        return $scope.when = {
+          'age': ['год', 'года', 'лет'],
+          'student': ['ученик', 'ученика', 'учеников'],
+          'minute': ['минуту', 'минуты', 'минут'],
+          'hour': ['час', 'часа', 'часов'],
+          'day': ['день', 'дня', 'дней'],
+          'meeting': ['встреча', 'встречи', 'встреч'],
+          'score': ['балл', 'балла', 'баллов'],
+          'rubbles': ['рубль', 'рубля', 'рублей'],
+          'lesson': ['занятие', 'занятия', 'занятий'],
+          'client': ['клиент', 'клиента', 'клиентов'],
+          'mark': ['оценки', 'оценок', 'оценок'],
+          'request': ['заявка', 'заявки', 'заявок'],
+          'hour': ['час', 'часа', 'часов'],
+          'photo': ['фотография', 'фотографии', 'фотографий']
+        };
+      }
+    };
+  });
+
+}).call(this);
+
+(function() {
+
+
+}).call(this);
+
+(function() {
+  var TAB;
+
+  TAB = 9;
+
+  angular.module('Egecms').directive('programItem', function() {
+    return {
+      restrict: 'E',
+      templateUrl: 'directives/program-item',
+      scope: {
+        item: '=',
+        level: '=?',
+        levelstring: '=',
+        "delete": '&delete'
+      },
+      controller: function($timeout, $element, $scope) {
+        var resetNewItem;
+        $scope.edit = function() {
+          return $scope.editing = true;
+        };
+        $scope.fake_id = 0;
+        $scope.onEdit = function(field, event) {
+          var elem, value;
+          elem = $(event.target);
+          value = elem.text().trim();
+          return $scope.$apply(function() {
+            return $scope.item[field] = value;
+          });
+        };
+        $scope.editKeydown = function(event) {
+          var elem, ref;
+          elem = $(event.target);
+          if ((ref = event != null ? event.keyCode : void 0) === 13 || ref === 27) {
+            event.preventDefault();
+            elem.blur();
+          }
+          if (elem.data('input-digits-only')) {
+            if (!(event.keyCode < 57)) {
+              return event.preventDefault();
+            }
+          }
+        };
+        $scope.addChild = function(event) {
+          $scope.is_adding = true;
+          return $timeout(function() {
+            return $(event.target).parents('li').first().find('input.add-item-title').last().focus();
+          });
+        };
+        $scope.createChild = function(event) {
+          if ((event != null ? event.keyCode : void 0) === 13) {
+            event.preventDefault();
+            if ($scope.new_item.title) {
+              if (!$scope.item.content) {
+                $scope.item.content = [];
+              }
+              if ($scope.new_item.title.length) {
+                $scope.item.content.push($scope.new_item);
+                resetNewItem(event);
+                $scope.addChild(event);
+              }
+            }
+          }
+          if (event.keyCode === 27) {
+            event.preventDefault();
+            $(event.target).blur();
+          }
+          if (event.keyCode === TAB) {
+            if ($(event.target).is(':not(.add-item-lesson-count)')) {
+              return $scope.is_tabbing = true;
+            }
+          }
+        };
+        $scope.deleteChild = function(child) {
+          return $scope.item.content = _.without($scope.item.content, child);
+        };
+        $scope.blur = function(event) {
+          if ($scope.is_tabbing) {
+            $scope.is_tabbing = false;
+            return event.preventDefault();
+          }
+          $scope.is_adding = false;
+          return $scope.is_editing = false;
+        };
+        $scope.focus = function() {
+          return $scope.is_adding = true;
+        };
+        $scope.getChildLevelString = function(child_index) {
+          var str;
+          str = $scope.levelstring ? $scope.levelstring : '';
+          return str + (child_index + 1) + '.';
+        };
+        $scope.getLessonCount = function() {
+          return $scope.item.lesson_count;
+        };
+        $scope.childLessonSum = function(item) {
+          if (!(item && item.content)) {
+            return 0;
+          }
+          if (!item.content.length) {
+            return +item.lesson_count || 0;
+          }
+          return _.reduce(item.content, function(sum, value) {
+            return sum + parseInt($scope.childLessonSum(value));
+          }, 0);
+        };
+        resetNewItem = function(event) {
+          $scope.new_item = {
+            title: '',
+            lesson_count: '',
+            child_lesson_sum: '',
+            content: [],
+            fake_id: $scope.fake_id
+          };
+          return $scope.fake_id++;
+        };
+        if (!$scope.level) {
+          $scope.level = 1;
+        }
+        if (!$scope.lesson_count) {
+          $scope.lesson_count = 0;
+        }
+        resetNewItem();
+        $scope.editBlur = function() {
+          return $scope.editing = false;
+        };
+        return $scope.editFocus = function() {
+          return $scope.editing = true;
+        };
+      }
+    };
+  });
+
+}).call(this);
+
+(function() {
+  angular.module('Egecms').directive('search', function() {
+    return {
+      restrict: 'E',
+      templateUrl: 'directives/search',
+      scope: {},
+      link: function() {
+        return $('.search-icon').on('click', function() {
+          return $('#search-app').modal('show');
+        });
+      },
+      controller: function($scope, $timeout, $http, Published, FactoryService) {
+        bindArguments($scope, arguments);
+        $scope.conditions = [];
+        $scope.options = [
+          {
+            title: 'ключевая фраза',
+            value: 'keyphrase',
+            type: 'text'
+          }, {
+            title: 'отображаемый URL',
+            value: 'url',
+            type: 'text'
+          }, {
+            title: 'title',
+            value: 'title',
+            type: 'text'
+          }, {
+            title: 'публикация',
+            value: 'published',
+            type: 'published'
+          }, {
+            title: 'h1 вверху',
+            value: 'h1',
+            type: 'text'
+          }, {
+            title: 'meta keywords',
+            value: 'keywords',
+            type: 'text'
+          }, {
+            title: 'meta description',
+            value: 'desc',
+            type: 'text'
+          }, {
+            title: 'предметы',
+            value: 'subjects',
+            type: 'subjects'
+          }, {
+            title: 'выезд',
+            value: 'place',
+            type: 'place'
+          }, {
+            title: 'метро',
+            value: 'station_id',
+            type: 'station_id'
+          }, {
+            title: 'сортировка',
+            value: 'sort',
+            type: 'sort'
+          }, {
+            title: 'скрытый фильтр',
+            value: 'hidden_filter',
+            type: 'text'
+          }, {
+            title: 'содержание раздела',
+            value: 'html',
+            type: 'textarea'
+          }
+        ];
+        $scope.getOption = function(condition) {
+          return $scope.options[condition.option];
+        };
+        $scope.addCondition = function() {
+          $scope.conditions.push({
+            option: 0
+          });
+          return $timeout(function() {
+            return $('.selectpicker').selectpicker();
+          });
+        };
+        $scope.addCondition();
+        $scope.selectControl = function(condition) {
+          condition.value = null;
+          switch ($scope.getOption(condition).type) {
+            case 'published':
+              return condition.value = 0;
+            case 'subjects':
+              if ($scope.subjects === void 0) {
+                return FactoryService.get('subjects', 'name').then(function(response) {
+                  return $scope.subjects = response.data;
+                });
+              }
+              break;
+            case 'place':
+              if ($scope.places === void 0) {
+                return FactoryService.get('places', 'serp').then(function(response) {
+                  return $scope.places = response.data;
+                });
+              }
+              break;
+            case 'station_id':
+              if ($scope.stations === void 0) {
+                return FactoryService.get('stations', 'title', 'title').then(function(response) {
+                  return $scope.stations = response.data;
+                });
+              }
+              break;
+            case 'sort':
+              if ($scope.sort === void 0) {
+                return FactoryService.get('sort').then(function(response) {
+                  return $scope.sort = response.data;
+                });
+              }
+          }
+        };
+        return $scope.search = function() {
+          var search;
+          search = {};
+          $scope.conditions.forEach(function(condition) {
+            return search[$scope.getOption(condition).value] = condition.value;
+          });
+          if (search.hasOwnProperty('html')) {
+            search.html = search.html.substr(0, 200);
+          }
+          $.cookie('search', JSON.stringify(search), {
+            expires: 365,
+            path: '/'
+          });
+          ajaxStart();
+          $scope.searching = true;
+          return window.location = 'search';
+        };
+      }
+    };
+  });
+
+}).call(this);
+
+(function() {
+  angular.module('Egecms').directive('ngSelectNew', function() {
+    return {
+      restrict: 'E',
+      replace: true,
+      scope: {
+        object: '=',
+        model: '=',
+        noneText: '@',
+        label: '@',
+        field: '@'
+      },
+      templateUrl: 'directives/select-new',
+      controller: function($scope, $element, $attrs, $timeout) {
+        var value;
+        if (!$scope.noneText) {
+          value = _.first(Object.keys($scope.object));
+          if ($scope.field) {
+            value = $scope.object[value][$scope.field];
+          }
+          if (!$scope.model) {
+            $scope.model = value;
+          }
+        }
+        $timeout(function() {
+          return $element.selectpicker({
+            noneSelectedText: $scope.noneText
+          });
+        }, 100);
+        return $scope.$watchGroup(['model', 'object'], function(newVal) {
+          if (newVal) {
+            return $timeout(function() {
+              return $element.selectpicker('refresh');
+            });
+          }
+        });
+      }
+    };
+  });
+
+}).call(this);
+
+(function() {
+  angular.module('Egecms').directive('ngSelect', function() {
+    return {
+      restrict: 'E',
+      replace: true,
+      scope: {
+        object: '=',
+        model: '=',
+        noneText: '@',
+        label: '@',
+        field: '@'
+      },
+      templateUrl: 'directives/ngselect',
+      controller: function($scope, $element, $attrs, $timeout) {
+        if (!$scope.noneText) {
+          if ($scope.field) {
+            $scope.model = $scope.object[_.first(Object.keys($scope.object))][$scope.field];
+          } else {
+            $scope.model = _.first(Object.keys($scope.object));
+          }
+        }
+        return $timeout(function() {
+          return $($element).selectpicker();
+        }, 150);
+      }
+    };
+  });
+
+}).call(this);
+
+(function() {
+
+
+}).call(this);
+
+(function() {
+
+
+}).call(this);
+
+(function() {
+
+
+}).call(this);
+
+(function() {
+
+
+}).call(this);
+
+(function() {
+
+
+}).call(this);
+
+(function() {
   angular.module('Egecms').controller('FaqIndex', function($scope, $rootScope, $attrs, $timeout, Faq, FaqGroup) {
     var dragEnd, l, moveToGroup, updatePositions;
     l = function(e) {
@@ -991,11 +1588,6 @@
         });
       };
     })(this);
-    $scope["delete"] = function(model) {
-      return Photo["delete"]({
-        id: model.id
-      });
-    };
     return $scope.filesize = function(size) {
       var unit, units;
       units = ['B', 'Kb', 'Mb', 'Gb'];
@@ -1252,603 +1844,6 @@
       };
     });
   });
-
-}).call(this);
-
-(function() {
-
-
-}).call(this);
-
-(function() {
-
-
-}).call(this);
-
-(function() {
-  angular.module('Egecms').directive('ngCounter', function($timeout) {
-    return {
-      restrict: 'A',
-      link: function($scope, $element, $attrs) {
-        var counter;
-        $($element).parent().append("<span class='input-counter'></span>");
-        counter = $($element).parent().find('.input-counter');
-        $($element).on('keyup', function() {
-          return counter.text($(this).val().length || '');
-        });
-        return $timeout(function() {
-          return $($element).keyup();
-        }, 500);
-      }
-    };
-  });
-
-}).call(this);
-
-(function() {
-  angular.module('Egecms').directive('digitsOnly', function() {
-    return {
-      restricts: 'A',
-      require: 'ngModel',
-      link: function($scope, $element, $attr, $ctrl) {
-        var filter, ref;
-        filter = function(value) {
-          var new_value;
-          if (!value) {
-            return void 0;
-          }
-          new_value = value.replace(/[^0-9]/g, '');
-          if (new_value !== value) {
-            $ctrl.$setViewValue(new_value);
-            $ctrl.$render();
-          }
-          return value;
-        };
-        return (ref = $ctrl.$parsers) != null ? ref.push(filter) : void 0;
-      }
-    };
-  });
-
-}).call(this);
-
-(function() {
-  angular.module('Egecms').directive('editable', function() {
-    return {
-      restrict: 'A',
-      link: function($scope, $element, $attrs) {
-        return $element.on('click', function(event) {
-          return $element.attr('contenteditable', 'true').focus();
-        }).on('keydown', function(event) {
-          var ref;
-          if ((ref = event.keyCode) === 13 || ref === 27) {
-            event.preventDefault();
-            $element.blur();
-          }
-          if ($element.data('input-digits-only')) {
-            if (!(event.keyCode < 57)) {
-              return event.preventDefault();
-            }
-          }
-        }).on('blur', function(event) {
-          $scope.onEdit($element.attr('editable'), event);
-          return $element.removeAttr('contenteditable');
-        });
-      }
-    };
-  });
-
-}).call(this);
-
-(function() {
-
-
-}).call(this);
-
-(function() {
-
-
-}).call(this);
-
-(function() {
-  angular.module('Egecms').directive('jumpOnTab', function() {
-    return {
-      restrict: 'A',
-      link: function($scope, $element, $attr) {
-        return $element.on('keydown', function(event) {
-          var focused_item, next_node, range;
-          if (event.keyCode === 9) {
-            event.preventDefault();
-            next_node = $(event.target).parents('h2').first().find('.' + $attr.jumpOnTab);
-            next_node = next_node.trigger('click').trigger('focus');
-            focused_item = next_node[0];
-            if (focused_item.childNodes.length) {
-              range = document.createRange();
-              range.setStart(focused_item.childNodes[0], focused_item.innerText.length);
-              range.collapse(true);
-              window.getSelection().removeAllRanges();
-              return window.getSelection().addRange(range);
-            }
-          }
-        });
-      }
-    };
-  });
-
-}).call(this);
-
-(function() {
-  angular.module('Egecms').directive('ngMulti', function() {
-    return {
-      restrict: 'E',
-      replace: true,
-      scope: {
-        object: '=',
-        model: '=',
-        label: '@',
-        noneText: '@'
-      },
-      templateUrl: 'directives/ngmulti',
-      controller: function($scope, $element, $attrs, $timeout) {
-        $element.selectpicker({
-          noneSelectedText: $scope.noneText
-        });
-        return $scope.$watchGroup(['model', 'object'], function(newVal) {
-          if (newVal) {
-            return $element.selectpicker('refresh');
-          }
-        });
-      }
-    };
-  });
-
-}).call(this);
-
-(function() {
-  angular.module('Egecms').directive('orderBy', function() {
-    return {
-      restrict: 'E',
-      replace: true,
-      scope: {
-        options: '='
-      },
-      templateUrl: 'directives/order-by',
-      link: function($scope, $element, $attrs) {
-        var IndexService, local_storage_key, syncIndexService;
-        IndexService = $scope.$parent.IndexService;
-        local_storage_key = 'sort-' + IndexService.controller;
-        syncIndexService = function(sort) {
-          IndexService.sort = sort;
-          IndexService.current_page = 1;
-          return IndexService.loadPage();
-        };
-        $scope.setSort = function(sort) {
-          $scope.sort = sort;
-          localStorage.setItem(local_storage_key, sort);
-          return syncIndexService(sort);
-        };
-        $scope.sort = localStorage.getItem(local_storage_key);
-        if ($scope.sort === null) {
-          return $scope.setSort(0);
-        } else {
-          return syncIndexService($scope.sort);
-        }
-      }
-    };
-  });
-
-}).call(this);
-
-(function() {
-
-
-}).call(this);
-
-(function() {
-
-
-}).call(this);
-
-(function() {
-  angular.module('Egecms').directive('plural', function() {
-    return {
-      restrict: 'E',
-      scope: {
-        count: '=',
-        type: '@',
-        noneText: '@'
-      },
-      templateUrl: 'directives/plural',
-      controller: function($scope, $element, $attrs, $timeout) {
-        $scope.textOnly = $attrs.hasOwnProperty('textOnly');
-        $scope.hideZero = $attrs.hasOwnProperty('hideZero');
-        return $scope.when = {
-          'age': ['год', 'года', 'лет'],
-          'student': ['ученик', 'ученика', 'учеников'],
-          'minute': ['минуту', 'минуты', 'минут'],
-          'hour': ['час', 'часа', 'часов'],
-          'day': ['день', 'дня', 'дней'],
-          'meeting': ['встреча', 'встречи', 'встреч'],
-          'score': ['балл', 'балла', 'баллов'],
-          'rubbles': ['рубль', 'рубля', 'рублей'],
-          'lesson': ['занятие', 'занятия', 'занятий'],
-          'client': ['клиент', 'клиента', 'клиентов'],
-          'mark': ['оценки', 'оценок', 'оценок'],
-          'request': ['заявка', 'заявки', 'заявок'],
-          'hour': ['час', 'часа', 'часов'],
-          'photo': ['фотография', 'фотографии', 'фотографий']
-        };
-      }
-    };
-  });
-
-}).call(this);
-
-(function() {
-
-
-}).call(this);
-
-(function() {
-  var TAB;
-
-  TAB = 9;
-
-  angular.module('Egecms').directive('programItem', function() {
-    return {
-      restrict: 'E',
-      templateUrl: 'directives/program-item',
-      scope: {
-        item: '=',
-        level: '=?',
-        levelstring: '=',
-        "delete": '&delete'
-      },
-      controller: function($timeout, $element, $scope) {
-        var resetNewItem;
-        $scope.edit = function() {
-          return $scope.editing = true;
-        };
-        $scope.fake_id = 0;
-        $scope.onEdit = function(field, event) {
-          var elem, value;
-          elem = $(event.target);
-          value = elem.text().trim();
-          return $scope.$apply(function() {
-            return $scope.item[field] = value;
-          });
-        };
-        $scope.editKeydown = function(event) {
-          var elem, ref;
-          elem = $(event.target);
-          if ((ref = event != null ? event.keyCode : void 0) === 13 || ref === 27) {
-            event.preventDefault();
-            elem.blur();
-          }
-          if (elem.data('input-digits-only')) {
-            if (!(event.keyCode < 57)) {
-              return event.preventDefault();
-            }
-          }
-        };
-        $scope.addChild = function(event) {
-          $scope.is_adding = true;
-          return $timeout(function() {
-            return $(event.target).parents('li').first().find('input.add-item-title').last().focus();
-          });
-        };
-        $scope.createChild = function(event) {
-          if ((event != null ? event.keyCode : void 0) === 13) {
-            event.preventDefault();
-            if ($scope.new_item.title) {
-              if (!$scope.item.content) {
-                $scope.item.content = [];
-              }
-              if ($scope.new_item.title.length) {
-                $scope.item.content.push($scope.new_item);
-                resetNewItem(event);
-                $scope.addChild(event);
-              }
-            }
-          }
-          if (event.keyCode === 27) {
-            event.preventDefault();
-            $(event.target).blur();
-          }
-          if (event.keyCode === TAB) {
-            if ($(event.target).is(':not(.add-item-lesson-count)')) {
-              return $scope.is_tabbing = true;
-            }
-          }
-        };
-        $scope.deleteChild = function(child) {
-          return $scope.item.content = _.without($scope.item.content, child);
-        };
-        $scope.blur = function(event) {
-          if ($scope.is_tabbing) {
-            $scope.is_tabbing = false;
-            return event.preventDefault();
-          }
-          $scope.is_adding = false;
-          return $scope.is_editing = false;
-        };
-        $scope.focus = function() {
-          return $scope.is_adding = true;
-        };
-        $scope.getChildLevelString = function(child_index) {
-          var str;
-          str = $scope.levelstring ? $scope.levelstring : '';
-          return str + (child_index + 1) + '.';
-        };
-        $scope.getLessonCount = function() {
-          return $scope.item.lesson_count;
-        };
-        $scope.childLessonSum = function(item) {
-          if (!(item && item.content)) {
-            return 0;
-          }
-          if (!item.content.length) {
-            return +item.lesson_count || 0;
-          }
-          return _.reduce(item.content, function(sum, value) {
-            return sum + parseInt($scope.childLessonSum(value));
-          }, 0);
-        };
-        resetNewItem = function(event) {
-          $scope.new_item = {
-            title: '',
-            lesson_count: '',
-            child_lesson_sum: '',
-            content: [],
-            fake_id: $scope.fake_id
-          };
-          return $scope.fake_id++;
-        };
-        if (!$scope.level) {
-          $scope.level = 1;
-        }
-        if (!$scope.lesson_count) {
-          $scope.lesson_count = 0;
-        }
-        resetNewItem();
-        $scope.editBlur = function() {
-          return $scope.editing = false;
-        };
-        return $scope.editFocus = function() {
-          return $scope.editing = true;
-        };
-      }
-    };
-  });
-
-}).call(this);
-
-(function() {
-  angular.module('Egecms').directive('search', function() {
-    return {
-      restrict: 'E',
-      templateUrl: 'directives/search',
-      scope: {},
-      link: function() {
-        return $('.search-icon').on('click', function() {
-          return $('#search-app').modal('show');
-        });
-      },
-      controller: function($scope, $timeout, $http, Published, FactoryService) {
-        bindArguments($scope, arguments);
-        $scope.conditions = [];
-        $scope.options = [
-          {
-            title: 'ключевая фраза',
-            value: 'keyphrase',
-            type: 'text'
-          }, {
-            title: 'отображаемый URL',
-            value: 'url',
-            type: 'text'
-          }, {
-            title: 'title',
-            value: 'title',
-            type: 'text'
-          }, {
-            title: 'публикация',
-            value: 'published',
-            type: 'published'
-          }, {
-            title: 'h1 вверху',
-            value: 'h1',
-            type: 'text'
-          }, {
-            title: 'meta keywords',
-            value: 'keywords',
-            type: 'text'
-          }, {
-            title: 'meta description',
-            value: 'desc',
-            type: 'text'
-          }, {
-            title: 'предметы',
-            value: 'subjects',
-            type: 'subjects'
-          }, {
-            title: 'выезд',
-            value: 'place',
-            type: 'place'
-          }, {
-            title: 'метро',
-            value: 'station_id',
-            type: 'station_id'
-          }, {
-            title: 'сортировка',
-            value: 'sort',
-            type: 'sort'
-          }, {
-            title: 'скрытый фильтр',
-            value: 'hidden_filter',
-            type: 'text'
-          }, {
-            title: 'содержание раздела',
-            value: 'html',
-            type: 'textarea'
-          }
-        ];
-        $scope.getOption = function(condition) {
-          return $scope.options[condition.option];
-        };
-        $scope.addCondition = function() {
-          $scope.conditions.push({
-            option: 0
-          });
-          return $timeout(function() {
-            return $('.selectpicker').selectpicker();
-          });
-        };
-        $scope.addCondition();
-        $scope.selectControl = function(condition) {
-          condition.value = null;
-          switch ($scope.getOption(condition).type) {
-            case 'published':
-              return condition.value = 0;
-            case 'subjects':
-              if ($scope.subjects === void 0) {
-                return FactoryService.get('subjects', 'name').then(function(response) {
-                  return $scope.subjects = response.data;
-                });
-              }
-              break;
-            case 'place':
-              if ($scope.places === void 0) {
-                return FactoryService.get('places', 'serp').then(function(response) {
-                  return $scope.places = response.data;
-                });
-              }
-              break;
-            case 'station_id':
-              if ($scope.stations === void 0) {
-                return FactoryService.get('stations', 'title', 'title').then(function(response) {
-                  return $scope.stations = response.data;
-                });
-              }
-              break;
-            case 'sort':
-              if ($scope.sort === void 0) {
-                return FactoryService.get('sort').then(function(response) {
-                  return $scope.sort = response.data;
-                });
-              }
-          }
-        };
-        return $scope.search = function() {
-          var search;
-          search = {};
-          $scope.conditions.forEach(function(condition) {
-            return search[$scope.getOption(condition).value] = condition.value;
-          });
-          if (search.hasOwnProperty('html')) {
-            search.html = search.html.substr(0, 200);
-          }
-          $.cookie('search', JSON.stringify(search), {
-            expires: 365,
-            path: '/'
-          });
-          ajaxStart();
-          $scope.searching = true;
-          return window.location = 'search';
-        };
-      }
-    };
-  });
-
-}).call(this);
-
-(function() {
-  angular.module('Egecms').directive('ngSelectNew', function() {
-    return {
-      restrict: 'E',
-      replace: true,
-      scope: {
-        object: '=',
-        model: '=',
-        noneText: '@',
-        label: '@',
-        field: '@'
-      },
-      templateUrl: 'directives/select-new',
-      controller: function($scope, $element, $attrs, $timeout) {
-        var value;
-        if (!$scope.noneText) {
-          value = _.first(Object.keys($scope.object));
-          if ($scope.field) {
-            value = $scope.object[value][$scope.field];
-          }
-          if (!$scope.model) {
-            $scope.model = value;
-          }
-        }
-        $timeout(function() {
-          return $element.selectpicker({
-            noneSelectedText: $scope.noneText
-          });
-        }, 100);
-        return $scope.$watchGroup(['model', 'object'], function(newVal) {
-          if (newVal) {
-            return $timeout(function() {
-              return $element.selectpicker('refresh');
-            });
-          }
-        });
-      }
-    };
-  });
-
-}).call(this);
-
-(function() {
-  angular.module('Egecms').directive('ngSelect', function() {
-    return {
-      restrict: 'E',
-      replace: true,
-      scope: {
-        object: '=',
-        model: '=',
-        noneText: '@',
-        label: '@',
-        field: '@'
-      },
-      templateUrl: 'directives/ngselect',
-      controller: function($scope, $element, $attrs, $timeout) {
-        if (!$scope.noneText) {
-          if ($scope.field) {
-            $scope.model = $scope.object[_.first(Object.keys($scope.object))][$scope.field];
-          } else {
-            $scope.model = _.first(Object.keys($scope.object));
-          }
-        }
-        return $timeout(function() {
-          return $($element).selectpicker();
-        }, 150);
-      }
-    };
-  });
-
-}).call(this);
-
-(function() {
-
-
-}).call(this);
-
-(function() {
-
-
-}).call(this);
-
-(function() {
-
-
-}).call(this);
-
-(function() {
-
 
 }).call(this);
 
@@ -2181,25 +2176,34 @@
 
 (function() {
   angular.module('Egecms').service('DndService', function($rootScope) {
-    var init, l, updatePositions;
+    var l, moveToGroup, updatePositions;
     this.dnd = {};
-    init = function(Resource, items) {
+    this.init = function(Group, Resource, relation) {
+      this.Group = Group;
       this.Resource = Resource;
-      return this.items = items;
+      return this.relation = relation;
+    };
+    this.updatePositions = function(group_ids) {
+      if (!_.isArray(group_ids)) {
+        group_ids = [group_ids];
+      }
+      return angular.forEach(group_ids, function(group_id) {
+        var group;
+        group = $rootScope.findById($scope.groups, group_id);
+        return angular.forEach(group.page, function(page, index) {
+          return Page.update({
+            id: page.id,
+            position: index
+          });
+        });
+      });
     };
     l = function(e) {
       return console.log(e);
     };
-    angular.element(document).ready(function() {
-      return $(document).scroll(function(event) {
-        if ($(document).scrollTop() + $(window).height() === $(document).height()) {
-          $(document).scrollTop($(document).height() - 50);
-          return l('scrolled back');
-        }
-      });
-    });
-    $scope.$watchCollection('dnd', function(newVal) {
-      return l($scope.dnd);
+    bindArguments($scope, arguments);
+    ExportService.init({
+      controller: 'pages'
     });
     updatePositions = function(group_ids) {
       if (!_.isArray(group_ids)) {
@@ -2208,12 +2212,123 @@
       return angular.forEach(group_ids, function(group_id) {
         var group;
         group = $rootScope.findById($scope.groups, group_id);
-        return angular.forEach(group[this.items], function(variable, index) {
-          return this.Resource.update({
-            id: variable.id,
+        return angular.forEach(group.page, function(page, index) {
+          return Page.update({
+            id: page.id,
             position: index
           });
         });
+      });
+    };
+    $scope.sortablePageConf = {
+      animation: 150,
+      group: {
+        name: 'variable',
+        put: 'variable'
+      },
+      fallbackTolerance: 5,
+      onUpdate: function(event) {
+        return updatePositions($scope.dnd.group_id);
+      },
+      onAdd: function(event) {
+        var page_id;
+        page_id = $scope.dnd.page_id;
+        if ($scope.dnd.group_id && $scope.dnd.page_id && ($scope.dnd.group_id !== $scope.dnd.old_group_id)) {
+          if ($scope.dnd.group_id === -1) {
+            return PageGroup.save({
+              page_id: $scope.dnd.page_id
+            }, function(response) {
+              $scope.groups.push(response);
+              moveToGroup($scope.dnd.page_id, response.id, $scope.dnd.old_group_id, true);
+              return dragEnd();
+            });
+          } else if ($scope.dnd.group_id) {
+            moveToGroup($scope.dnd.page_id, $scope.dnd.group_id, $scope.dnd.old_group_id);
+            return updatePositions([$scope.dnd.group_id, $scope.dnd.old_group_id]);
+          }
+        }
+      },
+      onEnd: function(event) {
+        if ($scope.dnd.group_id !== -1) {
+          return dragEnd();
+        }
+      }
+    };
+    $scope.dragOver = function(group) {
+      if ($scope.dnd.type !== 'group') {
+        return $scope.dnd.group_id = group.id;
+      }
+    };
+    $scope.sortableGroupConf = {
+      animation: 150,
+      handle: '.group-title',
+      dragClass: 'dragging-group',
+      onUpdate: function(event) {
+        return angular.forEach($scope.groups, function(group, index) {
+          group.position = index;
+          return PageGroup.update({
+            id: group.id,
+            position: index
+          });
+        });
+      },
+      onStart: function(event) {
+        return $scope.dnd.type = 'group';
+      },
+      onEnd: function(event) {
+        return $scope.dnd = {};
+      }
+    };
+    $scope.dnd = {};
+    moveToGroup = function(page_id, group_id, old_group_id, copy_item) {
+      var group_from, group_to, page;
+      if (copy_item == null) {
+        copy_item = false;
+      }
+      Page.update({
+        id: page_id,
+        group_id: group_id
+      });
+      group_from = _.find($scope.groups, {
+        id: old_group_id
+      });
+      page = _.clone(findById(group_from.page, page_id));
+      page.group_id = group_id;
+      group_from.page = removeById(group_from.page, page_id);
+      group_to = _.find($scope.groups, {
+        id: group_id
+      });
+      if (copy_item) {
+        return group_to.page.push(page);
+      } else {
+        page = $rootScope.findById(group_to.page, page_id);
+        return page.group_id = group_id;
+      }
+    };
+    this.removeGroup = function(group) {
+      return bootbox.confirm("Вы уверены, что хотите удалить группу «" + group.title + "»", function(response) {
+        var new_group_id;
+        if (response === true) {
+          Group.remove({
+            id: group.id
+          });
+          new_group_id = (_.max(_.without(this.groups, group), function(group) {
+            return group.position;
+          })).id;
+          if (group.page) {
+            angular.forEach(group.page, function(page) {
+              return moveToGroup(page.id, new_group_id, page.group_id, true);
+            });
+            updatePositions(new_group_id);
+          }
+          return $scope.groups = removeById($scope.groups, group.id);
+        }
+      });
+    };
+    this.editGroup = function(id, event) {
+      return this.Group.update({
+        id: id,
+        title: $(event.target).text()
       });
     };
     return this;
