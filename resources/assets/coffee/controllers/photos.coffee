@@ -156,10 +156,6 @@ angular
             item.formData.push
                 old_file: $scope.editing_model?.filename
 
-        $scope.delete = (model) ->
-            Photo.delete
-                id: model.id
-
         $scope.filesize = (size) ->
             units = ['B', 'Kb', 'Mb', 'Gb']
             unit = 0
