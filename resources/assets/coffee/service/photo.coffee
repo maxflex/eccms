@@ -1,5 +1,9 @@
 angular.module 'Egecms'
     .service 'PhotoService', ($http, Photo, FileUploader) ->
+        setInterval =>
+            console.log this.groups and this.groups.length
+        , 2000
+
         this.init = (groups) ->
             this.groups = groups
 
@@ -17,12 +21,12 @@ angular.module 'Egecms'
 
         this.Uploader.onSuccessItem = (item, response) =>
             if this.editing_model
-                group = _.find scope.groups, id: response.group_id
-                photo = _.find group.photo, id: response.id
+                group = _.find this.groups, id: response.group_id
+                photo = _.find this.photo, id: response.id
                 _.extend photo, response
             else
-                group = _.find scope.groups, id: response.group_id
-                group.push response
+                group = _.find this.groups, id: response.group_id
+                group.photo.push response
 
             this.editing_model = null
             if typeof this.onSuccessItemCallback is 'function'

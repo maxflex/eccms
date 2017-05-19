@@ -776,13 +776,12 @@
       bgClose: true,
       imgAnim: 'fadeup'
     });
-  }).controller('PhotosIndex', function($scope, $rootScope, $attrs, Photo, PhotoGroup, PhotoService, FormService) {
+  }).controller('PhotosIndex', function($scope, $rootScope, $attrs, Photo, PhotoGroup, FormService, FileUploader) {
     var dragEnd, l, moveToGroup, updatePositions;
     l = function(e) {
       return console.log(e);
     };
     angular.element(document).ready(function() {
-      PhotoService.init($scope.groups);
       return $(document).scroll(function(event) {
         if ($(document).scrollTop() + $(window).height() === $(document).height()) {
           $(document).scrollTop($(document).height() - 50);
@@ -934,7 +933,7 @@
       })(this));
     };
     $scope.upload = function(model) {
-      PhotoService.editing_model = model;
+      $scope.editing_model = model;
       return window.upload();
     };
     $scope.totalPhotos = function() {
@@ -945,7 +944,68 @@
         return sum += group.photo.length;
       }, 0);
     };
-    return PhotoService.init($scope.groups);
+    $scope.Uploader = new FileUploader({
+      url: 'api/photos/upload',
+      alias: 'file',
+      filters: [
+        {
+          name: 'imageFilter',
+          fn: function(file, options) {
+            var type;
+            type = "|" + (file.type.slice(file.type.lastIndexOf('/') + 1)) + "|";
+            return '|jpg|png|jpeg|'.indexOf(type) !== -1;
+          }
+        }
+      ],
+      autoUpload: true,
+      removeAfterUpload: true
+    });
+    $scope.Uploader.onSuccessItem = (function(_this) {
+      return function(item, response) {
+        var group, index;
+        if ($scope.editing_model) {
+          group = _.find($scope.groups, {
+            id: response.group_id
+          });
+          index = _.findIndex(group.photo, {
+            id: response.id
+          });
+          group.photo[index] = response;
+        } else {
+          group = _.find($scope.groups, {
+            id: response.group_id
+          });
+          group.photo.push(response);
+        }
+        $scope.editing_model = null;
+        if (typeof $scope.onSuccessItemCallback === 'function') {
+          return $scope.onSuccessItemCallback();
+        }
+      };
+    })(this);
+    $scope.Uploader.onBeforeUploadItem = (function(_this) {
+      return function(item) {
+        var ref;
+        return item.formData.push({
+          old_file: (ref = $scope.editing_model) != null ? ref.filename : void 0
+        });
+      };
+    })(this);
+    $scope["delete"] = function(model) {
+      return Photo["delete"]({
+        id: model.id
+      });
+    };
+    return $scope.filesize = function(size) {
+      var unit, units;
+      units = ['B', 'Kb', 'Mb', 'Gb'];
+      unit = 0;
+      while (size > 1024) {
+        size = size / 1024;
+        unit++;
+      }
+      return size.toFixed(1) + units[unit];
+    };
   });
 
 }).call(this);
@@ -2231,6 +2291,11 @@
 
 (function() {
   angular.module('Egecms').service('PhotoService', function($http, Photo, FileUploader) {
+    setInterval((function(_this) {
+      return function() {
+        return console.log(_this.groups && _this.groups.length);
+      };
+    })(this), 2000);
     this.init = function(groups) {
       return this.groups = groups;
     };
@@ -2254,18 +2319,18 @@
       return function(item, response) {
         var group, photo;
         if (_this.editing_model) {
-          group = _.find(scope.groups, {
+          group = _.find(_this.groups, {
             id: response.group_id
           });
-          photo = _.find(group.photo, {
+          photo = _.find(_this.photo, {
             id: response.id
           });
           _.extend(photo, response);
         } else {
-          group = _.find(scope.groups, {
+          group = _.find(_this.groups, {
             id: response.group_id
           });
-          group.push(response);
+          group.photo.push(response);
         }
         _this.editing_model = null;
         if (typeof _this.onSuccessItemCallback === 'function') {

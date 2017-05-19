@@ -7,12 +7,10 @@ angular
             imgBubbles: false
             bgClose   : true
             imgAnim   : 'fadeup'
-    .controller 'PhotosIndex', ($scope, $rootScope, $attrs, Photo, PhotoGroup, PhotoService, FormService) ->
+    .controller 'PhotosIndex', ($scope, $rootScope, $attrs, Photo, PhotoGroup, FormService, FileUploader) ->
         l = (e) -> console.log e
 
         angular.element(document).ready ->
-            PhotoService.init $scope.groups
-
             $(document).scroll (event) ->
                 if $(document).scrollTop() + $(window).height() is $(document).height()
                     $(document).scrollTop($(document).height() - 50)
@@ -119,7 +117,7 @@ angular
                     group.photo = _.without group.photo, model
 
         $scope.upload = (model) ->
-            PhotoService.editing_model = model
+            $scope.editing_model = model
             window.upload()
 
         $scope.totalPhotos = ->
@@ -128,4 +126,44 @@ angular
                 sum += group.photo.length
             , 0
 
-        PhotoService.init $scope.groups
+
+        $scope.Uploader = new FileUploader
+            url: 'api/photos/upload'
+            alias: 'file'
+            filters: [
+                name: 'imageFilter',
+                fn: (file, options) ->
+                    type = "|#{file.type.slice(file.type.lastIndexOf('/') + 1)}|"
+                    '|jpg|png|jpeg|'.indexOf(type) isnt -1
+            ]
+            autoUpload: true
+            removeAfterUpload: true
+
+        $scope.Uploader.onSuccessItem = (item, response) =>
+            if $scope.editing_model
+                group = _.find $scope.groups, id: response.group_id
+                index = _.findIndex group.photo, id: response.id
+                group.photo[index] = response
+            else
+                group = _.find $scope.groups, id: response.group_id
+                group.photo.push response
+
+            $scope.editing_model = null
+            if typeof $scope.onSuccessItemCallback is 'function'
+                $scope.onSuccessItemCallback()
+
+        $scope.Uploader.onBeforeUploadItem = (item) =>
+            item.formData.push
+                old_file: $scope.editing_model?.filename
+
+        $scope.delete = (model) ->
+            Photo.delete
+                id: model.id
+
+        $scope.filesize = (size) ->
+            units = ['B', 'Kb', 'Mb', 'Gb']
+            unit = 0
+            while size > 1024
+                size = size / 1024
+                unit++
+            size.toFixed(1) + units[unit]
