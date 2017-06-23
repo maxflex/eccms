@@ -54,7 +54,9 @@ class Sync extends Command
             // какие данные на продакшене ОБНОВИТЬ
             $production_update_data = [];
 
-            // добавление отсутствующих страниц
+            // если добавилось в обеих местах с одинаковым ID
+            $same_ids = [];
+
             foreach($server_data as $server) {
                 $local = DB::table($table)->whereId($server->id)->get()->first();
 
@@ -62,7 +64,23 @@ class Sync extends Command
                 if ($local !== null) {
                     $local->previous_md5 = VersionControl::get($table, $local->id);
 
-                    // если запись найдена, проверяем по каждому полю
+
+                    // если local->previous_md5 не установлен, значит,
+                    // локально это новодобавленная страница и на сервере она тоже создана
+                    //
+                    //
+                    // (previous_md5 === null) = новодобавленная страница
+                    if ($local->previous_md5 === null) {
+                        // полностью передобавляем страницы
+                        $same_ids[] = (object)[
+                            'server' => clone $server,
+                            'local'  => clone $local,
+                        ];
+                        continue;
+                    }
+
+                    /* проверяем по каждому полю */
+
                     // сначала проверить целостно, и если равны – пропускать
                     if (md5(json_encode($local)) == md5(json_encode($server))) {
                         continue;
@@ -139,40 +157,48 @@ class Sync extends Command
                 }
             }
 
-            // Обновление данных на продакшн
-            if (count($production_update_data)) {
-                Api::post("sync/update/{$table}", [
-                    'form_params' => $production_update_data
-                ]);
-            }
+            // Обновить данные полей на production
+            $this->productionUpdateData($table, $production_update_data);
 
             /**
              * Добавление страниц
              */
+            $this->syncNewRecords($table, $server_data);
 
-            $server_data = collect($server_data);
-            $server_ids = $server_data->pluck('id')->all();
-            $local_ids = DB::table($table)->pluck('id')->all();
+            /**
+             * Передобавление новых записей с одинаковыми ID
+             */
+            if (count($same_ids)) {
+                $this->line("\n************** RE-ADDING RECORDS WITH SAME IDS ************** \n");
+                foreach($same_ids as $data) {
+                    // удаление на сервере/локалхосте
+                    $production_update_data[$data->local->id] = [
+                        'deleted_at' => now(),
+                        'url' => uniqid(),
+                    ];
+                    DB::table($table)->whereId($data->local->id)->delete();
 
-            // добавляем на локалхост новые сущности
-            foreach(array_diff($server_ids, $local_ids) as $id) {
-                $this->info("Adding to localhost $table " . $id);
-                $data = $server_data->where('id', $id)->first();
-                unset($data->previous_md5);
-                DB::table($table)->insert((array)$data);
-            }
+                    // удаляем из server_data тоже, иначе будет пытаться добавить на локалхост в syncNewRecords
+                    $server_data = array_filter($server_data, function($e) use ($data) {
+                        return $e->id != $data->local->id;
+                    });
 
-            // добавляем на продакшн новые сущности
-            $production_insert_data = [];
-            foreach(array_diff($local_ids, $server_ids) as $id) {
-                $this->info("Adding to server $table " . $id);
-                $production_insert_data[] = DB::table($table)->whereId($id)->first();
-            }
+                    // удаляем ненужные для добавления поля в обоих
+                    foreach(['local', 'server'] as $location) {
+                        foreach(['id', 'previous_md5'] as $field) {
+                            unset($data->{$location}->{$field});
+                        }
+                    }
 
-            if (count($production_insert_data)) {
-                Api::post("sync/insert/{$table}", [
-                    'form_params' => $production_insert_data
-                ]);
+                    // Передобавление
+                    // достаточно добавить данные на локалхост, тогда на сервер
+                    // данные передобавятся автоматически потому что
+                    // $local_ids = DB::table($table)->pluck('id')->all()
+                    DB::table($table)->insert((array)$data->local);
+                    DB::table($table)->insert((array)$data->server);
+                }
+                $this->productionUpdateData($table, $production_update_data);
+                $this->syncNewRecords($table, $server_data);
             }
         }
         $this->line("\n************** RE-GENERATE PRODUCTION TABLE ************** \n");
@@ -197,4 +223,51 @@ class Sync extends Command
             }
         }
     }
+
+    /**
+     * Обновить данные полей на production
+     */
+    private function productionUpdateData($table, $production_update_data)
+    {
+        if (count($production_update_data)) {
+            Api::post("sync/update/{$table}", [
+                'form_params' => $production_update_data
+            ]);
+        }
+    }
+
+    /**
+     * Синхронизировать новые записи
+     */
+    private function syncNewRecords($table, $server_data)
+    {
+        $server_data_collection = collect($server_data);
+        $server_ids = $server_data_collection->pluck('id')->all();
+        $local_ids = DB::table($table)->pluck('id')->all();
+
+        // добавление записей в БД локалхоста
+        foreach(array_diff($server_ids, $local_ids) as $id) {
+            $this->info("Adding to localhost $table " . $id);
+            $data = $server_data_collection->where('id', $id)->first();
+            unset($data->previous_md5);
+            DB::table($table)->insert((array)$data);
+        }
+
+        // добавляем на продакшн новые сущности
+        $production_insert_data = [];
+
+        // генерируем массив данных для добавления новых записей на продакшн
+        foreach(array_diff($local_ids, $server_ids) as $id) {
+            $this->info("Adding to server $table " . $id);
+            $production_insert_data[] = DB::table($table)->whereId($id)->first();
+        }
+
+        // добавление записей в БД продакшн
+        if (count($production_insert_data)) {
+            Api::post("sync/insert/{$table}", [
+                'form_params' => $production_insert_data
+            ]);
+        }
+    }
+
 }

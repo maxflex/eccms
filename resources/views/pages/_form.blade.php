@@ -26,7 +26,6 @@
             'model' => 'title',
             'attributes' => [
                 'ng-counter' => true,
-                'ng-keyup' => 'checkExistance(\'title\', $event)',
             ]
         ])
     </div>

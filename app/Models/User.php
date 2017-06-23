@@ -78,8 +78,18 @@ class User extends Model
 	{
 		return isset($_SESSION["user"]) // пользователь залогинен
             && ! User::isBlocked()      // и не заблокирован
-            && User::worldwideAccess(); // и можно входить
+            && User::worldwideAccess()  // и можно входить
+            && User::notChanged();      // и данные не изменились
 	}
+    
+    /**
+     * Данные по пользователю не изменились
+     * если поменяли в настройках хоть что-то, сразу выкидывает, чтобы перезайти
+     */
+    public static function notChanged()
+    {
+        return User::fromSession()->updated_at == dbEgecrm('users')->whereId(User::fromSession()->id)->value('updated_at');
+    }
 
     /*
 	 * Пользователь из сессии

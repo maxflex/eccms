@@ -32,20 +32,6 @@ class VersionControl
         }
     }
 
-    /**
-     * @temp
-     */
-    public static function generateForNew($table, $id)
-    {
-        $data = DB::table($table)->whereId($id)->first();
-        $columns = Schema::getColumnListing($table);
-        $entity_id = $id;
-        foreach(array_diff($columns, self::EXCLUDE) as $column) {
-            $md5 = md5($data->{$column});
-            DB::table(self::TABLE)->insert(compact('table', 'column', 'entity_id', 'md5'));
-        }
-    }
-
     public static function get($table, $entity_id)
     {
         $data = DB::table(self::TABLE)->where('table', $table)->where('entity_id', $entity_id)
@@ -54,6 +40,6 @@ class VersionControl
         foreach($data as $d) {
             $return[$d->column] = $d->md5;
         }
-        return (object)$return;
+        return (count($return) ? (object)$return : null);
     }
 }
