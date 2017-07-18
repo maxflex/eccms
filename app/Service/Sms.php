@@ -43,19 +43,6 @@ class Sms
 		curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
 		$result = curl_exec($ch);
 		curl_close($ch);
-
-		// Сохраняем отправленную смс
-		$info = explode("\n", $result);
-
-		$info = [
-			"id_status" => $info[0],
-			"id_smsru"	=> $info[1],
-			"balance"	=> $info[2],
-            "user_id"   => User::loggedIn() ? User::fromSession()->id : 0,
-			"message"	=> $params["text"],
-			"number"	=> $params["to"],
-            "mass"      => $mass,
-		];
 	}
 
 
