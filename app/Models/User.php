@@ -4,6 +4,7 @@ namespace App\Models;
 
 use \Shared\Model;
 use App\Service\Sms;
+use Illuminate\Support\Facades\Redis;
 
 class User extends Model
 {
