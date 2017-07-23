@@ -26,7 +26,7 @@ class Sms
 				"api_id"	=>	"8d5c1472-6dea-d6e4-75f4-a45e1a0c0653",
 				"to"		=>	$number,
 				"text"		=>	$message,
-				"from"      =>  "EGE-Repetit",
+				"from"      =>  "EGE-Centr",
 			);
 			$result = self::exec("http://sms.ru/sms/send", $params, $mass);
 		}

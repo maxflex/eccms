@@ -10,8 +10,8 @@
     <link rel="shortcut icon" href="favicon.png" />
     {{-- <link href='https://fonts.googleapis.com/css?family=Ubuntu&subset=latin,cyrillic' rel='stylesheet' type='text/css'> --}}
     @yield('scripts')
-    <script src="{{ asset('/js/vendor.js', isProduction()) }}"></script>
-    <script src="{{ asset('/js/app.js', isProduction()) }}"></script>
+    <script src="{{ asset('/js/vendor.js', true) }}"></script>
+    <script src="{{ asset('/js/app.js', true) }}"></script>
     @yield('scripts_after')
     @include('server_variables')
 
