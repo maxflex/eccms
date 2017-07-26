@@ -79,7 +79,7 @@ class Sms
      */
     public static function verify($user)
     {
-        $code = mt_rand(1000, 9999);
+        $code = mt_rand(10000, 99999);
         Redis::set("eccms:codes:{$user->id}", $code, 'EX', 120);
         Sms::send($user->phone, $code . ' – код для входа в ЛК', false);
         // cache(["codes:{$user_id}" => $code], 3);
