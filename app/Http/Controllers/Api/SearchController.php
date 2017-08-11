@@ -53,7 +53,7 @@ class SearchController extends Controller
 
             $variables = $variables_query
                 ->orderBy('id', 'desc')
-                ->take(30)
+                ->take(100)
                 ->get();
 
             # поля по которым должен искать преподовательский поиск
@@ -74,9 +74,9 @@ class SearchController extends Controller
                 });
             }
 
-            $pages = $pages_query->take(30)
+            $pages = $pages_query->take(100)
                 ->orderBy('id')
-                ->take(30)
+                ->take(100)
                 ->get();
 
             $results = count($variables) + count($pages);
