@@ -31,7 +31,7 @@ class Sms
 				"mes"		=> $message,
 				"sender"    => "EGE-Centr",
 			);
-			$result = self::exec(config('sms.host'), $params, $create);
+			$result = self::exec(config('sms.host'), $params);
 		}
 
 
