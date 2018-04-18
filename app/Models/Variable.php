@@ -9,6 +9,8 @@ class Variable extends Model
 {
     use SoftDeletes;
 
+    protected $hidden = ['html'];
+
     protected $dates = ['deleted_at'];
 
     protected $fillable = [

@@ -13,6 +13,7 @@ class Page extends Model
 {
    use Exportable, SoftDeletes;
 
+   protected $hidden = ['html', 'html_mobile', 'seo_text'];
    protected $dates = ['deleted_at'];
    protected $commaSeparated = ['subjects'];
    protected $fillable = [

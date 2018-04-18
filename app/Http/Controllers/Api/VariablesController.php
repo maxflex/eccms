@@ -51,7 +51,7 @@ class VariablesController extends Controller
      */
     public function show($id)
     {
-        return Variable::find($id);
+        return Variable::find($id)->makeVisible('html');
     }
 
     /**
