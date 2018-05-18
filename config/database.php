@@ -64,7 +64,6 @@ return [
             'prefix' => '',
             'strict' => false,
             'engine' => null,
-            'unix_socket' => env('DB_SOCKET', ''),
         ],
 
         'egecrm' => [
@@ -75,7 +74,7 @@ return [
             'password'  => env('DB_PASSWORD_EGECRM', 'root'),
             'charset'   => 'utf8',
             'collation' => 'utf8_unicode_ci',
-            'unix_socket' => env('DB_SOCKET', ''),
+            'port' => env('DB_PORT', '3306'),
         ],
 
         'egerep' => [
@@ -86,7 +85,7 @@ return [
             'password'  => env('DB_PASSWORD_EGEREP'),
             'charset'   => 'utf8',
             'collation' => 'utf8_unicode_ci',
-            'unix_socket' => env('DB_SOCKET', ''),
+            'port' => env('DB_PORT', '3306'),
         ],
 
         'factory' => [
@@ -97,7 +96,7 @@ return [
             'password'  => env('DB_PASSWORD_FACTORY'),
             'charset'   => 'utf8',
             'collation' => 'utf8_unicode_ci',
-            'unix_socket' => env('DB_SOCKET', ''),
+            'port' => env('DB_PORT', '3306'),
         ],
 
         'pgsql' => [

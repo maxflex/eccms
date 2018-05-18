@@ -110,11 +110,11 @@ angular
 
         angular.element(document).ready ->
             FormService.init(Page, $scope.id, $scope.model)
-            FormService.dataLoaded.promise.then ->
+            FormService.dataLoaded.promise.then -> 
                 FormService.model.useful = [angular.copy(empty_useful)] if (not FormService.model.useful or not FormService.model.useful.length)
-                ['html', 'html_mobile', 'seo_text'].forEach (field) -> AceService.initEditor(FormService, 15, "editor--#{field}")
+                ['html', 'html_mobile', 'html_af', 'html_mobile_af', 'seo_text'].forEach (field) -> AceService.initEditor(FormService, 15, "editor--#{field}")
             FormService.beforeSave = ->
-                ['html', 'html_mobile', 'seo_text'].forEach (field) -> FormService.model[field] = AceService.getEditor("editor--#{field}").getValue()
+                ['html', 'html_mobile', 'html_af', 'html_mobile_af', 'seo_text'].forEach (field) -> FormService.model[field] = AceService.getEditor("editor--#{field}").getValue()
 
         $scope.generateUrl = (event) ->
             $http.post '/api/translit/to-url',

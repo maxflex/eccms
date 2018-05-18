@@ -24,17 +24,17 @@ const elixir = require('laravel-elixir');
 
  elixir(function(mix) {
      mix
-        .browserSync({
-            port: 8099,
-            open: 'external',
-            host: 'eccms.app',
-            proxy: 'https://eccms.app:8098',
-            https: true,
-            ghostMode: false,
-            watchOptions: {
-                ignored: '*.php'
-            }
-        })
+        // .browserSync({
+        //     port: 8099,
+        //     open: 'external',
+        //     host: 'eccms.app',
+        //     proxy: 'https://eccms.test',
+        //     // https: true,
+        //     ghostMode: false,
+        //     watchOptions: {
+        //         ignored: '*.php'
+        //     }
+        // })
          .sass('app.scss')
          .coffee(['resources/assets/coffee/*.coffee', 'resources/assets/coffee/*/*.coffee'])
          .scripts(jsFromBower([

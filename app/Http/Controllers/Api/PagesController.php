@@ -48,7 +48,7 @@ class PagesController extends Controller
      */
     public function show($id)
     {
-        return Page::with(['useful'])->find($id)->makeVisible(['html', 'html_mobile', 'seo_text']);;
+        return Page::with(['useful'])->find($id)->makeVisible(['html', 'html_mobile', 'seo_text', 'html_mobile_af', 'html_af']);;
     }
 
     /**

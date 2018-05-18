@@ -78,11 +78,15 @@
     <div class="col-sm-12">
         <label ng-class="{'active link-like': !AceService.isShown('editor')}" ng-click="AceService.show('editor')">стационар</label>
         <label ng-class="{'active link-like': !AceService.isShown('editor-mobile')}" ng-click="AceService.show('editor-mobile')">мобильная</label>
+        <label ng-class="{'active link-like': !AceService.isShown('editor-af')}" ng-click="AceService.show('editor-af')">стационар (af)</label>
+        <label ng-class="{'active link-like': !AceService.isShown('editor-mobile-af')}" ng-click="AceService.show('editor-mobile-af')">мобильная (af)</label>
         <label class="pull-right" style='top: 3px; position: relative'>
             <span class='link-like' ng-click='addLinkDialog()'>добавить ссылку</span>
         </label>
         <div id='editor--html' ng-show="AceService.isShown('editor')" style="height: 500px">@{{ FormService.model.html }}</div>
         <div id='editor--html_mobile' ng-show="AceService.isShown('editor-mobile')" style="height: 500px">@{{ FormService.model.html_mobile }}</div>
+        <div id='editor--html_af' ng-show="AceService.isShown('editor-af')" style="height: 500px">@{{ FormService.model.html_af }}</div>
+        <div id='editor--html_mobile_af' ng-show="AceService.isShown('editor-mobile-af')" style="height: 500px">@{{ FormService.model.html_mobile_af }}</div>
     </div>
 </div>
 @include('pages._modals')

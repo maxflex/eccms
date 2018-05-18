@@ -13,7 +13,7 @@ class Page extends Model
 {
    use Exportable, SoftDeletes;
 
-   protected $hidden = ['html', 'html_mobile', 'seo_text'];
+   protected $hidden = ['html', 'html_mobile', 'html_af', 'html_mobile_af', 'seo_text'];
    protected $dates = ['deleted_at'];
    protected $commaSeparated = ['subjects'];
    protected $fillable = [
@@ -26,6 +26,8 @@ class Page extends Model
         'h1',
         'html',
         'html_mobile',
+        'html_af',
+        'html_mobile_af',
         'variable_id',
         'useful',
         'group_id',
@@ -47,7 +49,9 @@ class Page extends Model
 
     protected static $long_fields = [
         'html',
-        'html_mobile'
+        'html_mobile',
+        'html_af',
+        'html_mobile_af',
     ];
 
 
