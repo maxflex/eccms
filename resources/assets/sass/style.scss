@@ -4195,3 +4195,12 @@ select[multiple] {
         }
     }
 }
+
+.star-control {
+    color: $gray;
+    cursor: pointer;
+    &--filled {
+        font-weight: bold !important;
+        color: $orange;
+    }
+}

@@ -17939,6 +17939,16 @@ select[multiple] {
   display: none;
 }
 
+.star-control {
+  color: #999999;
+  cursor: pointer;
+}
+
+.star-control--filled {
+  font-weight: bold !important;
+  color: #fbaa33;
+}
+
 .program-container h2 {
   margin: 5px 0px;
 }

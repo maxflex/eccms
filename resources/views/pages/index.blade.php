@@ -9,6 +9,7 @@
 @stop
 
 @section('content')
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
     <span ng-init='groups = {{ json_encode(\App\Models\PageGroup::get()) }}'></span>
     <div ng-sortable='sortableGroupConf' class="nested-dnd">
         <div class="layer group" ng-repeat="group in groups">
@@ -25,7 +26,11 @@
                     ng-repeat="page in group.page"
                     ng-dragstart="dnd.page_id = page.id; dnd.old_group_id = group.id;"
                 >
-                    <a style="width:35%;" class="group-item-title" href="pages/@{{ page.id }}/edit">@{{ page.keyphrase }}</a>
+                    <a style="width:32%;" class="group-item-title" href="pages/@{{ page.id }}/edit">@{{ page.keyphrase }}</a>
+                    <i style='width: 2%' class="far fa-star star-control"
+                        ng-click="toggleEnumServer(page, 'is_ready', Published, Page)"
+                        ng-class="{'star-control--filled': page.is_ready == 1}"
+                    ></i>
                     <span style="width:20%;" class="link-like" ng-class="{'link-gray': 0 == +page.published}" ng-click="toggleEnumServer(page, 'published', Published, Page)">@{{ Published[page.published].title }}</span>
                     <span style="width:20%;">@{{ formatDateTime(page.updated_at) }}</span>
                     <a style="width:23%;" href="{{ config('app.web-url') }}@{{ page.url }}" target="_blank">просмотреть страницу на сайте</a>

@@ -32,7 +32,8 @@ class Page extends Model
         'useful',
         'group_id',
         'position',
-        'seo_text'
+        'seo_text',
+        'is_ready'
     ];
 
     protected static $hidden_on_export = [
