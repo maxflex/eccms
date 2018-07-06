@@ -22,17 +22,18 @@
                 ng-dragenter="dragOver(group, $event)"
                 class="group-list"
             >
-                <li class="group-item"
+                <li class="group-item" style='padding-left: 0'
                     ng-repeat="page in group.page"
                     ng-dragstart="dnd.page_id = page.id; dnd.old_group_id = group.id;"
                 >
-                    <a style="width:32%;" class="group-item-title" href="pages/@{{ page.id }}/edit">@{{ page.keyphrase }}</a>
+                    <span style="width: 40px;">@{{ page.id }}</span>
+                    <a style="width:30%;" class="group-item-title" href="pages/@{{ page.id }}/edit">@{{ page.keyphrase }}</a>
                     <i style='width: 2%' class="far fa-star star-control"
                         ng-click="toggleEnumServer(page, 'is_ready', Published, Page)"
                         ng-class="{'star-control--filled': page.is_ready == 1}"
                     ></i>
-                    <span style="width:20%;" class="link-like" ng-class="{'link-gray': 0 == +page.published}" ng-click="toggleEnumServer(page, 'published', Published, Page)">@{{ Published[page.published].title }}</span>
-                    <span style="width:20%;">@{{ formatDateTime(page.updated_at) }}</span>
+                    <span style="width:19%;" class="link-like" ng-class="{'link-gray': 0 == +page.published}" ng-click="toggleEnumServer(page, 'published', Published, Page)">@{{ Published[page.published].title }}</span>
+                    <span style="width:19%;">@{{ formatDateTime(page.updated_at) }}</span>
                     <a style="width:23%;" href="{{ config('app.web-url') }}@{{ page.url }}" target="_blank">просмотреть страницу на сайте</a>
                 </li>
             </ul>
