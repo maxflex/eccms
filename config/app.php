@@ -54,6 +54,7 @@ return [
     'url' => env('APP_URL'),
     'web-url' => env('WEB_URL'),
     'api-url' => env('API_URL'),
+    'egerep-url' => env('EGEREP_URL'),
 
     /*
     |--------------------------------------------------------------------------

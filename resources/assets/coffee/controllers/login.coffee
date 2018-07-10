@@ -1,7 +1,28 @@
 angular
     .module 'Egecms'
     .controller 'LoginCtrl', ($scope, $http) ->
+
+        loadImage = ->
+            $scope.image_loaded = false
+            img = new Image
+            img.addEventListener "load", ->
+                $('body').css({'background-image': "url(#{$scope.wallpaper.image_url})"})
+                $scope.image_loaded = true
+                $scope.$apply()
+                setTimeout ->
+                    $('#center').removeClass('animated').removeClass('fadeIn').removeAttr('style')
+                , 2000
+            img.src = $scope.wallpaper.image_url
+
         angular.element(document).ready ->
+            loadImage()
+            $('input[autocomplete="off"]').each ->
+                input = this
+                id = $(input).attr('id')
+                $(input).removeAttr('id')
+                setTimeout ->
+                    $(input).attr('id', id)
+                , 2000
             $scope.l = Ladda.create(document.querySelector('#login-submit'))
             login_data = $.cookie("login_data")
             if login_data isnt undefined
@@ -17,7 +38,8 @@ angular
                 $scope.checkFields()
 
         $scope.goLogin = ->
-            ajaxStart()
+            return if $scope.preview
+            # $('center').removeClass('invalid')
             $http.post 'login',
                 login: $scope.login
                 password: $scope.password
@@ -29,18 +51,20 @@ angular
                     $.removeCookie('login_data')
                     location.reload()
                 else if response.data is 'sms'
-                    ajaxEnd()
                     $scope.in_process = false
                     $scope.l.stop()
                     $scope.sms_verification = true
                     $.cookie("login_data", JSON.stringify({login: $scope.login, password: $scope.password}), { expires: 1 / (24 * 60) * 2, path: '/' })
                 else
                     $scope.in_process = false
-                    ajaxEnd()
                     $scope.l.stop()
-                    notifyError "Неправильная пара логин-пароль"
+                    $scope.error = "Неправильная пара логин-пароль"
+                    # $('center').addClass('invalid')
+                $scope.$apply()
 
         $scope.checkFields = ->
+            return if $scope.preview
             $scope.l.start()
             $scope.in_process = true
+            # $scope.goLogin()
             if grecaptcha.getResponse() is '' then grecaptcha.execute() else $scope.goLogin()
