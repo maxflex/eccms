@@ -24,7 +24,7 @@ class UserLogin
                 // если не найден, делаем dummy-объект с зеленым фоном
                 if ($wallpaper === null) {
                     $wallpaper = (object)[
-                        'image_url' => config('app.egerep-url') . Background::UPLOAD_DIR . 'blue.png'
+                        'image_url' => Background::UPLOAD_DIR . 'blue.png'
                     ];
                 }
             }
