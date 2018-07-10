@@ -1,6 +1,8 @@
 angular.module 'Egecms'
 	.service 'ExportService', ($rootScope, FileUploader) ->
 		bindArguments(this, arguments)
+		this.export_fields = []
+
 		this.init = (options) ->
 			this.controller = options.controller
 			this.FileUploader.FileSelect.prototype.isEmptyAfterSelection = ->
@@ -30,7 +32,7 @@ angular.module 'Egecms'
 			return false
 
 		this.export = ->
-			window.location = "/#{ this.controller }/export?field=#{ this.export_field }"
+			window.location = "/#{ this.controller }/export?fields=#{ this.export_fields.join(',') }"
 			$('#export-modal').modal 'hide'
 			return false
 		this

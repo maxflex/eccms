@@ -3,14 +3,12 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-body">
-          <select class='selectpicker' ng-model='ExportService.export_field'>
-              <option value='' selected>выберите поле для экспорта</option>
-              <option disabled>──────────────</option>
+          <select class='selectpicker' ng-model='ExportService.export_fields' multiple title="выберите поля для экспорта">
               <option ng-repeat='field in exportable_fields' value='@{{ field }}'>@{{ field }}</option>
           </select>
       </div>
       <div class="modal-footer center">
-        <button ng-disabled='!ExportService.export_field' type="button" class="btn btn-primary" ng-click="ExportService.export()">экспорт</button>
+        <button ng-disabled='!ExportService.export_fields.length' type="button" class="btn btn-primary" ng-click="ExportService.export()">экспорт</button>
       </div>
     </div>
   </div>

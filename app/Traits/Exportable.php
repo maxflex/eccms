@@ -4,6 +4,7 @@ namespace App\Traits;
 
 use Schema;
 use Excel;
+use DB;
 
 
 /**
@@ -35,38 +36,30 @@ trait Exportable
         return Excel::create($table_name . '_' . date('Y-m-d_H-i-s'), function($excel) use ($request, $table_name) {
             $excel->sheet($table_name, function($sheet) use ($request, $table_name) {
                 $groups_table_name = mb_strimwidth($table_name, 0, strlen($table_name) - 1) . '_groups'; // variables => variable_groups
-                $query = static::select(self::tableField($table_name, 'id'), 'keyphrase', self::tableField($table_name, $request->field))->join($groups_table_name, $groups_table_name . '.id', '=', $table_name . '.group_id')
-                    ->orderBy(\DB::raw($groups_table_name . '.position, ' . $table_name . '.position'));
-                // если экспортируем HTML, то только длина символов
-                if(isset(static::$with_comma_on_export) && in_array($request->field, static::$with_comma_on_export)) {
-                    $query->with(static::$with_comma_on_export);
-                } else {
-                    static::$selects_on_export[] =  $request->field;
-                }
 
-                $data = $query->get();
+                $export_fields = explode(',', $request->fields);
+                array_unshift($export_fields, 'id');
+                $export_fields_prefixed = array_map(function($field) use ($table_name) {
+                    return self::tableField($table_name, $field);
+                }, $export_fields);
+
+                $data = DB::table($table_name)
+                    ->select($export_fields_prefixed)
+                    ->whereNull('deleted_at')
+                    ->join($groups_table_name, $groups_table_name . '.id', '=', $table_name . '.group_id')
+                    ->orderBy(\DB::raw($groups_table_name . '.position, ' . $table_name . '.position'))
+                    ->get();
+
                 $exportData = [];
-
-                $data->map(function ($item, $key) use ($request, &$exportData) {
-                    if (isset(static::$with_comma_on_export) && in_array($request->field, static::$with_comma_on_export)) {
-                        foreach (static::$with_comma_on_export as $field) {
-                            $item->$field = count($ids = $item->$field->pluck('id')) ? implode(',', $ids->all()) : '';
-                            unset($item->relations[$field]);
+                foreach($data as $index => $d) {
+                    foreach($d as $field => $value) {
+                        if (in_array($field, static::$long_fields)) {
+                            $exportData[$index][$field] = strlen($value);
+                        } else {
+                            $exportData[$index][$field] = $value;
                         }
                     }
-
-                    $exportData[$key] = $item->toArray();
-                    switch($field = $request->field) {
-                        case 'subjects':
-                            $exportData[$key][$field] = $item->getClean($field);
-                            break;
-                        case 'html':
-                        case 'html_mobile':
-                            $exportData[$key][$field] = strlen($item->$field);
-                            break;
-                    }
-
-                });
+                }
 
                 $sheet->fromArray($exportData, null, 'A1', true);
             });

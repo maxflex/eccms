@@ -40,15 +40,11 @@ class Page extends Model
         'id',
         'created_at',
         'updated_at',
+        'deleted_at',
         'position'
     ];
 
-    protected static $selects_on_export = [
-        'id',
-        'keyphrase',
-    ];
-
-    protected static $long_fields = [
+    public static $long_fields = [
         'html',
         'html_mobile',
         'html_af',
