@@ -7,11 +7,6 @@ use Excel;
 use DB;
 
 
-/**
- *
- * using Exportable trait obliges defining $selects_on_export field in classes.
- *
-*/
 trait Exportable
 {
     public static function getExportableFields()

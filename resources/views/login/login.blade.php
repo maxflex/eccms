@@ -4,7 +4,7 @@
     <div class="g-recaptcha" data-sitekey="{{ config('captcha.site') }}" data-size="invisible" data-callback="captchaChecked"></div>
     <div class="login-logo group">
         <img src="/img/svg/logo.svg" />
-        <span>DEV</span>
+        <span>CMS</span>
     </div>
     <div class="input-groups">
         <div class="group">
