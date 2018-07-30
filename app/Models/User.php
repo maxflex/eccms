@@ -24,7 +24,7 @@ class User extends Model
      */
     public function getColorAttribute()
     {
-        if ($this->allowed(\Shared\Rights::ERC_BANNED)) {
+        if ($this->allowed(\Shared\Rights::ECC_BANNED)) {
             return static::DEFAULT_COLOR;
         } else {
             return $this->attributes['color'];
@@ -73,14 +73,14 @@ class User extends Model
             if ($allowed_to_login) {
                 # дополнительная СМС-проверка, если пользователь логинится если не из офиса
                 if ($allowed_to_login->confirm_by_sms) {
-                    $sent_code = Redis::get("egecms:codes:{$user_id}");
+                    $sent_code = Redis::get("eccms:codes:{$user_id}");
                     // если уже был отправлен – проверяем
                     if (! empty($sent_code)) {
                         if (@$data['code'] != $sent_code) {
                             // self::log($user_id, 'failed_login', 'неверный смс-код');
                             return false;
                         } else {
-                            Redis::del("egecms:codes:{$user_id}");
+                            Redis::del("eccms:codes:{$user_id}");
                         }
                     } else {
                         // иначе отправляем код
@@ -171,12 +171,12 @@ class User extends Model
      */
     public static function scopeActive($query)
     {
-        return $query->whereRaw('NOT FIND_IN_SET(' . \Shared\Rights::ERC_BANNED . ', rights)');
+        return $query->whereRaw('NOT FIND_IN_SET(' . \Shared\Rights::ECC_BANNED . ', rights)');
     }
 
     public function isBanned()
     {
-        return $this->allowed(\Shared\Rights::ERC_BANNED);
+        return $this->allowed(\Shared\Rights::ECC_BANNED);
     }
 
     /**
