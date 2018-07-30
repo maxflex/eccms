@@ -2,7 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+
+use \Shared\Model;
 use Illuminate\Support\Facades\Redis;
 
 class User extends Model
