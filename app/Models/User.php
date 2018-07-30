@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Redis;
-use App\Models\Service\Log;
 
 class User extends Model
 {
@@ -42,14 +41,14 @@ class User extends Model
         if ($query->exists()) {
             $user_id = $query->value('id_entity');
         } else {
-            self::log(null, 'failed_login', 'неверный логин', ['login' => $data['login']]);
+            // self::log(null, 'failed_login', 'неверный логин', ['login' => $data['login']]);
             return false;
         }
 
         # проверка пароля
         $query->where('password', static::_password($data['password']));
         if (! $query->exists()) {
-            self::log($user_id, 'failed_login', 'неверный пароль');
+            // self::log($user_id, 'failed_login', 'неверный пароль');
             return false;
         }
 
@@ -57,7 +56,7 @@ class User extends Model
 
         # забанен ли?
         if ($user->isBanned()) {
-            self::log($user_id, 'failed_login', 'пользователь заблокирован');
+            // self::log($user_id, 'failed_login', 'пользователь заблокирован');
         } else {
             $allowed_to_login = $user->allowedToLogin();
 
@@ -69,23 +68,23 @@ class User extends Model
                     // если уже был отправлен – проверяем
                     if (! empty($sent_code)) {
                         if (@$data['code'] != $sent_code) {
-                            self::log($user_id, 'failed_login', 'неверный смс-код');
+                            // self::log($user_id, 'failed_login', 'неверный смс-код');
                             return false;
                         } else {
                             Redis::del("egecms:codes:{$user_id}");
                         }
                     } else {
                         // иначе отправляем код
-                        self::log($user_id, 'sms_code_sent');
+                        // self::log($user_id, 'sms_code_sent');
                         Sms::verify($user);
                         return 'sms';
                     }
                 }
-                self::log($user_id, 'success_login');
+                // self::log($user_id, 'success_login');
                 $user->toSession();
                 return true;
             } else {
-                self::log($user_id, 'failed_login', 'нет прав доступа для данного IP');
+                // self::log($user_id, 'failed_login', 'нет прав доступа для данного IP');
             }
         }
         return false;
@@ -204,13 +203,4 @@ class User extends Model
 
         return false;
 	}
-
-    public static function log($user_id, $type, $message = '', $data = [])
-    {
-        $data = array_merge($data, [
-            $type => $message,
-            'user_agent' => @$_SERVER['HTTP_USER_AGENT']
-        ]);
-        Log::custom('authorization', $user_id, $data);
-    }
 }
