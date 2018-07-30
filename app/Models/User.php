@@ -90,6 +90,13 @@ class User extends Model
         return false;
     }
 
+    public static function _password($password)
+	{
+		$password = md5($password."_rM");
+        $password = md5($password."Mr");
+		return $password;
+	}
+
 
     public static function logout()
     {
