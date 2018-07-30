@@ -12,8 +12,7 @@ class User extends Model
 
     protected $connection = 'egecrm';
     protected $table = 'admins';
-
-    protected static $commaSeparated = ['rights'];
+    protected $commaSeparated = ['rights'];
 
     const USER_TYPE    = 'ADMIN';
     const DEFAULT_COLOR = 'black';
