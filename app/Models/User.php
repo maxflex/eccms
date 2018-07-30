@@ -31,6 +31,14 @@ class User extends Model
     }
 
     /**
+     * Этот fix нужнен, потому что возвращается instance Carbon
+     */
+    public function getUpdatedAtAttribute($value)
+ 	{
+ 		return $value;
+ 	}
+
+    /**
      * Вход пользователя
      */
     public static function login($data)
