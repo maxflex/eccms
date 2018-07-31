@@ -27,7 +27,7 @@
   </head>
 
   <body class="content animated fadeIn login-ec" ng-app="Egecms" ng-controller="LoginCtrl"
-    ng-init='wallpaper = {{ json_encode($wallpaper) }}; preview = {{  isset($preview) ? 'true' : 'false' }}'>
+    ng-init='wallpaper = {{ json_encode($wallpaper) }}; logged_user = <?= (isset($_COOKIE['logged_user']) ? $_COOKIE['logged_user'] : 'null') ?>'>
       <div ng-show="image_loaded">
           @yield('content')
           @if (@$wallpaper->user)
