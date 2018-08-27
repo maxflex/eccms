@@ -80,5 +80,6 @@ const elixir = require('laravel-elixir');
              'Sortable/Sortable',
              'vue/dist/vue',
              'vue-resource/dist/vue-resource.min',
+             'pusher/dist/web/pusher'
          ]).concat(['resources/assets/js/*.js']), 'public/js/vendor.js');
  });

@@ -4,7 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use App\Models\User;
-use App\Models\Background;
+use App\Service\SessionService;
 
 class UserLogin
 {
@@ -18,18 +18,9 @@ class UserLogin
     public function handle($request, Closure $next)
     {
         if (! User::loggedIn()) {
-            $wallpaper = Background::approved()->where('date', now(true))->first();
-            if ($wallpaper === null) {
-                $wallpaper = Background::approved()->where('date', '<', now(true))->orderBy('date', 'desc')->first();
-                // если не найден, делаем dummy-объект с зеленым фоном
-                if ($wallpaper === null) {
-                    $wallpaper = (object)[
-                        'image_url' => Background::UPLOAD_DIR . 'blue.png'
-                    ];
-                }
-            }
-            return view('login.login', compact('wallpaper'));
+            return redirect(config('sso.server') . '?url=' . url()->current());
         }
+        SessionService::action();
         view()->share('user', User::fromSession());
         return $next($request);
     }
