@@ -122,7 +122,7 @@ class Sync extends Command
                                             $production_update_data[$local->id][$column] = $local->{$column};
                                             break;
                                         case 'server':
-                                            DB::table($table)->whereId($local->id)->update([$column => $server->{$column}]);
+                                            // DB::table($table)->whereId($local->id)->update([$column => $server->{$column}]);
                                             break;
                                     }
                                 } else {
@@ -132,14 +132,14 @@ class Sync extends Command
                             } else {
                                 if ($server_changed) {
                                     $this->info("$table {$local->id} $column changed remotely");
-                                    DB::table($table)->whereId($local->id)->update([$column => $server->{$column}]);
+                                    // DB::table($table)->whereId($local->id)->update([$column => $server->{$column}]);
                                 }
                             }
                         } else {
                             // если последние синхронизированные версии не равны, то проверяем изменился ли локалхост
                             // если локалхост не изменился, то всегда подтягиваем версию с продакшн
                             if ($local_md5 == $local->previous_md5->{$column}) {
-                                DB::table($table)->whereId($local->id)->update([$column => $server->{$column}]);
+                                // DB::table($table)->whereId($local->id)->update([$column => $server->{$column}]);
                                 $this->info("$table {$local->id} $column changed remotely (2)");
                             } else {
                                 $this->error("$table {$local->id} $column");
@@ -148,7 +148,7 @@ class Sync extends Command
                                         $production_update_data[$local->id][$column] = $local->{$column};
                                         break;
                                     case 'server':
-                                        DB::table($table)->whereId($local->id)->update([$column => $server->{$column}]);
+                                        // DB::table($table)->whereId($local->id)->update([$column => $server->{$column}]);
                                         break;
                                 }
                             }
@@ -176,7 +176,7 @@ class Sync extends Command
                         'deleted_at' => now(),
                         'url' => uniqid(),
                     ];
-                    DB::table($table)->whereId($data->local->id)->delete();
+                    // DB::table($table)->whereId($data->local->id)->delete();
 
                     // удаляем из server_data тоже, иначе будет пытаться добавить на локалхост в syncNewRecords
                     $server_data = array_filter($server_data, function($e) use ($data) {
@@ -194,18 +194,18 @@ class Sync extends Command
                     // достаточно добавить данные на локалхост, тогда на сервер
                     // данные передобавятся автоматически потому что
                     // $local_ids = DB::table($table)->pluck('id')->all()
-                    DB::table($table)->insert((array)$data->local);
-                    DB::table($table)->insert((array)$data->server);
+                    // DB::table($table)->insert((array)$data->local);
+                    // DB::table($table)->insert((array)$data->server);
                 }
-                $this->productionUpdateData($table, $production_update_data);
+                // $this->productionUpdateData($table, $production_update_data);
                 $this->syncNewRecords($table, $server_data);
             }
         }
         $this->line("\n************** RE-GENERATE PRODUCTION TABLE ************** \n");
-        shell_exec('envoy run generate:version_control');
+        // shell_exec('envoy run generate:version_control');
 
         $this->line("\n************** RE-GENERATE LOCALHOST TABLE ************** \n");
-        shell_exec('php artisan generate:version_control');
+        // shell_exec('php artisan generate:version_control');
     }
 
 
@@ -229,11 +229,11 @@ class Sync extends Command
      */
     private function productionUpdateData($table, $production_update_data)
     {
-        if (count($production_update_data)) {
-            Api::post("sync/update/{$table}", [
-                'form_params' => $production_update_data
-            ]);
-        }
+        // if (count($production_update_data)) {
+        //     Api::post("sync/update/{$table}", [
+        //         'form_params' => $production_update_data
+        //     ]);
+        // }
     }
 
     /**
@@ -250,7 +250,7 @@ class Sync extends Command
             $this->info("Adding to localhost $table " . $id);
             $data = $server_data_collection->where('id', $id)->first();
             unset($data->previous_md5);
-            DB::table($table)->insert((array)$data);
+            // DB::table($table)->insert((array)$data);
         }
 
         // добавляем на продакшн новые сущности
@@ -264,9 +264,9 @@ class Sync extends Command
 
         // добавление записей в БД продакшн
         if (count($production_insert_data)) {
-            Api::post("sync/insert/{$table}", [
-                'form_params' => $production_insert_data
-            ]);
+            // Api::post("sync/insert/{$table}", [
+            //     'form_params' => $production_insert_data
+            // ]);
         }
     }
 

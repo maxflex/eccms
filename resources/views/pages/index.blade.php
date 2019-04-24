@@ -9,7 +9,7 @@
 @stop
 
 @section('content')
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
     <span ng-init='groups = {{ json_encode(\App\Models\PageGroup::get()) }}'></span>
     <div ng-sortable='sortableGroupConf' class="nested-dnd">
         <div class="layer group" ng-repeat="group in groups">
@@ -22,19 +22,37 @@
                 ng-dragenter="dragOver(group, $event)"
                 class="group-list"
             >
-                <li class="group-item" style='padding-left: 0'
+                <li class="group-item" style='display: flex'
                     ng-repeat="page in group.page"
                     ng-dragstart="dnd.page_id = page.id; dnd.old_group_id = group.id;"
                 >
                     <span style="width: 40px;">@{{ page.id }}</span>
-                    <a style="width:30%;" class="group-item-title" href="pages/@{{ page.id }}/edit">@{{ page.keyphrase }}</a>
-                    <i style='width: 2%' class="far fa-star star-control"
-                        ng-click="toggleEnumServer(page, 'is_ready', Published, Page)"
-                        ng-class="{'star-control--filled': page.is_ready == 1}"
-                    ></i>
-                    <span style="width:19%;" class="link-like" ng-class="{'link-gray': 0 == +page.published}" ng-click="toggleEnumServer(page, 'published', Published, Page)">@{{ Published[page.published].title }}</span>
-                    <span style="width:19%;">@{{ formatDateTime(page.updated_at) }}</span>
-                    <a style="width:23%;" href="{{ config('app.web-url') }}@{{ page.url }}" target="_blank">просмотреть страницу на сайте</a>
+                    <a style="width:50%;" class="group-item-title" href="pages/@{{ page.id }}/edit">@{{ page.keyphrase }}</a>
+                    <div class='page-index-icons'>
+                        <i class="fa fa-file"
+                            ng-repeat='(field, value) in page.filled' 
+                            title="@{{ field }}"
+                            ng-class="{
+                                'bold color-green': value === true,
+                                'font-weight-normal color-gray': value === false
+                            }"
+                            aria-hidden="true"></i>
+                    </div>
+                    <div class='page-index-icons' style='justify-content: flex-end; flex: 1'>
+                        <i class="far fa-star star-control"
+                            ng-click="toggleEnumServer(page, 'is_ready', Published, Page)"
+                            ng-class="{'star-control--filled': page.is_ready == 1}"
+                        ></i>
+                        <i class="fa fa-globe pointer" 
+                            ng-click="toggleEnumServer(page, 'published', Published, Page)" 
+                            ng-class="{
+                            'color-gray': 0 == +page.published,
+                            'color-green': 1 == +page.published,
+                        }" aria-hidden="true"></i>
+                        <a href="{{ config('app.web-url') }}@{{ page.url }}" target="_blank">
+                            <i class="fa fa-eye" aria-hidden="true"></i>
+                        </a>
+                    </div>
                 </li>
             </ul>
         </div>

@@ -13638,6 +13638,14 @@ button.close {
   width: 34px;
 }
 
+.color-green {
+  color: #26A65B;
+}
+
+.color-gray {
+  color: #999999;
+}
+
 .place_mark {
   display: inline-block;
   border-width: 1px;
@@ -14937,6 +14945,10 @@ body {
 
 .bold {
   font-weight: bold;
+}
+
+.font-weight-normal {
+  font-weight: normal !important;
 }
 
 .bright-green {
@@ -17947,6 +17959,15 @@ select[multiple] {
 .star-control--filled {
   font-weight: bold !important;
   color: #fbaa33;
+}
+
+.page-index-icons {
+  display: inline-flex;
+  align-items: center;
+}
+
+.page-index-icons > *:not(:first-child) {
+  margin-left: 10px;
 }
 
 .program-container h2 {

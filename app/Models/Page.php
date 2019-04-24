@@ -16,6 +16,9 @@ class Page extends Model
    protected $hidden = ['html', 'html_mobile', 'html_af', 'html_mobile_af', 'seo_text'];
    protected $dates = ['deleted_at'];
    protected $commaSeparated = ['subjects'];
+
+   protected $appends = ['filled'];
+
    protected $fillable = [
         'keyphrase',
         'url',
@@ -74,6 +77,18 @@ class Page extends Model
         } else {
             $this->attributes['variable_id'] = $value;
         }
+    }
+
+    /**
+     * Какие long_fields заполнены?
+     */
+    public function getFilledAttribute()
+    {
+        $return = [];
+        foreach(self::$long_fields as $field) {
+            $return[$field] = ! empty(trim($this->{$field}));
+        } 
+        return $return;
     }
 
     public static function search($search)

@@ -26,6 +26,13 @@ $hr_gray 			: #eee;
 $half_black			: rgba(0, 0, 0, .5);
 $quater_black 		: rgba(0, 0, 0, .25);
 
+.color-green {
+    color: $green-main;
+}
+
+.color-gray {
+    color: $gray;
+}
 
 .place_mark {
     display: inline-block;
@@ -1217,6 +1224,10 @@ color: #C07911 !important;
 
 .bold {
 font-weight: bold;
+}
+
+.font-weight-normal {
+    font-weight: normal !important;
 }
 
 .bright-green {
@@ -4202,5 +4213,13 @@ select[multiple] {
     &--filled {
         font-weight: bold !important;
         color: $orange;
+    }
+}
+
+.page-index-icons {
+    display: inline-flex;
+    align-items: center;
+    & > *:not(:first-child) {
+        margin-left: 10px;
     }
 }
