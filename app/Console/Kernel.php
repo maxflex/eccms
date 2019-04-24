@@ -4,6 +4,7 @@ namespace App\Console;
 
 use App\Console\Commands\DeleteUrl;
 use App\Console\Commands\Sync;
+use App\Console\Commands\TransferAf;
 use App\Console\Commands\CleanVariables;
 use App\Console\Commands\FixTags;
 use Illuminate\Console\Scheduling\Schedule;
@@ -19,6 +20,7 @@ class Kernel extends ConsoleKernel
     protected $commands = [
         Sync::class,
         CleanVariables::class,
+        TransferAf::class,
     ];
 
     /**
