@@ -53,10 +53,10 @@ class CleanVariables extends Command
         foreach($variables as $variable) {
             $usedInVars = Variable::whereRaw($this->getCondition('html', $variable))->exists();
             $usedInPages = Page::query()
-                ->where($this->getCondition('html', $variable))
-                ->orWhere($this->getCondition('html_af', $variable))
-                ->orWhere($this->getCondition('html_mobile', $variable))
-                ->orWhere($this->getCondition('html_mobile_af', $variable))
+                ->whereRaw($this->getCondition('html', $variable))
+                ->orWhereRaw($this->getCondition('html_af', $variable))
+                ->orWhereRaw($this->getCondition('html_mobile', $variable))
+                ->orWhereRaw($this->getCondition('html_mobile_af', $variable))
                 ->exists();
             if (! $usedInVars && ! $usedInPages) {
                 $varsToDelete[] = $variable->id;
