@@ -51,12 +51,12 @@ class CleanVariables extends Command
         // какие переменные удалить?
         $varsToDelete = [];
         foreach($variables as $variable) {
-            $usedInVars = Variable::where('html', 'like', '%[' . $variable->name . '%')->exists();
+            $usedInVars = Variable::whereRaw($this->getCondition('html', $variable))->exists();
             $usedInPages = Page::query()
-                ->where('html', 'like', '%[' . $variable->name . '%')
-                ->orWhere('html_af', 'like', '%[' . $variable->name . '%')
-                ->orWhere('html_mobile', 'like', '%[' . $variable->name . '%')
-                ->orWhere('html_mobile_af', 'like', '%[' . $variable->name . '%')
+                ->where($this->getCondition('html', $variable))
+                ->orWhere($this->getCondition('html_af', $variable))
+                ->orWhere($this->getCondition('html_mobile', $variable))
+                ->orWhere($this->getCondition('html_mobile_af', $variable))
                 ->exists();
             if (! $usedInVars && ! $usedInPages) {
                 $varsToDelete[] = $variable->id;
@@ -80,5 +80,9 @@ class CleanVariables extends Command
             }
         }
     }
-
+    
+    private function getCondition($field, $variable)
+    {
+        return "({$field} like '%[{$variable->name}|%' or {$field} = '[{$variable->name}]')";
+    }
 }
