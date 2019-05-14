@@ -83,6 +83,6 @@ class CleanVariables extends Command
     
     private function getCondition($field, $variable)
     {
-        return "({$field} like '%[{$variable->name}|%' or {$field} = '[{$variable->name}]')";
+        return "({$field} like '%[{$variable->name}|%' or {$field} like '%[{$variable->name}]%')";
     }
 }
