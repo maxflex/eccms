@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 
 use App\Http\Requests;
 use App\Models\Variable;
+use App\Models\VariableGroup;
 
 class VariablesController extends Controller
 {
@@ -29,7 +30,8 @@ class VariablesController extends Controller
     public function create()
     {
         return view('variables.create')->with(ngInit([
-            'model' => new Variable,
+            'model' => new Variable(['group_id' => 3]), // остальное
+            'groups' => VariableGroup::orderBy('position')->get(),
         ]));
     }
 
@@ -63,7 +65,10 @@ class VariablesController extends Controller
      */
     public function edit($id)
     {
-        return view('variables.edit')->with(ngInit(compact('id')));
+        return view('variables.edit')->with(ngInit([
+            'id' => $id,
+            'groups' => VariableGroup::orderBy('position')->get(),
+        ]));
     }
 
     /**

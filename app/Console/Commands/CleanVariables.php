@@ -43,7 +43,10 @@ class CleanVariables extends Command
     public function handle()
     {
         $this->line('Cleaning variables...');
-        $variables = DB::table('variables')->get()->all();
+        $variables = DB::table('variables')
+            ->whereNotIn('name', ['faq-image'])
+            ->get()
+            ->all();
 
         // какие переменные удалить?
         $varsToDelete = [];
