@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Redis;
 
 class User extends Model
 {
-    protected $connection = 'egecrm';
+    protected $connection = 'egecrm2';
     protected $table = 'admins';
     protected $commaSeparated = ['rights'];
 
@@ -64,8 +64,8 @@ class User extends Model
 	{
         return isset($_SESSION["user"]) && $_SESSION["user"]    // пользователь залогинен
             && ! User::fromSession()->isBanned()                // и не заблокирован
-            && User::notChanged()                               // и данные по пользователю не изменились
-            && SessionService::exists();
+           && User::notChanged()                               // и данные по пользователю не изменились
+           && SessionService::exists();
 	}
 
     /*
@@ -130,7 +130,7 @@ class User extends Model
      */
     public static function notChanged()
     {
-        return User::fromSession()->updated_at == dbEgecrm('admins')->whereId(User::id())->value('updated_at');
+        return User::fromSession()->updated_at == self::whereId(User::id())->value('updated_at');
     }
 
     /**

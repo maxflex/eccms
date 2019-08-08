@@ -18,8 +18,6 @@ class UserLogin
     public function handle($request, Closure $next)
     {
         if (! User::loggedIn()) {
-            // $user = User::find(69);
-            // $user->toSession();
             return redirect(config('sso.server') . '?url=' . url()->current());
         }
         SessionService::action();
